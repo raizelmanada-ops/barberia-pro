@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#ca8a04" />
+    </linearGradient>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#1c1917" />
+      <stop offset="100%" stop-color="#09090b" />
+    </radialGradient>
+  </defs>
+  
+  <!-- Outer circular frame with gold border -->
+  <circle cx="100" cy="100" r="94" fill="url(#bgGrad)" stroke="url(#goldGrad)" stroke-width="4" />
+  <circle cx="100" cy="100" r="88" fill="none" stroke="url(#goldGrad)" stroke-width="1" stroke-dasharray="3,3" opacity="0.6" />
+  
+  <!-- Barber Scissors Emblem -->
+  <g transform="translate(100, 75)" stroke="url(#goldGrad)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Blade 1 -->
+    <path d="M-25,25 L15,-15 M15,-15 L22,-20" />
+    <circle cx="-25" cy="25" r="7" />
+    <!-- Blade 2 -->
+    <path d="M25,25 L-15,-15 M-15,-15 L-22,-20" />
+    <circle cx="25" cy="25" r="7" />
+    <!-- Pivot screw -->
+    <circle cx="0" cy="5" r="2.5" fill="url(#goldGrad)" />
+  </g>
+  
+  <!-- Crown / Stars Icon -->
+  <g transform="translate(100, 42)" fill="url(#goldGrad)">
+    <polygon points="0,-7 2,-2 7,-2 3,1 5,6 0,3 -5,6 -3,1 -7,-2 -2,-2" transform="scale(0.8)" />
+    <polygon points="-24,-5 -22,-1 -18,-1 -21,1 -20,5 -24,3 -28,5 -27,1 -30,-1 -26,-1" transform="scale(0.6)" />
+    <polygon points="24,-5 26,-1 30,-1 27,1 28,5 24,3 20,5 21,1 18,-1 22,-1" transform="scale(0.6)" />
+  </g>
+
+  <!-- Typography: ARIZSHOP -->
+  <text x="100" y="128" text-anchor="middle" font-family="'Outfit', 'Montserrat', sans-serif" font-weight="900" font-size="20" fill="url(#goldGrad)" letter-spacing="2">
+    ARIZSHOP
+  </text>
+  
+  <!-- Subtitle: BARBER -->
+  <text x="100" y="148" text-anchor="middle" font-family="'Plus Jakarta Sans', sans-serif" font-weight="700" font-size="11" fill="#fef08a" letter-spacing="4">
+    BARBER
+  </text>
+  
+  <!-- Fine ornament bottom -->
+  <path d="M70,162 L130,162" stroke="url(#goldGrad)" stroke-width="1.5" stroke-linecap="round" opacity="0.8" />
+  <circle cx="100" cy="162" r="2" fill="url(#goldGrad)" />
+</svg>
