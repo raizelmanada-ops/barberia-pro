@@ -648,16 +648,18 @@ export const ClientHome: React.FC = () => {
             <span>Biblioteca</span>
           </button>
 
-          {/* Acceso discreto para el equipo / barbero */}
+          {/* Acceso para el Administrador / Personal */}
           <button
             onClick={() => setStaffTargetRole('owner')}
-            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 border border-zinc-800 transition cursor-pointer shadow"
-            title="Acceso Personal / Administración"
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-amber-400 border border-zinc-800 hover:border-amber-500/40 transition cursor-pointer shadow text-xs font-bold"
+            title="Ingreso al Dashboard de Administración (PIN)"
           >
-            <Lock className="w-3.5 h-3.5" />
+            <Lock className="w-3.5 h-3.5 text-amber-400" />
+            <span>Admin</span>
           </button>
         </div>
       </div>
+
 
 
       {/* 🌟 1. ELEGIR ESTILO — EL GRAN ACCESO PRINCIPAL A LA BIBLIOTECA VISUAL */}
