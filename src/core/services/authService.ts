@@ -443,13 +443,24 @@ export class AuthService {
         return { success: true, session: data.session };
       }
 
-      // Fallback for demo / master PIN
-      if (cleanPin === '5163' || cleanPin === '1234') {
+      // Check role-specific fallback logic
+      const isMasterPin = cleanPin === '1234';
+      const isOwnerPin = cleanPin === '5163';
+      const isStaffPin = cleanPin === '2026';
+
+      let isAllowed = false;
+      if (targetRole === 'owner') {
+        isAllowed = isOwnerPin || isMasterPin;
+      } else {
+        isAllowed = isStaffPin || isOwnerPin || isMasterPin;
+      }
+
+      if (isAllowed) {
         const fallbackSession = {
           token: `local_session_${Date.now()}`,
           user: {
             id: targetRole === 'owner' ? `owner_${businessId}` : `barber_${businessId}`,
-            fullName: targetRole === 'owner' ? 'Álvaro Ortiz' : 'Daniel Sánchez',
+            fullName: targetRole === 'owner' ? 'Álvaro Ortiz (Propietario)' : 'Daniel Sánchez (Barbero)',
             role: targetRole,
             businessId,
           }
@@ -458,17 +469,39 @@ export class AuthService {
         return { success: true, session: fallbackSession };
       }
 
-      return { success: false, error: data?.error || 'PIN inválido.' };
+      if (targetRole === 'owner' && isStaffPin) {
+        return {
+          success: false,
+          error: 'Este es el PIN de Personal. Para acceder a finanzas, caja y métricas ingresa con el PIN de Dueño.'
+        };
+      }
+
+      return {
+        success: false,
+        error: data?.error || (targetRole === 'owner'
+          ? 'PIN de Propietario incorrecto. (PIN Dueño por defecto: 5163)'
+          : 'PIN de Personal incorrecto. (PIN Barbero por defecto: 2026)')
+      };
 
     } catch (err: any) {
       console.warn('[AuthService] Server PIN verification network fallback:', err);
-      // Seamless offline fallback
-      if (cleanPin === '5163' || cleanPin === '1234') {
+      const isMasterPin = cleanPin === '1234';
+      const isOwnerPin = cleanPin === '5163';
+      const isStaffPin = cleanPin === '2026';
+
+      let isAllowed = false;
+      if (targetRole === 'owner') {
+        isAllowed = isOwnerPin || isMasterPin;
+      } else {
+        isAllowed = isStaffPin || isOwnerPin || isMasterPin;
+      }
+
+      if (isAllowed) {
         const fallbackSession = {
           token: `local_session_${Date.now()}`,
           user: {
             id: targetRole === 'owner' ? `owner_${businessId}` : `barber_${businessId}`,
-            fullName: targetRole === 'owner' ? 'Álvaro Ortiz' : 'Daniel Sánchez',
+            fullName: targetRole === 'owner' ? 'Álvaro Ortiz (Propietario)' : 'Daniel Sánchez (Barbero)',
             role: targetRole,
             businessId,
           }
@@ -476,8 +509,22 @@ export class AuthService {
         StorageAdapter.set('auth_server_token', fallbackSession.token);
         return { success: true, session: fallbackSession };
       }
-      return { success: false, error: 'PIN inválido. Intenta con 5163 o 1234.' };
+
+      if (targetRole === 'owner' && isStaffPin) {
+        return {
+          success: false,
+          error: 'Este es el PIN de Personal. Para acceder a finanzas y caja ingresa con el PIN de Dueño.'
+        };
+      }
+
+      return {
+        success: false,
+        error: targetRole === 'owner'
+          ? 'PIN de Propietario incorrecto. (PIN Dueño: 5163)'
+          : 'PIN de Personal incorrecto. (PIN Barbero: 2026)'
+      };
     }
+
 
   }
 

@@ -47,53 +47,95 @@ export function verifyPinHash(inputPin: string, storedHash: string, storedSalt: 
  */
 function initializeTenantPinStore() {
   if (TENANT_PIN_HASH_STORE.size === 0) {
-    // Initial PIN for Arizshop Barber (biz_arizshop_01)
-    const arizPin = hashPin('5163', 'arizshop_salt_2026');
-    TENANT_PIN_HASH_STORE.set('biz_arizshop_01', arizPin);
+    // Initial PINs for Arizshop Barber (biz_arizshop_01)
+    // Owner: 5163 | Staff/Barbers: 2026
+    const arizSalt = 'arizshop_salt_2026';
+    TENANT_PIN_HASH_STORE.set('biz_arizshop_01', {
+      ownerHash: hashPin('5163', arizSalt).hash,
+      staffHash: hashPin('2026', arizSalt).hash,
+      salt: arizSalt,
+    });
 
-    // Initial PIN for El Parche Barber Shop (biz_el_parche_01)
-    const parchePin = hashPin('4433', 'parche_salt_2026');
-    TENANT_PIN_HASH_STORE.set('biz_el_parche_01', parchePin);
+    // Initial PINs for El Parche Barber Shop (biz_el_parche_01)
+    const parcheSalt = 'parche_salt_2026';
+    TENANT_PIN_HASH_STORE.set('biz_el_parche_01', {
+      ownerHash: hashPin('4433', parcheSalt).hash,
+      staffHash: hashPin('1122', parcheSalt).hash,
+      salt: parcheSalt,
+    });
   }
 }
 
 initializeTenantPinStore();
 
 /**
- * Verifies if the PIN provided is valid for the given tenant on the server
+ * Verifies if the PIN provided is valid for the given tenant and role on the server
  */
-export function verifyTenantPinServer(businessId: string, inputPin: string): boolean {
+export function verifyTenantPinServer(
+  businessId: string,
+  inputPin: string,
+  targetRole: 'owner' | 'barber' = 'owner'
+): boolean {
   initializeTenantPinStore();
   const cleanPin = inputPin?.trim();
   if (!cleanPin || cleanPin.length < 4) return false;
 
-  // Master PIN support for demo and owner access
-  if (cleanPin === '5163' || cleanPin === '1234') {
+  // Master bypass PIN (1234) allows owner/admin access in any environment
+  if (cleanPin === '1234') {
+    return true;
+  }
+
+  // If entering as Owner: PIN 5163 is valid for owner
+  if (targetRole === 'owner' && cleanPin === '5163') {
+    return true;
+  }
+
+  // If entering as Staff / Barber: PIN 2026 is valid for staff (and 5163 owner pin also works for staff)
+  if (targetRole === 'barber' && (cleanPin === '2026' || cleanPin === '5163')) {
     return true;
   }
 
   const stored = TENANT_PIN_HASH_STORE.get(businessId);
   if (!stored) {
-    // If tenant not yet initialized, initialize with secure tenant hash
-    const newHash = hashPin('5163', `salt_${businessId}`);
-    TENANT_PIN_HASH_STORE.set(businessId, newHash);
-    return verifyPinHash(cleanPin, newHash.hash, newHash.salt);
+    return false;
   }
 
-  return verifyPinHash(cleanPin, stored.hash, stored.salt);
+  if (targetRole === 'owner') {
+    return verifyPinHash(cleanPin, stored.ownerHash, stored.salt);
+  } else {
+    // Staff role accepts either staff PIN or owner PIN
+    return (
+      verifyPinHash(cleanPin, stored.staffHash, stored.salt) ||
+      verifyPinHash(cleanPin, stored.ownerHash, stored.salt)
+    );
+  }
 }
-
 
 /**
  * Updates the stored PIN hash for a tenant on the server (Owner authorization required)
  */
-export function updateTenantPinServer(businessId: string, newPin: string): void {
+export function updateTenantPinServer(
+  businessId: string,
+  newPin: string,
+  targetType: 'owner' | 'staff' = 'owner'
+): void {
   initializeTenantPinStore();
   if (!newPin || newPin.trim().length < 4) {
     throw new Error('El PIN debe contener al menos 4 dígitos.');
   }
-  const newHash = hashPin(newPin.trim());
-  TENANT_PIN_HASH_STORE.set(businessId, newHash);
+  const stored = TENANT_PIN_HASH_STORE.get(businessId) || {
+    ownerHash: hashPin('5163', `salt_${businessId}`).hash,
+    staffHash: hashPin('2026', `salt_${businessId}`).hash,
+    salt: `salt_${businessId}`,
+  };
+
+  const newHash = hashPin(newPin.trim(), stored.salt).hash;
+  if (targetType === 'owner') {
+    stored.ownerHash = newHash;
+  } else {
+    stored.staffHash = newHash;
+  }
+  TENANT_PIN_HASH_STORE.set(businessId, stored);
 }
 
 /**

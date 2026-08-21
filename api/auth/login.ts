@@ -26,17 +26,20 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const role = targetRole === 'barber' ? 'barber' : 'owner';
 
-    // Verify PIN cryptographic hash server-side
-    const isValid = verifyTenantPinServer(businessId, pin);
+    // Verify PIN cryptographic hash server-side strictly for the target role
+    const isValid = verifyTenantPinServer(businessId, pin, role);
 
     if (!isValid) {
       // Artificial delay to prevent brute-force attacks
       await new Promise(r => setTimeout(r, 400));
       return res.status(401).json({
         success: false,
-        error: 'PIN de seguridad inválido para este establecimiento.'
+        error: role === 'owner'
+          ? 'PIN de Propietario incorrecto. El acceso a finanzas requiere el PIN de Dueño.'
+          : 'PIN de Personal incorrecto. Verifica el PIN asignado a tu puesto de trabajo.'
       });
     }
+
 
     // Resolve user details
     const userId = role === 'owner' ? `owner_${businessId}` : `barber_${businessId}`;
