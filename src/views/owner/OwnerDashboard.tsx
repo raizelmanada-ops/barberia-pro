@@ -1920,7 +1920,7 @@ export const OwnerDashboard: React.FC = () => {
             </div>
 
             <div className="sm:col-span-2">
-              <label className="font-bold text-zinc-300 block mb-1">⭐ Enlace para Calificar en Google / Reseñas:</label>
+              <label className="font-bold text-zinc-300 block mb-1">⭐ Enlace para Calificar en Google (Google Reviews):</label>
               <input
                 type="text"
                 value={bizGoogleReview}
@@ -1929,9 +1929,10 @@ export const OwnerDashboard: React.FC = () => {
                 className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs"
               />
               <span className="text-[10px] text-zinc-500 mt-0.5 block">
-                * Los clientes verán un botón de lujo en su pantalla principal para calificar la barbería en Google con 5 estrellas.
+                * Los clientes verán un botón "Calificar en Google" en la sección de contacto para dejar su opinión sobre el servicio.
               </span>
             </div>
+
           </div>
 
           <button
