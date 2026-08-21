@@ -254,19 +254,48 @@ export class WalkInService {
     }
   }
 
-  public static playChime(): void {
+  private static audioCtx: AudioContext | null = null;
+
+  /**
+   * Desbloquea el AudioContext en el primer toque o login del barbero para evitar bloqueos de autoplay
+   */
+  public static unlockAudio(): void {
+    if (typeof window === 'undefined') return;
     try {
-      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const oscillator = ctx.createOscillator();
-      const gainNode = ctx.createGain();
-      oscillator.connect(gainNode);
-      gainNode.connect(ctx.destination);
-      oscillator.frequency.value = 880;
-      oscillator.type = 'sine';
-      gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
-      oscillator.start(ctx.currentTime);
-      oscillator.stop(ctx.currentTime + 0.5);
+      if (!this.audioCtx) {
+        const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+        this.audioCtx = new AudioCtx();
+      }
+      if (this.audioCtx.state === 'suspended') {
+        this.audioCtx.resume();
+      }
+    } catch { /* Audio not supported */ }
+  }
+
+  /**
+   * Sintetizador puro a 880 Hz (A5) con decaimiento natural para notificaciones en vivo
+   */
+  public static playChime(): void {
+    if (typeof window === 'undefined') return;
+    try {
+      this.unlockAudio();
+      if (!this.audioCtx) return;
+
+      const osc = this.audioCtx.createOscillator();
+      const gain = this.audioCtx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, this.audioCtx.currentTime); // 880 Hz (Nota La5)
+
+      gain.gain.setValueAtTime(0.3, this.audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, this.audioCtx.currentTime + 1.2);
+
+      osc.connect(gain);
+      gain.connect(this.audioCtx.destination);
+
+      osc.start();
+      osc.stop(this.audioCtx.currentTime + 1.2);
     } catch { /* Audio not available */ }
   }
 }
+
