@@ -808,24 +808,24 @@ export const ClientHome: React.FC = () => {
             </div>
 
             {/* Preferencias aprendidas */}
-            <div className="sm:col-span-2 space-y-2.5 text-xs sm:text-sm">
-              <div className="bg-zinc-950/60 p-3 rounded-2xl border border-zinc-800/80 space-y-1.5">
+            <div className="sm:col-span-2 space-y-3 text-xs sm:text-sm">
+              <div className="bg-zinc-950/70 p-3.5 rounded-2xl border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                    <ThumbsUp className="w-3.5 h-3.5" /> Lo que te gustó y quieres mantener:
+                  <div className="text-xs sm:text-sm font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                    <ThumbsUp className="w-4 h-4" /> Lo que te gustó y quieres mantener:
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => startVoiceDictation('liked')}
-                      className={`text-xs font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition cursor-pointer ${
+                      className={`text-xs font-black flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition cursor-pointer shadow ${
                         isListeningLiked
                           ? 'bg-red-500 text-white border-red-400 animate-pulse'
-                          : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
+                          : 'bg-emerald-500 hover:bg-emerald-400 text-black border-emerald-400'
                       }`}
                       title="Hablar por micrófono para dictar lo que te gustó"
                     >
-                      <Mic className="w-3 h-3" />
-                      <span>{isListeningLiked ? 'Escuchando...' : '🎙️ Dictar'}</span>
+                      <Mic className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>{isListeningLiked ? 'Escuchando...' : 'Dictar por Voz'}</span>
                     </button>
 
                     {!isEditingLiked && (
@@ -834,7 +834,7 @@ export const ClientHome: React.FC = () => {
                           setDraftLiked(activeLiked);
                           setIsEditingLiked(true);
                         }}
-                        className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 transition cursor-pointer"
+                        className="text-xs text-zinc-300 hover:text-white font-bold flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition cursor-pointer"
                       >
                         <Pencil className="w-3 h-3" />
                         <span>Editar</span>
@@ -843,11 +843,10 @@ export const ClientHome: React.FC = () => {
                   </div>
                 </div>
 
-
                 {isListeningLiked && (
-                  <div className="text-[10px] font-bold text-red-400 flex items-center gap-1.5 animate-pulse bg-red-500/10 p-1.5 rounded-lg border border-red-500/20">
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                    <span>🎙️ Habla ahora: Estamos transcribiendo lo que te gusta de tu corte...</span>
+                  <div className="text-xs font-bold text-red-400 flex items-center gap-2 animate-pulse bg-red-500/10 p-2 rounded-xl border border-red-500/30">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping shrink-0" />
+                    <span>🎙️ Habla ahora: Estamos escuchando lo que te gusta de tu corte...</span>
                   </div>
                 )}
 
@@ -858,49 +857,49 @@ export const ClientHome: React.FC = () => {
                       value={draftLiked}
                       onChange={(e) => setDraftLiked(e.target.value)}
                       placeholder="Escribe o dicta lo que te encanta de tu corte (ej: El degradado a piel, la navaja en contornos, la textura superior...)"
-                      className="w-full bg-zinc-900 border border-emerald-500/50 rounded-xl p-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-400 shadow-inner"
+                      className="w-full bg-zinc-900 border border-emerald-500/50 rounded-xl p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-400 shadow-inner"
                       autoFocus
                     />
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => setIsEditingLiked(false)}
-                        className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-zinc-400 hover:text-white bg-zinc-800 transition cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white bg-zinc-800 transition cursor-pointer"
                       >
                         Cancelar
                       </button>
                       <button
                         onClick={() => handleSaveLiked(draftLiked)}
-                        className="px-3 py-1 rounded-lg text-[10px] font-black text-black bg-emerald-500 hover:bg-emerald-400 flex items-center gap-1 transition shadow cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-lg text-xs font-black text-black bg-emerald-500 hover:bg-emerald-400 flex items-center gap-1 transition shadow cursor-pointer"
                       >
-                        <Check className="w-3 h-3 stroke-[3]" />
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
                         <span>Guardar</span>
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-zinc-200 font-medium">
+                  <div className="text-zinc-200 font-medium leading-relaxed">
                     {activeLiked}
                   </div>
                 )}
               </div>
 
-              <div className="bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800/80 space-y-1.5">
+              <div className="bg-zinc-950/70 p-3.5 rounded-2xl border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" /> Ajuste indicado para la próxima:
+                  <div className="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                    <AlertCircle className="w-4 h-4" /> Ajuste indicado para la próxima:
                   </div>
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-2">
                     <button
                       onClick={() => startVoiceDictation('adjustment')}
-                      className={`text-[10px] font-bold flex items-center gap-1 px-2 py-0.5 rounded-lg border transition cursor-pointer ${
+                      className={`text-xs font-black flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition cursor-pointer shadow ${
                         isListeningAdjustment
                           ? 'bg-red-500 text-white border-red-400 animate-pulse'
-                          : 'bg-amber-500/10 text-amber-400 border-amber-500/20 hover:bg-amber-500/20'
+                          : 'bg-amber-500 hover:bg-amber-400 text-black border-amber-400'
                       }`}
                       title="Hablar por micrófono para dictar el ajuste para Álvaro"
                     >
-                      <Mic className="w-2.5 h-2.5" />
-                      <span>{isListeningAdjustment ? 'Escuchando...' : '🎙️ Dictar'}</span>
+                      <Mic className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <span>{isListeningAdjustment ? 'Escuchando...' : 'Dictar por Voz'}</span>
                     </button>
 
                     {!isEditingAdjustment && (
@@ -909,9 +908,9 @@ export const ClientHome: React.FC = () => {
                           setDraftAdjustment(activeAdjustment);
                           setIsEditingAdjustment(true);
                         }}
-                        className="text-[10px] text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-500/10 border border-amber-500/20 transition cursor-pointer"
+                        className="text-xs text-zinc-300 hover:text-white font-bold flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition cursor-pointer"
                       >
-                        <Pencil className="w-2.5 h-2.5" />
+                        <Pencil className="w-3 h-3" />
                         <span>Editar</span>
                       </button>
                     )}
@@ -919,9 +918,9 @@ export const ClientHome: React.FC = () => {
                 </div>
 
                 {isListeningAdjustment && (
-                  <div className="text-[10px] font-bold text-red-400 flex items-center gap-1.5 animate-pulse bg-red-500/10 p-1.5 rounded-lg border border-red-500/20">
-                    <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                    <span>🎙️ Habla ahora: Cuéntanos el ajuste especial que le indicaremos a Álvaro...</span>
+                  <div className="text-xs font-bold text-red-400 flex items-center gap-2 animate-pulse bg-red-500/10 p-2 rounded-xl border border-red-500/30">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping shrink-0" />
+                    <span>🎙️ Habla ahora: Cuéntanos el ajuste especial para Álvaro...</span>
                   </div>
                 )}
 
@@ -932,32 +931,33 @@ export const ClientHome: React.FC = () => {
                       value={draftAdjustment}
                       onChange={(e) => setDraftAdjustment(e.target.value)}
                       placeholder="Escribe o dicta tu ajuste especial para Álvaro (ej: Dejar más largo arriba, no tocar patillas, subir fade...)"
-                      className="w-full bg-zinc-900 border border-amber-500/50 rounded-xl p-2 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 shadow-inner"
+                      className="w-full bg-zinc-900 border border-amber-500/50 rounded-xl p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 shadow-inner"
                       autoFocus
                     />
                     <div className="flex items-center justify-end gap-1.5">
                       <button
                         onClick={() => setIsEditingAdjustment(false)}
-                        className="px-2.5 py-1 rounded-lg text-[10px] font-bold text-zinc-400 hover:text-white bg-zinc-800 transition cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg text-xs font-bold text-zinc-400 hover:text-white bg-zinc-800 transition cursor-pointer"
                       >
                         Cancelar
                       </button>
                       <button
                         onClick={() => handleSaveAdjustment(draftAdjustment)}
-                        className="px-3 py-1 rounded-lg text-[10px] font-black text-black bg-amber-500 hover:bg-amber-400 flex items-center gap-1 transition shadow cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-lg text-xs font-black text-black bg-amber-500 hover:bg-amber-400 flex items-center gap-1 transition shadow cursor-pointer"
                       >
-                        <Check className="w-3 h-3 stroke-[3]" />
+                        <Check className="w-3.5 h-3.5 stroke-[3]" />
                         <span>Guardar Ajuste</span>
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="text-zinc-200 font-medium">
+                  <div className="text-zinc-200 font-medium leading-relaxed">
                     "{activeAdjustment}"
                   </div>
                 )}
               </div>
             </div>
+
           </div>
 
           {/* Quick CTA: REPETIR MI ESTILO CON AJUSTES */}
