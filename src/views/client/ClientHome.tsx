@@ -336,17 +336,20 @@ export const ClientHome: React.FC = () => {
 
 
 
-
-
   const [isVisitDetailsModalOpen, setIsVisitDetailsModalOpen] = useState(false);
   const [isLoyaltyModalOpen, setIsLoyaltyModalOpen] = useState(false);
   const [isWalkInModalOpen, setIsWalkInModalOpen] = useState(false);
+  const primaryBarber = businessBarbers[0];
+  const primaryBarberName = primaryBarber?.fullName || currentBusiness.ownerName || 'Tu Barbero';
+  const primaryBarberFirstName = primaryBarberName.split(' ')[0];
+
+  const [walkInBarber, setWalkInBarber] = useState(primaryBarberName);
   const [walkInSent, setWalkInSent] = useState(false);
-  const [walkInBarber, setWalkInBarber] = useState(businessBarbers[0]?.fullName || 'Álvaro Ortiz');
   const [walkInNote, setWalkInNote] = useState('');
   const [walkInStyle, setWalkInStyle] = useState('Mi Estilo de Memoria (El Siete Colombiano)');
 
   const handleRepeatStyle = () => {
+
     setBookingMode('repeat');
     if (businessServices.length > 0) setSelectedService(businessServices[0]);
     if (businessBarbers.length > 0) setSelectedBarber(businessBarbers[0]);
@@ -701,9 +704,10 @@ export const ClientHome: React.FC = () => {
               </span>
             </div>
             <p className="text-xs sm:text-sm text-zinc-300 mt-1">
-              Toca aquí para avisar a Álvaro: <strong>"Ya llegué, quiero este corte"</strong>.
+              Toca aquí para avisar a {primaryBarberFirstName}: <strong>"Ya llegué, quiero este corte"</strong>.
             </p>
           </div>
+
         </div>
         <ChevronRight className="w-5 h-5 text-amber-400 group-hover:translate-x-1 transition shrink-0" />
       </section>
@@ -896,7 +900,7 @@ export const ClientHome: React.FC = () => {
                           ? 'bg-red-500 text-white border-red-400 animate-pulse'
                           : 'bg-amber-500 hover:bg-amber-400 text-black border-amber-400'
                       }`}
-                      title="Hablar por micrófono para dictar el ajuste para Álvaro"
+                      title="Hablar por micrófono para dictar el ajuste para tu barbero"
                     >
                       <Mic className="w-3.5 h-3.5 stroke-[2.5]" />
                       <span>{isListeningAdjustment ? 'Escuchando...' : 'Dictar por Voz'}</span>
@@ -920,7 +924,7 @@ export const ClientHome: React.FC = () => {
                 {isListeningAdjustment && (
                   <div className="text-xs font-bold text-red-400 flex items-center gap-2 animate-pulse bg-red-500/10 p-2 rounded-xl border border-red-500/30">
                     <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping shrink-0" />
-                    <span>🎙️ Habla ahora: Cuéntanos el ajuste especial para Álvaro...</span>
+                    <span>🎙️ Habla ahora: Cuéntanos el ajuste especial para {primaryBarberFirstName}...</span>
                   </div>
                 )}
 
@@ -930,7 +934,7 @@ export const ClientHome: React.FC = () => {
                       rows={2}
                       value={draftAdjustment}
                       onChange={(e) => setDraftAdjustment(e.target.value)}
-                      placeholder="Escribe o dicta tu ajuste especial para Álvaro (ej: Dejar más largo arriba, no tocar patillas, subir fade...)"
+                      placeholder={`Escribe o dicta tu ajuste especial para ${primaryBarberFirstName} (ej: Dejar más largo arriba, no tocar patillas, subir fade...)`}
                       className="w-full bg-zinc-900 border border-amber-500/50 rounded-xl p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 shadow-inner"
                       autoFocus
                     />
@@ -961,35 +965,29 @@ export const ClientHome: React.FC = () => {
           </div>
 
           {/* Quick CTA: REPETIR MI ESTILO CON AJUSTES */}
-          <div className="mt-4 pt-3 border-t border-zinc-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <span className="text-xs text-zinc-400">
-              Fórmula técnica: <strong className="text-zinc-200">{clientMemory.technicalFormula}</strong>
-            </span>
+          <div className="mt-3.5 pt-3.5 border-t border-zinc-800/80 flex items-center justify-between gap-3">
+            <div className="text-[11px] text-zinc-400 hidden sm:block">
+              Fórmula técnica: <span className="font-mono text-zinc-300">{clientMemory.technicalFormula}</span>
+            </div>
             <button
               onClick={handleRepeatStyle}
-              className="w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-black text-black flex items-center justify-center gap-2 shadow-lg transition active:scale-95"
-              style={{ backgroundColor: 'var(--brand-primary)' }}
+              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition cursor-pointer active:scale-98"
             >
-              <RotateCcw className="w-4 h-4" />
-              Repetir mi estilo con ajustes
+              <RotateCcw className="w-4 h-4 stroke-[2.5]" />
+              <span>Repetir mi estilo con ajustes</span>
             </button>
           </div>
         </section>
       ) : (
-        <section className="rounded-2xl p-5 bg-gradient-to-br from-zinc-900 to-zinc-950 border border-zinc-800 text-center py-6 space-y-2.5 shadow-lg relative overflow-hidden">
-          <div
-            className="absolute -right-8 -top-8 w-32 h-32 rounded-full blur-3xl opacity-15 pointer-events-none"
-            style={{ backgroundColor: 'var(--brand-primary)' }}
-          />
-          <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center mx-auto text-amber-400">
-            <Sparkles className="w-5 h-5" />
+        /* Empty State si el cliente aún no tiene memoria guardada */
+        <section className="rounded-2xl p-4 bg-zinc-900/60 border border-zinc-800 text-center space-y-2">
+          <div className="w-10 h-10 mx-auto rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+            <Scissors className="w-5 h-5" />
           </div>
-          <div>
-            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Tu Memoria de Estilo Capilar</h3>
-            <p className="text-xs text-zinc-400 max-w-sm mx-auto mt-1 leading-relaxed">
-              Aún no tienes un corte registrado en {currentBusiness.name}. Al finalizar tu cita con Álvaro Ortiz, registraremos tu degradado, fórmula técnica y fotos para que puedas repetir tu estilo con un solo toque.
-            </p>
-          </div>
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Tu Memoria de Estilo Capilar</h3>
+          <p className="text-xs text-zinc-400 max-w-sm mx-auto">
+            Aún no tienes un corte registrado en {currentBusiness.name}. Al finalizar tu cita con {primaryBarberName}, registraremos tu degradado, fórmula técnica y fotos para que puedas repetir tu estilo con un solo toque.
+          </p>
         </section>
       )}
 
@@ -1559,7 +1557,7 @@ export const ClientHome: React.FC = () => {
               <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-400">Barbero que te atendió:</span>
-                  <span className="font-bold text-white">Álvaro Ortiz (Maestro Barbero)</span>
+                  <span className="font-bold text-white">{primaryBarberName}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-zinc-400">Servicio Realizado:</span>
@@ -1606,8 +1604,10 @@ export const ClientHome: React.FC = () => {
                 className="w-full py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 shadow-xl transition cursor-pointer text-xs"
               >
                 <Calendar className="w-4 h-4" />
-                <span>Agendar Nueva Cita con Álvaro Ortiz</span>
+                <span>Agendar Nueva Cita con {primaryBarberName}</span>
               </button>
+
+
             </div>
           </div>
         </div>
@@ -1796,7 +1796,7 @@ export const ClientHome: React.FC = () => {
                   {currentBusiness.loyalty.rewardDescription}
                 </p>
                 <p className="text-[11px] text-zinc-400 pt-1 border-t border-zinc-900 leading-relaxed">
-                  Por cada visita y servicio en {currentBusiness.name}, Álvaro Ortiz sella tu tarjeta digital. En tu visita #{currentBusiness.loyalty.stampsThreshold || 8} recibes tu premio sin costo alguno.
+                  Por cada visita y servicio en {currentBusiness.name}, {primaryBarberName} sella tu tarjeta digital. En tu visita #{currentBusiness.loyalty.stampsThreshold || 8} recibes tu premio sin costo alguno.
                 </p>
               </div>
 
@@ -1839,7 +1839,7 @@ export const ClientHome: React.FC = () => {
       {/* 11. MODAL DE TURNO EN VIVO / SALA DE ESPERA: "QUIERO ESTE CORTE" */}
       {isWalkInModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
-          <div className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl my-0">
+          <div className="w-full max-w-lg bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl my-0">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
@@ -1864,7 +1864,7 @@ export const ClientHome: React.FC = () => {
                 <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30">
                   <Check className="w-6 h-6 stroke-[3]" />
                 </div>
-                <h4 className="text-base font-black text-white">¡Álvaro ya recibió tu alerta en vivo! 🛎️</h4>
+                <h4 className="text-base font-black text-white">¡{walkInBarber && walkInBarber !== 'Primer barbero libre' ? walkInBarber.split(' ')[0] : primaryBarberFirstName} ya recibió tu alerta en vivo! 🛎️</h4>
                 <p className="text-xs text-zinc-300">
                   Tu barbero ya tiene en su pantalla la foto del corte que pediste (<strong>{walkInStyle}</strong>).
                 </p>
@@ -1944,7 +1944,7 @@ export const ClientHome: React.FC = () => {
 
                 <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-zinc-300 block">3. Instrucción especial para el barbero:</span>
+                    <span className="font-bold text-zinc-200 text-xs sm:text-sm">3. Instrucciones especiales para el barbero:</span>
                     <button
                       type="button"
                       onClick={() => {
@@ -1961,12 +1961,17 @@ export const ClientHome: React.FC = () => {
                           if (t) setWalkInNote((prev) => (prev ? `${prev} ${t}` : t));
                         };
                       }}
-                      className="text-[10px] text-amber-400 font-bold flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs flex items-center gap-1.5 transition cursor-pointer shadow-md shadow-amber-500/20 active:scale-95"
                     >
-                      <Mic className="w-3 h-3 text-amber-400" />
+                      <Mic className="w-3.5 h-3.5 stroke-[2.5]" />
                       <span>Dictar por Voz</span>
                     </button>
                   </div>
+
+                  <p className="text-[11px] text-zinc-400 leading-relaxed">
+                    💡 Toca <strong>Dictar por Voz</strong> para hablarle a tu celular o escribe notas para {walkInBarber && walkInBarber !== 'Primer barbero libre' ? walkInBarber.split(' ')[0] : primaryBarberFirstName}.
+                  </p>
+
                   <input
                     type="text"
                     value={walkInNote}
@@ -1995,9 +2000,10 @@ export const ClientHome: React.FC = () => {
                   className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 shadow-2xl transition cursor-pointer text-xs sm:text-sm active:scale-98"
                 >
                   <Bell className="w-4 h-4 stroke-[2.5]" />
-                  <span>¡Avisar a Álvaro: "Quiero este corte"!</span>
+                  <span>¡Avisar a {walkInBarber && walkInBarber !== 'Primer barbero libre' ? walkInBarber.split(' ')[0] : primaryBarberFirstName}: "Quiero este corte"!</span>
                 </button>
               </div>
+
 
             )}
           </div>
