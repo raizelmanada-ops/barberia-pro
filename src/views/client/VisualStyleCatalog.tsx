@@ -207,12 +207,13 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
         {onBack && (
           <button
             onClick={onBack}
-            className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white font-bold text-xs sm:text-sm flex items-center gap-1 transition cursor-pointer border border-zinc-700 shadow shrink-0"
+            className="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs sm:text-sm flex items-center gap-1.5 transition cursor-pointer shadow-lg shrink-0"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-4 h-4 stroke-[3]" />
             <span>Volver</span>
           </button>
         )}
+
       </div>
 
       {/* 2. Pestañas Principales: Cabello vs Barba */}
@@ -374,11 +375,12 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
           <div className="p-3 sm:p-4 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/95 sticky top-0 z-30 shrink-0">
             <button
               onClick={handleCloseModal}
-              className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white flex items-center gap-1 text-xs font-bold transition cursor-pointer border border-zinc-700 shadow"
+              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black flex items-center gap-1 text-xs font-black transition cursor-pointer shadow"
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-4 h-4 stroke-[3]" />
               <span>Volver</span>
             </button>
+
 
             <div className="text-center px-2">
               <h2 className="text-sm sm:text-base font-black text-white tracking-wide leading-tight line-clamp-1">
