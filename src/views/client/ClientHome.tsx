@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 import { useTenant } from '../../core/tenant/TenantContext';
 import { useAuth } from '../../core/auth/AuthContext';
@@ -7,10 +7,10 @@ import { Service, BarberProfile, StyleMemory } from '../../core/types';
 import { BeardStyle } from '../../database/beardStylesData';
 import { AuthService } from '../../core/services/authService';
 import { VisualStyleCatalog } from './VisualStyleCatalog';
+import { CameraCaptureModal } from '../../components/CameraCaptureModal';
 
 import {
   Sparkles,
-
   RotateCcw,
   Star,
   Clock,
@@ -25,13 +25,13 @@ import {
   Calendar,
   Pencil,
   Check,
-  Image as ImageIcon,
   ShieldCheck,
   Store,
   Mic,
   Bell,
   Lock
 } from 'lucide-react';
+
 
 import { SubscriptionService } from '../../core/services/subscriptionService';
 import { ServiceCatalogService } from '../../core/services/serviceCatalogService';
@@ -285,20 +285,12 @@ export const ClientHome: React.FC = () => {
     }
   });
   const [isMemoryPhotoModalOpen, setIsMemoryPhotoModalOpen] = useState(false);
-  const photoFileInputRef = useRef<HTMLInputElement>(null);
-  const photoCameraInputRef = useRef<HTMLInputElement>(null);
-
   const activePhoto = customPhotoUrl || clientMemory?.photoUrl || '/styles/el-siete-colombiano.jpg';
 
-  const [isUploadingMemoryPhoto, setIsUploadingMemoryPhoto] = useState(false);
 
-  const handlePhotoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsUploadingMemoryPhoto(true);
+  const handleConfirmStylePhoto = async (dataUrlOrFile: string) => {
     try {
-      const publicUrl = await ImageStorageService.uploadImage(currentBusiness.id, file, 'memories');
+      const publicUrl = await ImageStorageService.uploadImage(currentBusiness.id, dataUrlOrFile, 'memories');
       setCustomPhotoUrl(publicUrl);
 
       // Guardar en Supabase hair_style_memories aislado por business_id y client
@@ -315,11 +307,11 @@ export const ClientHome: React.FC = () => {
 
       setIsMemoryPhotoModalOpen(false);
     } catch (err) {
-      console.error('Error subiendo foto de memoria de estilo:', err);
-    } finally {
-      setIsUploadingMemoryPhoto(false);
+      console.error('Error guardando foto de memoria de estilo:', err);
     }
   };
+
+
 
 
   const [isVisitDetailsModalOpen, setIsVisitDetailsModalOpen] = useState(false);
@@ -583,9 +575,10 @@ export const ClientHome: React.FC = () => {
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-black bg-amber-500 hover:bg-amber-400 border border-amber-400 shadow-lg shadow-amber-500/20 transition hover:scale-105 active:scale-95 cursor-pointer"
           >
             <Scissors className="w-4 h-4" />
-            <span>Estilos de Barba</span>
+            <span>Biblioteca Visual</span>
           </button>
         </div>
+
       </div>
 
 
@@ -1002,13 +995,14 @@ export const ClientHome: React.FC = () => {
           </div>
           <div>
             <div className="text-xs font-black text-white flex items-center gap-1.5">
-              <span>Catálogo Visual de Estilos de Barba</span>
-              <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 uppercase">Oficial</span>
+              <span>Biblioteca Visual de Estilos</span>
+              <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 uppercase">Cabello & Barba</span>
             </div>
             <p className="text-[11px] text-zinc-400 mt-0.5">
-              Explora nuestra colección con vistas detalladas frontal, lateral y posterior.
+              Explora nuestra colección oficial de cortes y barbas con referencias técnicas.
             </p>
           </div>
+
         </div>
         <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition" />
       </section>
@@ -1480,74 +1474,15 @@ export const ClientHome: React.FC = () => {
         </div>
       )}
 
-      {/* 8. MODAL PARA TOMAR / CAMBIAR FOTO DE LA MEMORIA DE ESTILO */}
-      {isMemoryPhotoModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl animate-fade-in">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  <Camera className="w-4 h-4" />
-                </span>
-                <h3 className="text-sm font-bold text-white">Foto de tu Memoria de Estilo</h3>
-              </div>
-              <button
-                onClick={() => setIsMemoryPhotoModalOpen(false)}
-                className="text-xs text-zinc-400 hover:text-white px-2 py-1 bg-zinc-800 rounded-lg cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
+      {/* 8. MODAL INTERACTIVO DE CÁMARA & GALERÍA PARA MEMORIA DE ESTILO */}
+      <CameraCaptureModal
+        isOpen={isMemoryPhotoModalOpen}
+        onClose={() => setIsMemoryPhotoModalOpen(false)}
+        onConfirmPhoto={handleConfirmStylePhoto}
+        title="Tu Memoria de Estilo Capilar"
+        subtitle="Toma una foto en vivo con la cámara o selecciona una imagen desde la galería."
+      />
 
-            <p className="text-xs text-zinc-400">
-              Captura tu corte recién terminado o sube una foto de tu estilo favorito para que Álvaro Ortiz la recuerde en tus próximas visitas.
-            </p>
-
-            {isUploadingMemoryPhoto ? (
-              <div className="p-6 text-center space-y-2 bg-zinc-950 rounded-2xl border border-zinc-800 animate-pulse">
-                <div className="w-8 h-8 mx-auto border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
-                <span className="text-xs font-bold text-amber-400 block">Sincronizando foto en Supabase...</span>
-              </div>
-            ) : (
-              <div className="space-y-2.5 pt-1">
-                <button
-                  onClick={() => photoCameraInputRef.current?.click()}
-                  className="w-full py-3 px-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 transition shadow cursor-pointer text-xs"
-                >
-                  <Camera className="w-4 h-4 stroke-[2.5]" />
-                  <span>📸 Tomar Foto con la Cámara</span>
-                </button>
-
-                <button
-                  onClick={() => photoFileInputRef.current?.click()}
-                  className="w-full py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-750 text-white font-bold flex items-center justify-center gap-2 border border-zinc-700 transition cursor-pointer text-xs"
-                >
-                  <ImageIcon className="w-4 h-4 text-amber-400" />
-                  <span>🖼️ Subir desde la Galería</span>
-                </button>
-              </div>
-            )}
-
-
-            {/* Inputs ocultos de archivo y cámara */}
-            <input
-              type="file"
-              ref={photoCameraInputRef}
-              accept="image/*"
-              capture="environment"
-              onChange={handlePhotoFileChange}
-              className="hidden"
-            />
-            <input
-              type="file"
-              ref={photoFileInputRef}
-              accept="image/*"
-              onChange={handlePhotoFileChange}
-              className="hidden"
-            />
-          </div>
-        </div>
-      )}
 
       {/* 9. MODAL DE DETALLES DE ÚLTIMA VISITA REGISTRADA */}
       {isVisitDetailsModalOpen && (
