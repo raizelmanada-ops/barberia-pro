@@ -2,12 +2,14 @@ import React, { useState, useMemo, useRef } from 'react';
 import { useTenant } from '../../core/tenant/TenantContext';
 import { useAuth } from '../../core/auth/AuthContext';
 import { INITIAL_BARBERS, INITIAL_SERVICES, INITIAL_STYLE_MEMORIES } from '../../database/mockData';
-import { Service, BarberProfile, StyleMemory, StyleCatalogItem } from '../../core/types';
+import { Service, BarberProfile, StyleMemory } from '../../core/types';
+import { BeardStyle } from '../../database/beardStylesData';
 import { AuthService } from '../../core/services/authService';
-import { StyleTryOnView } from './StyleTryOnView';
 import { VisualStyleCatalog } from './VisualStyleCatalog';
+
 import {
   Sparkles,
+
   RotateCcw,
   Star,
   Clock,
@@ -125,8 +127,9 @@ export const ClientHome: React.FC = () => {
   });
   const [selectedTime, setSelectedTime] = useState('14:00');
   const [bookingConfirmed, setBookingConfirmed] = useState(false);
-  const [bookingMode, setBookingMode] = useState<'repeat' | 'tryon' | 'standard'>('standard');
+  const [bookingMode, setBookingMode] = useState<'repeat' | 'tryon' | 'style_catalog' | 'standard'>('standard');
   const [customStyleNote, setCustomStyleNote] = useState('');
+
 
   // Feedback State
   const [feedbackSent, setFeedbackSent] = useState(false);
@@ -303,28 +306,18 @@ export const ClientHome: React.FC = () => {
     setActiveTab('booking');
   };
 
-  const handleBookFromTryOn = (styleName: string) => {
-    setBookingMode('tryon');
-    setCustomStyleNote(`Referencia del Probador: ${styleName}`);
+  const [selectedBeardStyle, setSelectedBeardStyle] = useState<BeardStyle | null>(null);
+
+  const handleSelectStyleFromCatalog = (style: BeardStyle) => {
+    setSelectedBeardStyle(style);
+    setBookingMode('style_catalog');
+    setCustomStyleNote(`Estilo Solicitado: ${style.name} (${style.category})`);
     if (businessServices.length > 0) setSelectedService(businessServices[0]);
     setActiveTab('booking');
-  };
-
-  const handleSelectStyleFromCatalog = (style: StyleCatalogItem) => {
-    setBookingMode('tryon');
-    setCustomStyleNote(`Estilo Solicitado: ${style.name} (${style.category.toUpperCase()})`);
-    if (businessServices.length > 0) setSelectedService(businessServices[0]);
-    setActiveTab('booking');
-  };
-
-  const [tryOnTargetStyleId, setTryOnTargetStyleId] = useState<string | undefined>(undefined);
-
-  const handleTryOnStyleFromCatalog = (style: StyleCatalogItem) => {
-    setTryOnTargetStyleId(style.id);
-    setActiveTab('tryon');
   };
 
   const handleConfirmBooking = () => {
+
     setBookingConfirmed(true);
 
     const clientName = currentUser.fullName !== 'Cliente Invitado' ? currentUser.fullName : 'Pedro Duarte';
@@ -414,23 +407,10 @@ export const ClientHome: React.FC = () => {
       <VisualStyleCatalog
         onBack={() => setActiveTab('home')}
         onSelectStyle={handleSelectStyleFromCatalog}
-        onTryOnStyle={handleTryOnStyleFromCatalog}
       />
     );
   }
 
-  if (activeTab === 'tryon') {
-    return (
-      <StyleTryOnView
-        onBack={() => {
-          setTryOnTargetStyleId(undefined);
-          setActiveTab('home');
-        }}
-        onBookWithStyle={handleBookFromTryOn}
-        initialStyleId={tryOnTargetStyleId}
-      />
-    );
-  }
 
   if (!isOperational) {
     return (
@@ -568,21 +548,15 @@ export const ClientHome: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('catalog')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-white bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 shadow transition hover:scale-105 active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-black bg-amber-500 hover:bg-amber-400 border border-amber-400 shadow-lg shadow-amber-500/20 transition hover:scale-105 active:scale-95 cursor-pointer"
           >
-            <Scissors className="w-4 h-4 text-amber-400" />
-            <span>Catálogo</span>
-          </button>
-          <button
-            onClick={() => setActiveTab('tryon')}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-black shadow-lg transition hover:scale-105 active:scale-95 cursor-pointer"
-            style={{ backgroundColor: 'var(--brand-primary)' }}
-          >
-            <Camera className="w-4 h-4" />
-            <span>Probar Estilo</span>
+            <Scissors className="w-4 h-4" />
+            <span>Estilos de Barba</span>
           </button>
         </div>
       </div>
+
+
 
       {/* 🎁 BANNER DESTACADO DEL CLUB DE FIDELIZACIÓN: 1 CORTE GRATIS */}
       <section
@@ -985,27 +959,28 @@ export const ClientHome: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. PROBADOR DE ESTILO BANNER */}
+      {/* 4. CATÁLOGO VISUAL DE ESTILOS DE BARBA BANNER */}
       <section
-        onClick={() => setActiveTab('tryon')}
+        onClick={() => setActiveTab('catalog')}
         className="rounded-2xl p-4 bg-gradient-to-r from-zinc-900 via-zinc-800/80 to-zinc-900 border border-zinc-700 cursor-pointer hover:border-amber-500/50 transition flex items-center justify-between group"
       >
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
-            <Camera className="w-6 h-6" />
+          <div className="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
+            <Scissors className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xs font-bold text-white flex items-center gap-1.5">
-              <span>Probador Personal de Estilo</span>
-              <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-sky-500/20 text-sky-300">NUEVO</span>
+            <div className="text-xs font-black text-white flex items-center gap-1.5">
+              <span>Catálogo Visual de Estilos de Barba</span>
+              <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 uppercase">Oficial</span>
             </div>
             <p className="text-[11px] text-zinc-400 mt-0.5">
-              Mira cómo te verías con diferentes cortes y barbas antes de sentarte.
+              Explora nuestra colección con vistas detalladas frontal, lateral y posterior.
             </p>
           </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-white transition" />
+        <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition" />
       </section>
+
 
       {/* 5. SERVICIOS & BARBEROS DISPONIBLES (AISLADOS POR TENANT) */}
       <section className="space-y-3">
@@ -1140,10 +1115,11 @@ export const ClientHome: React.FC = () => {
                 <h3 className="text-base font-bold text-white">
                   {bookingMode === 'repeat'
                     ? 'Repitiendo tu Estilo'
-                    : bookingMode === 'tryon'
-                    ? 'Reservando desde el Probador'
+                    : bookingMode === 'style_catalog'
+                    ? `Estilo: ${selectedBeardStyle?.name || 'Catálogo de Barba'}`
                     : 'Agendar Cita'}
                 </h3>
+
                 <p className="text-xs text-zinc-400">
                   {selectedService?.name || 'Servicio'} • ${selectedService?.priceCOP.toLocaleString('es-CO')} COP
                 </p>

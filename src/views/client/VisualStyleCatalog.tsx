@@ -1,326 +1,273 @@
-import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { useTenant } from '../../core/tenant/TenantContext';
-import { StyleCatalogService } from '../../core/services/styleCatalogService';
-import { StyleCatalogItem } from '../../core/types';
+// ==========================================================================
+// BARBERIA_PRO - Galería Oficial de Estilos de Barba
+// Alto Rendimiento, Lazy Loading, Grilla Responsive & Navegación Modal
+// ==========================================================================
+
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import {
-  Scissors,
-  Heart,
+  OFFICIAL_BEARD_STYLES,
+  BEARD_CATEGORIES,
+  BeardStyle
+} from '../../database/beardStylesData';
+import {
   Search,
-  Check,
-  Calendar,
-  Camera,
   ArrowLeft,
-  SlidersHorizontal,
-  Flame,
-  UserCheck,
-  Rotate3d,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Calendar,
+  Check,
+  Eye,
+  Scissors,
   Sparkles,
-  Play,
-  Pause,
-  Smile,
-  Zap
+  SlidersHorizontal
 } from 'lucide-react';
 
 interface VisualStyleCatalogProps {
   onBack: () => void;
-  onSelectStyle: (style: StyleCatalogItem) => void;
-  onTryOnStyle: (style: StyleCatalogItem) => void;
+  onSelectStyle?: (style: BeardStyle) => void;
 }
 
 export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
   onBack,
-  onSelectStyle,
-  onTryOnStyle
+  onSelectStyle
 }) => {
-  const { currentBusiness } = useTenant();
-  const favoritesStorageKey = `barberia_favs_${currentBusiness.id}`;
-
-  const [catalogStyles, setCatalogStyles] = useState<StyleCatalogItem[]>(() =>
-    StyleCatalogService.getStyles(currentBusiness.id)
-  );
-
-  useEffect(() => {
-    const handleCatalogUpdate = () => {
-      setCatalogStyles(StyleCatalogService.getStyles(currentBusiness.id));
-    };
-    window.addEventListener('barberia:catalog_updated', handleCatalogUpdate);
-    return () => window.removeEventListener('barberia:catalog_updated', handleCatalogUpdate);
-  }, [currentBusiness.id]);
-
-  const [activeCategory, setActiveCategory] = useState<'all' | 'ninos' | 'corte' | 'disenos' | 'barba' | 'combo'>('all');
+  const [styles] = useState<BeardStyle[]>(OFFICIAL_BEARD_STYLES);
   const [searchQuery, setSearchQuery] = useState('');
-  const [hairTypeFilter, setHairTypeFilter] = useState<'todos' | 'liso' | 'ondulado' | 'afro'>('todos');
-  const [selectedStyleDetail, setSelectedStyleDetail] = useState<StyleCatalogItem | null>(null);
-  const [activeAngle, setActiveAngle] = useState<'front' | 'side' | 'back' | '3d'>('3d');
-  const [rotationAngle, setRotationAngle] = useState<number>(0);
-  const [isAutoRotating, setIsAutoRotating] = useState<boolean>(false);
-  const autoRotateIntervalRef = useRef<any>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>('todas');
+  
+  // Modal de visualización ampliada
+  const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
+  const [selectedStyleId, setSelectedStyleId] = useState<string | null>(null);
 
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    try {
-      const saved = localStorage.getItem(favoritesStorageKey);
-      return saved ? JSON.parse(saved) : [];
-    } catch {
-      return [];
-    }
-  });
-  const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem(favoritesStorageKey, JSON.stringify(favorites));
-    } catch (e) {
-      console.warn('Error saving favorites to localStorage', e);
-    }
-  }, [favorites, favoritesStorageKey]);
-
-  // Auto-rotation effect in 3D mode
-  useEffect(() => {
-    if (isAutoRotating && activeAngle === '3d') {
-      autoRotateIntervalRef.current = setInterval(() => {
-        setRotationAngle(prev => (prev >= 360 ? 0 : prev + 2));
-      }, 50);
-    } else {
-      if (autoRotateIntervalRef.current) {
-        clearInterval(autoRotateIntervalRef.current);
-      }
-    }
-    return () => {
-      if (autoRotateIntervalRef.current) clearInterval(autoRotateIntervalRef.current);
-    };
-  }, [isAutoRotating, activeAngle]);
-
-  const toggleFavorite = (e: React.MouseEvent, styleId: string) => {
-    e.stopPropagation();
-    setFavorites(prev =>
-      prev.includes(styleId) ? prev.filter(id => id !== styleId) : [...prev, styleId]
-    );
-  };
-
+  // Filtrado de estilos
   const filteredStyles = useMemo(() => {
-    return catalogStyles.filter(style => {
-      if (activeCategory !== 'all') {
-        if (activeCategory === 'ninos') {
-          const isForKids = style.tags.some(t => ['niños', 'kids', 'escolar'].includes(t.toLowerCase())) || style.targetAudience === 'ninos';
-          if (!isForKids) return false;
-        } else if (activeCategory === 'disenos') {
-          const hasDesign = style.tags.some(t => ['diseño', 'líneas', 'freestyle'].includes(t.toLowerCase()));
-          if (!hasDesign) return false;
-        } else if (style.category !== activeCategory) {
-          return false;
-        }
-      }
-      if (showOnlyFavorites && !favorites.includes(style.id)) {
+    return styles.filter((style) => {
+      // Filtro por categoría
+      if (selectedCategory !== 'todas' && style.categoryKey !== selectedCategory) {
         return false;
       }
-      if (hairTypeFilter !== 'todos') {
-        const matchesTag = style.tags.some(tag =>
-          tag.toLowerCase().includes(hairTypeFilter.toLowerCase())
-        );
-        const matchesDesc = style.description.toLowerCase().includes(hairTypeFilter.toLowerCase());
-        const matchesHairType = style.hairType === hairTypeFilter || style.hairType === 'todos';
-        if (!matchesTag && !matchesDesc && !matchesHairType) {
-          return false;
-        }
-      }
+      // Filtro por buscador
       if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchesName = style.name.toLowerCase().includes(q);
-        const matchesDesc = style.description.toLowerCase().includes(q);
-        const matchesTags = style.tags.some(t => t.toLowerCase().includes(q));
-        if (!matchesName && !matchesDesc && !matchesTags) {
-          return false;
-        }
+        const query = searchQuery.toLowerCase().trim();
+        const matchesName = style.name.toLowerCase().includes(query);
+        const matchesDesc = style.description.toLowerCase().includes(query);
+        const matchesCat = style.category.toLowerCase().includes(query);
+        if (!matchesName && !matchesDesc && !matchesCat) return false;
       }
       return true;
     });
-  }, [activeCategory, showOnlyFavorites, favorites, hairTypeFilter, searchQuery]);
+  }, [styles, selectedCategory, searchQuery]);
+
+  const activeStyle = activeModalIndex !== null ? filteredStyles[activeModalIndex] : null;
+
+  // Navegación anterior / siguiente dentro del modal
+  const handlePrevStyle = useCallback(() => {
+    if (activeModalIndex === null) return;
+    setActiveModalIndex((prev) => (prev! > 0 ? prev! - 1 : filteredStyles.length - 1));
+  }, [activeModalIndex, filteredStyles.length]);
+
+  const handleNextStyle = useCallback(() => {
+    if (activeModalIndex === null) return;
+    setActiveModalIndex((prev) => (prev! < filteredStyles.length - 1 ? prev! + 1 : 0));
+  }, [activeModalIndex, filteredStyles.length]);
+
+  const handleCloseModal = useCallback(() => {
+    setActiveModalIndex(null);
+  }, []);
+
+  // Navegación con teclado (Flechas izq/der y Escape)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (activeModalIndex === null) return;
+      if (e.key === 'ArrowLeft') handlePrevStyle();
+      if (e.key === 'ArrowRight') handleNextStyle();
+      if (e.key === 'Escape') handleCloseModal();
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [activeModalIndex, handlePrevStyle, handleNextStyle, handleCloseModal]);
+
+  const handleChooseStyle = (style: BeardStyle) => {
+    setSelectedStyleId(style.id);
+    handleCloseModal();
+    if (onSelectStyle) {
+      onSelectStyle(style);
+    }
+  };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-4 space-y-5 animate-fade-in pb-28 text-xs">
-      {/* Top Header Navigation */}
-      <div className="flex items-center justify-between">
+    <div className="min-h-screen bg-[#09090b] text-zinc-100 px-3 sm:px-6 py-4 max-w-7xl mx-auto space-y-6 animate-fade-in pb-28 text-xs select-none">
+      
+      {/* 1. Barra de Navegación Superior */}
+      <div className="flex items-center justify-between border-b border-zinc-850 pb-4">
         <button
           onClick={onBack}
-          className="flex items-center gap-1.5 font-semibold text-zinc-400 hover:text-white px-2.5 py-1.5 rounded-xl bg-zinc-800/60 border border-zinc-700 transition cursor-pointer"
+          className="flex items-center gap-2 font-bold text-zinc-400 hover:text-white px-3.5 py-2 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-zinc-700 transition cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" />
-          Volver a Mi Barbería
+          <ArrowLeft className="w-4 h-4 text-amber-400" />
+          <span>Regresar</span>
         </button>
 
-        <button
-          onClick={() => setShowOnlyFavorites(prev => !prev)}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-bold border transition cursor-pointer ${
-            showOnlyFavorites
-              ? 'bg-rose-500/20 text-rose-400 border-rose-500/40'
-              : 'bg-zinc-800/60 text-zinc-400 border-zinc-700 hover:text-white'
-          }`}
-        >
-          <Heart className={`w-3.5 h-3.5 ${showOnlyFavorites ? 'fill-rose-500 text-rose-500' : ''}`} />
-          <span>Favoritos ({favorites.length})</span>
-        </button>
+        <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-widest text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-xl border border-amber-500/20">
+          <Sparkles className="w-3.5 h-3.5" />
+          <span>Galería Oficial</span>
+        </div>
       </div>
 
-      {/* Hero Header */}
-      <div>
-        <div className="inline-flex items-center gap-1.5 font-bold uppercase tracking-wider text-amber-400">
-          <Rotate3d className="w-3.5 h-3.5" /> Biblioteca Oficial de Cortes de Barbería & Visor 3D
-        </div>
-        <h2 className="text-xl sm:text-2xl font-extrabold text-white mt-1">
-          Cortes Reales en Sillón de Barbería
-        </h2>
-        <p className="text-zinc-400 mt-1">
-          Fotografías 100% de barbería profesional. Toca cualquier estilo para inspeccionarlo en 360°, ver el visagismo y reservarlo con Álvaro Ortiz.
+      {/* 2. Encabezado de la Galería */}
+      <div className="space-y-1">
+        <h1 className="text-xl sm:text-3xl font-black text-white tracking-tight">
+          ESTILOS DE BARBA
+        </h1>
+        <p className="text-zinc-400 text-xs sm:text-sm max-w-2xl leading-relaxed">
+          Catálogo visual de referencias y diseños. Selecciona cualquier miniatura para inspeccionar las diferentes vistas del estilo.
         </p>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative">
-        <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-        <input
-          type="text"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Buscar cortes, fades, niños, barbas (ej: El Siete, Burst Fade, Crop)..."
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl pl-10 pr-4 py-3 text-zinc-200 placeholder-zinc-500 focus:outline-none focus:border-amber-500 transition text-xs shadow-inner"
-        />
-        {searchQuery && (
-          <button
-            onClick={() => setSearchQuery('')}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white text-xs font-bold cursor-pointer"
-          >
-            Limpiar
-          </button>
-        )}
+      {/* 3. Buscador y Filtros por Categoría */}
+      <div className="space-y-3">
+        {/* Buscador */}
+        <div className="relative">
+          <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Buscar por estilo (ej: Boxed, Garibaldi, Fade, Van Dyke)..."
+            className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-10 pr-4 py-3 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 transition text-xs shadow-inner"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white text-xs font-bold p-1 cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Píldoras de Categoría */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[11px] font-bold text-zinc-500 shrink-0 mr-1 flex items-center gap-1">
+            <SlidersHorizontal className="w-3 h-3 text-amber-400" />
+            Filtrar:
+          </span>
+          {BEARD_CATEGORIES.map((cat) => (
+            <button
+              key={cat.key}
+              onClick={() => setSelectedCategory(cat.key)}
+              className={`px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap text-[11px] transition cursor-pointer border ${
+                selectedCategory === cat.key
+                  ? 'bg-amber-500 text-black border-amber-400 shadow-md shadow-amber-500/20'
+                  : 'bg-zinc-900 text-zinc-400 hover:text-white border-zinc-800 hover:border-zinc-700'
+              }`}
+            >
+              {cat.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Category Tabs: TODOS / NIÑOS / CORTES / DISEÑOS / BARBAS / COMBOS */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-        {[
-          { id: 'all', label: `Todos (${catalogStyles.length})`, icon: null },
-          { id: 'ninos', label: '👦 Niños & Kids', icon: Smile },
-          { id: 'corte', label: '✂️ Fades & Cortes', icon: Scissors },
-          { id: 'disenos', label: '⚡ Diseños & Líneas', icon: Zap },
-          { id: 'barba', label: '🧔 Barbas', icon: UserCheck },
-          { id: 'combo', label: '👑 Combos', icon: Flame }
-        ].map(tab => (
-          <button
-            key={tab.id}
-            onClick={() => { setActiveCategory(tab.id as any); setShowOnlyFavorites(false); }}
-            className={`py-2 px-3 rounded-xl font-bold whitespace-nowrap flex items-center gap-1.5 transition cursor-pointer ${
-              activeCategory === tab.id && !showOnlyFavorites
-                ? 'bg-amber-500 text-black shadow-lg'
-                : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
-            }`}
-          >
-            {tab.icon && <tab.icon className="w-3.5 h-3.5" />}
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Hair Type Filter Chips */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        <span className="text-[11px] font-bold text-zinc-500 shrink-0 flex items-center gap-1">
-          <SlidersHorizontal className="w-3 h-3" /> Tipo de Cabello:
-        </span>
-        {[
-          { id: 'todos', label: 'Todos' },
-          { id: 'liso', label: 'Liso / Fino' },
-          { id: 'ondulado', label: 'Ondulado' },
-          { id: 'afro', label: 'Rizado / Afro' }
-        ].map(filter => (
-          <button
-            key={filter.id}
-            onClick={() => setHairTypeFilter(filter.id as any)}
-            className={`px-3 py-1 rounded-lg text-[11px] font-semibold whitespace-nowrap transition cursor-pointer ${
-              hairTypeFilter === filter.id
-                ? 'bg-zinc-700 text-amber-400 border border-amber-500/30'
-                : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
-            }`}
-          >
-            {filter.label}
-          </button>
-        ))}
-      </div>
-
-      {/* Style Grid Results (Only Pure Professional Barbershop Photos) */}
+      {/* 4. Cuadrícula Responsive de Miniaturas (Móvil: 2 cols, Tablet: 3 cols, Escritorio: 4 cols) */}
       {filteredStyles.length === 0 ? (
-        <div className="text-center py-12 bg-zinc-900/40 rounded-3xl border border-zinc-800 space-y-3">
-          <Scissors className="w-8 h-8 text-zinc-600 mx-auto" />
-          <p className="text-zinc-400 font-bold">No se encontraron estilos con los filtros seleccionados.</p>
+        <div className="text-center py-16 bg-zinc-900/30 rounded-3xl border border-zinc-800/60 p-6 space-y-3">
+          <Scissors className="w-10 h-10 text-zinc-600 mx-auto" />
+          <h3 className="text-sm font-bold text-zinc-300">No se encontraron estilos</h3>
+          <p className="text-zinc-500 text-xs">Prueba con otro término de búsqueda o selecciona otra categoría.</p>
           <button
-            onClick={() => { setActiveCategory('all'); setSearchQuery(''); setHairTypeFilter('todos'); setShowOnlyFavorites(false); }}
-            className="px-4 py-2 rounded-xl bg-zinc-800 text-amber-400 font-bold hover:bg-zinc-700 transition cursor-pointer"
+            onClick={() => { setSearchQuery(''); setSelectedCategory('todas'); }}
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-bold rounded-xl transition cursor-pointer text-xs"
           >
-            Restablecer Filtros
+            Ver todos los estilos
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {filteredStyles.map(style => {
-            const isFav = favorites.includes(style.id);
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {filteredStyles.map((style, index) => {
+            const isSelected = selectedStyleId === style.id;
             return (
               <div
                 key={style.id}
-                onClick={() => {
-                  setSelectedStyleDetail(style);
-                  setActiveAngle('3d');
-                  setRotationAngle(0);
-                  setIsAutoRotating(false);
-                }}
-                className="group relative bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden shadow-lg hover:border-amber-500/50 transition cursor-pointer flex flex-col justify-between"
+                onClick={() => setActiveModalIndex(index)}
+                className={`group relative bg-zinc-900/90 border rounded-2xl sm:rounded-3xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-amber-500/50 transition-all duration-300 flex flex-col justify-between cursor-pointer ${
+                  isSelected ? 'border-amber-500 ring-1 ring-amber-500/40' : 'border-zinc-800'
+                }`}
               >
-                <div className="relative aspect-square w-full overflow-hidden bg-zinc-950">
+                {/* Contenedor de Miniatura con Dimensiones Definidas y Lazy Loading */}
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-950 flex items-center justify-center">
                   <img
-                    src={style.previewOverlayUrl}
+                    src={style.thumbnail}
                     alt={style.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                     loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      // Fallback elegante a la imagen principal o silueta si no existe miniatura
+                      const target = e.target as HTMLImageElement;
+                      if (target.src !== style.image && style.image) {
+                        target.src = style.image;
+                      } else {
+                        target.style.display = 'none';
+                      }
+                    }}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-bold text-amber-400 border border-amber-500/20 uppercase flex items-center gap-1">
-                    <Rotate3d className="w-2.5 h-2.5" />
-                    <span>360° 3D</span>
+
+                  {/* Placeholder estético para cuando la imagen esté en carga/preparación */}
+                  <div className="absolute inset-0 -z-10 flex flex-col items-center justify-center p-3 text-center bg-zinc-950">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-1">
+                      <Scissors className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-bold text-zinc-400 uppercase line-clamp-1">{style.name}</span>
                   </div>
 
-                  <button
-                    onClick={(e) => toggleFavorite(e, style.id)}
-                    className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/70 backdrop-blur-md flex items-center justify-center text-zinc-400 hover:text-rose-500 transition cursor-pointer border border-white/10"
-                  >
-                    <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
-                  </button>
+                  {/* Badge de Categoría */}
+                  <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-extrabold text-amber-400 border border-amber-500/20 uppercase tracking-wider">
+                    {style.category}
+                  </div>
+
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 bg-amber-500 text-black px-2 py-0.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-1 shadow-md">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                      <span>Elegido</span>
+                    </div>
+                  )}
+
+                  {/* Overlay sutil al pasar cursor */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2 sm:p-3">
+                    <span className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
+                      <Eye className="w-3 h-3" /> Ver detalles
+                    </span>
+                  </div>
                 </div>
 
-                <div className="p-3 space-y-1.5 flex-1 flex flex-col justify-between">
+                {/* Información de la Tarjeta */}
+                <div className="p-3 sm:p-4 space-y-2 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="font-extrabold text-white text-xs leading-tight group-hover:text-amber-400 transition">
+                    <h3 className="font-extrabold text-white text-xs sm:text-sm group-hover:text-amber-400 transition leading-snug">
                       {style.name}
                     </h3>
-                    <p className="text-[10px] text-zinc-400 line-clamp-2 mt-0.5">
+                    <p className="text-[10px] sm:text-[11px] text-zinc-400 line-clamp-2 mt-0.5 leading-relaxed">
                       {style.description}
                     </p>
                   </div>
 
-                  <div className="pt-2 border-t border-zinc-800/80 flex items-center gap-1.5">
+                  <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between">
+                    <span className="text-[10px] text-zinc-500 flex items-center gap-1">
+                      <Clock className="w-3 h-3 text-amber-400" />
+                      {style.duration}
+                    </span>
+
                     <button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onSelectStyle(style);
+                        setActiveModalIndex(index);
                       }}
-                      className="flex-1 py-1.5 px-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-extrabold text-[11px] flex items-center justify-center gap-1 transition shadow cursor-pointer"
+                      className="px-2.5 py-1 rounded-xl bg-zinc-800 group-hover:bg-amber-500 group-hover:text-black text-zinc-200 text-[10px] font-extrabold transition cursor-pointer flex items-center gap-1"
                     >
-                      <Check className="w-3 h-3 stroke-[3]" />
-                      <span>Quiero este</span>
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onTryOnStyle(style);
-                      }}
-                      title="Probar con mi foto"
-                      className="p-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 border border-zinc-700 transition cursor-pointer"
-                    >
-                      <Camera className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Ver estilo</span>
                     </button>
                   </div>
                 </div>
@@ -330,151 +277,133 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
         </div>
       )}
 
-      {/* Style Detail & Interactive 3D / 360° Viewer Modal */}
-      {selectedStyleDetail && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-end sm:items-center justify-center p-3 animate-fade-in overflow-y-auto">
-          <div className="w-full max-w-lg bg-zinc-900 border border-zinc-700 rounded-3xl overflow-hidden shadow-2xl space-y-4 my-auto">
-            {/* Top Bar of Modal */}
-            <div className="p-4 pb-0 flex items-center justify-between">
+      {/* 5. Modal de Vista Ampliada con Navegación Anterior / Siguiente */}
+      {activeStyle && (
+        <div
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 animate-fade-in"
+          onClick={handleCloseModal}
+        >
+          {/* Contenedor del Modal (click inside no cierra) */}
+          <div
+            className="relative w-full max-w-2xl bg-zinc-900 border border-zinc-750 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Cabecera del Modal */}
+            <div className="p-4 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/95 sticky top-0 z-10">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  <Rotate3d className="w-4 h-4" />
+                  <Scissors className="w-4 h-4" />
                 </span>
                 <div>
-                  <h3 className="text-sm font-black text-white">{selectedStyleDetail.name}</h3>
-                  <span className="text-[10px] text-amber-400 font-bold uppercase">{selectedStyleDetail.category}</span>
+                  <h2 className="text-sm sm:text-base font-black text-white tracking-wide">
+                    {activeStyle.name}
+                  </h2>
+                  <span className="text-[10px] text-amber-400 font-bold uppercase">
+                    {activeStyle.category}
+                  </span>
                 </div>
               </div>
 
+              {/* Botón Cerrar */}
               <button
-                onClick={() => setSelectedStyleDetail(null)}
-                className="w-7 h-7 rounded-full bg-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center text-xs font-bold transition cursor-pointer"
+                onClick={handleCloseModal}
+                className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center text-xs font-bold transition cursor-pointer border border-zinc-700"
+                title="Cerrar (Esc)"
               >
-                ✕
+                <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* 3D / 360° Interactive Canvas */}
-            <div className="relative aspect-square w-full bg-zinc-950 flex items-center justify-center overflow-hidden perspective-[1000px] border-y border-zinc-800">
-              <div
-                className="relative w-full h-full flex items-center justify-center transition-transform duration-100 ease-out"
-                style={{
-                  transform:
-                    activeAngle === '3d'
-                      ? `rotateY(${rotationAngle}deg) rotateX(${Math.sin((rotationAngle * Math.PI) / 180) * 8}deg) scale(0.95)`
-                      : 'none',
-                  transformStyle: 'preserve-3d'
-                }}
-              >
+            {/* Cuerpo del Modal con Fotografía en Alta Resolución y Navegadores */}
+            <div className="overflow-y-auto p-4 sm:p-5 space-y-4 flex-1">
+              
+              {/* Contenedor Principal de la Imagen */}
+              <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-800 flex items-center justify-center shadow-inner group">
                 <img
-                  src={selectedStyleDetail.previewOverlayUrl}
-                  alt={selectedStyleDetail.name}
-                  className="w-full h-full object-cover rounded-2xl shadow-2xl"
-                  style={{
-                    filter: `brightness(${1 + Math.cos((rotationAngle * Math.PI) / 180) * 0.15})`
+                  src={activeStyle.image}
+                  alt={activeStyle.name}
+                  decoding="async"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    if (target.src !== activeStyle.thumbnail) {
+                      target.src = activeStyle.thumbnail;
+                    }
                   }}
+                  className="w-full h-full object-contain"
                 />
 
-                {activeAngle === '3d' && (
-                  <div className="absolute inset-0 border-2 border-amber-500/30 rounded-2xl pointer-events-none shadow-[inset_0_0_30px_rgba(245,158,11,0.2)] flex items-center justify-center">
-                    <div className="absolute bottom-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-amber-400 border border-amber-500/40">
-                      Giro: {Math.round(rotationAngle)}° / 360°
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="absolute top-3 right-3 flex items-center gap-2">
+                {/* Botón Anterior */}
                 <button
-                  onClick={() => setIsAutoRotating(prev => !prev)}
-                  className="px-2.5 py-1 rounded-xl bg-black/80 backdrop-blur-md text-zinc-200 hover:text-white border border-white/20 text-[10px] font-bold flex items-center gap-1 cursor-pointer transition shadow"
+                  onClick={handlePrevStyle}
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer"
+                  title="Estilo anterior (Flecha Izquierda)"
                 >
-                  {isAutoRotating ? <Pause className="w-3 h-3 text-amber-400" /> : <Play className="w-3 h-3 text-amber-400" />}
-                  <span>{isAutoRotating ? 'Pausar' : 'Giro Auto'}</span>
+                  <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
                 </button>
-              </div>
-            </div>
 
-            {/* 3D Rotation Slider Control */}
-            <div className="px-5 space-y-1.5">
-              <div className="flex items-center justify-between text-[11px] font-bold text-zinc-400">
-                <span className="flex items-center gap-1 text-amber-400">
-                  <Rotate3d className="w-3.5 h-3.5" />
-                  Control de Rotación 360° (Desliza para girar):
-                </span>
-                <span>{Math.round(rotationAngle)}°</span>
-              </div>
-              <input
-                type="range"
-                min="0"
-                max="360"
-                value={rotationAngle}
-                onChange={(e) => {
-                  setRotationAngle(Number(e.target.value));
-                  setIsAutoRotating(false);
-                }}
-                className="w-full accent-amber-500 h-2 bg-zinc-800 rounded-lg cursor-pointer"
-              />
-            </div>
+                {/* Botón Siguiente */}
+                <button
+                  onClick={handleNextStyle}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer"
+                  title="Estilo siguiente (Flecha Derecha)"
+                >
+                  <ChevronRight className="w-5 h-5 stroke-[2.5]" />
+                </button>
 
-            {/* Modal Technical Details & Visagism */}
-            <div className="px-5 space-y-3">
-              <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2 text-[11px]">
-                <div className="flex items-start gap-2">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="font-bold text-white block">Asesoría de Visagismo:</span>
-                    <span className="text-zinc-400">{selectedStyleDetail.faceShape || selectedStyleDetail.description}</span>
-                  </div>
+                {/* Indicador de posición (ej: 3 / 12) */}
+                <div className="absolute bottom-2.5 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-zinc-300 border border-white/10">
+                  {activeModalIndex! + 1} de {filteredStyles.length}
+                </div>
+              </div>
+
+              {/* Ficha Técnica del Estilo */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-1">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-amber-400" /> Tiempo estimado
+                  </span>
+                  <span className="text-xs font-black text-white block">
+                    {activeStyle.duration}
+                  </span>
                 </div>
 
-                {selectedStyleDetail.technicalFormula && (
-                  <div className="flex items-start gap-2 pt-1 border-t border-zinc-900">
-                    <Scissors className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-white block">Fórmula de Sillón para Álvaro:</span>
-                      <span className="text-zinc-400">{selectedStyleDetail.technicalFormula}</span>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-wrap gap-1.5">
-                {selectedStyleDetail.tags.map(tag => (
-                  <span
-                    key={tag}
-                    className="px-2 py-0.5 rounded-lg bg-zinc-800 text-zinc-400 text-[10px] font-semibold"
-                  >
-                    #{tag}
+                <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-1">
+                  <span className="text-[10px] font-bold text-zinc-500 uppercase flex items-center gap-1">
+                    <Calendar className="w-3 h-3 text-amber-400" /> Mantenimiento
                   </span>
-                ))}
+                  <span className="text-xs font-black text-white block">
+                    {activeStyle.maintenance}
+                  </span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2.5 pt-2 pb-1">
-                <button
-                  onClick={() => {
-                    const style = selectedStyleDetail;
-                    setSelectedStyleDetail(null);
-                    onTryOnStyle(style);
-                  }}
-                  className="py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-750 text-white font-bold flex items-center justify-center gap-1.5 border border-zinc-700 transition cursor-pointer"
-                >
-                  <Camera className="w-4 h-4 text-amber-400" />
-                  <span>Probar en Mi Foto</span>
-                </button>
-
-                <button
-                  onClick={() => {
-                    const style = selectedStyleDetail;
-                    setSelectedStyleDetail(null);
-                    onSelectStyle(style);
-                  }}
-                  className="py-3 px-3 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 text-black font-black flex items-center justify-center gap-1.5 shadow-xl transition hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
-                >
-                  <Calendar className="w-4 h-4" />
-                  <span>Quiero este (Reservar)</span>
-                </button>
+              {/* Descripción */}
+              <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-1 text-xs">
+                <span className="text-[10px] font-extrabold uppercase text-amber-400 block tracking-wider">
+                  Detalles del Estilo
+                </span>
+                <p className="text-zinc-300 leading-relaxed">
+                  {activeStyle.description}
+                </p>
               </div>
+            </div>
+
+            {/* Pie del Modal con Botón Principal */}
+            <div className="p-4 pt-3 border-t border-zinc-800 bg-zinc-900/95 flex items-center gap-3">
+              <button
+                onClick={handleCloseModal}
+                className="py-3 px-4 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs transition cursor-pointer border border-zinc-700"
+              >
+                Cerrar
+              </button>
+
+              <button
+                onClick={() => handleChooseStyle(activeStyle)}
+                className="flex-1 py-3 px-4 rounded-2xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-black text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-xl shadow-amber-500/20 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+              >
+                <Check className="w-4 h-4 stroke-[3]" />
+                <span>Quiero este estilo</span>
+              </button>
             </div>
           </div>
         </div>

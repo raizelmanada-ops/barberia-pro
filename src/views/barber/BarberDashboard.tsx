@@ -4,6 +4,8 @@ import { useAuth } from '../../core/auth/AuthContext';
 import { TeamService } from '../../core/services/teamService';
 import { WalkInService, WalkInTicket } from '../../core/services/walkinService';
 import { ShiftCommissionService, BarberDailySummary } from '../../core/services/shiftCommissionService';
+import { StyleCatalogService } from '../../core/services/styleCatalogService';
+import { BarberWorkItem } from '../../core/types';
 import {
   Star,
   ThumbsUp,
@@ -18,8 +20,13 @@ import {
   Gift,
   Scissors,
   ArrowLeft,
-  Wallet
+  Wallet,
+  Plus,
+  Trash2,
+  Calendar,
+  Image as ImageIcon
 } from 'lucide-react';
+
 
 export const BarberDashboard: React.FC = () => {
   const { currentBusiness } = useTenant();
@@ -79,6 +86,26 @@ export const BarberDashboard: React.FC = () => {
   const [clientStamps, setClientStamps] = useState(4); // Simulación real de la tarjeta del cliente
   const [rewardClaimed, setRewardClaimed] = useState(false);
   const [serviceCompleted, setServiceCompleted] = useState(false);
+
+  // Portafolio "Mis Trabajos" del barbero
+  const [barberWorks, setBarberWorks] = useState<BarberWorkItem[]>(() =>
+    StyleCatalogService.getBarberWorks(currentBusiness.id, barber?.id)
+  );
+  const [isAddWorkModalOpen, setIsAddWorkModalOpen] = useState(false);
+  const [newWorkStyle, setNewWorkStyle] = useState('Crop Texturizado Con Fade Bajo');
+  const [newWorkNotes, setNewWorkNotes] = useState('');
+  const [newWorkPhoto, setNewWorkPhoto] = useState('');
+
+  useEffect(() => {
+    const handleWorksUpdate = () => {
+      if (barber) {
+        setBarberWorks(StyleCatalogService.getBarberWorks(currentBusiness.id, barber.id));
+      }
+    };
+    window.addEventListener('barberia:works_updated', handleWorksUpdate);
+    return () => window.removeEventListener('barberia:works_updated', handleWorksUpdate);
+  }, [currentBusiness.id, barber]);
+
 
   const handleAddStamp = (amount: number = 1) => {
     setClientStamps((prev) => {
@@ -555,6 +582,195 @@ export const BarberDashboard: React.FC = () => {
           </div>
         </section>
       )}
+
+      {/* ✂️ SECCIÓN "MIS TRABAJOS" - Portafolio Real del Barbero */}
+      <section className="bg-zinc-900/90 border border-zinc-800 rounded-3xl p-4.5 space-y-4 shadow-xl">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div className="flex items-center gap-2">
+            <span className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              <Scissors className="w-4 h-4" />
+            </span>
+            <div>
+              <h3 className="text-sm font-black text-white">MIS TRABAJOS</h3>
+              <span className="text-[10px] text-zinc-400">
+                Portafolio real de cortes y barbas realizados por {barber.fullName}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsAddWorkModalOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs transition cursor-pointer shadow"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[3]" />
+            <span>Subir Trabajo</span>
+          </button>
+        </div>
+
+        {barberWorks.length === 0 ? (
+          <div className="text-center py-8 bg-zinc-950/40 rounded-2xl border border-zinc-850 p-4 space-y-2">
+            <ImageIcon className="w-8 h-8 text-zinc-600 mx-auto stroke-[1.5]" />
+            <p className="text-xs font-bold text-zinc-400">Aún no has registrado trabajos en tu portafolio.</p>
+            <p className="text-[10px] text-zinc-500">Sube fotos de tus mejores cortes para mostrarlos a tus clientes.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {barberWorks.map((work) => (
+              <div
+                key={work.id}
+                className="bg-zinc-950 border border-zinc-800 rounded-2xl overflow-hidden group hover:border-amber-500/40 transition flex flex-col justify-between"
+              >
+                <div className="relative aspect-[4/3] w-full bg-zinc-900 overflow-hidden flex items-center justify-center">
+                  {work.fotoUrl ? (
+                    <img
+                      src={work.fotoUrl}
+                      alt={work.estiloUtilizado}
+                      className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex flex-col items-center justify-center p-2 text-center bg-zinc-900">
+                      <Scissors className="w-5 h-5 text-amber-400 mb-1" />
+                      <span className="text-[9px] text-zinc-400 font-bold">{work.estiloUtilizado}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => StyleCatalogService.deleteBarberWork(currentBusiness.id, work.id)}
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/80 text-zinc-400 hover:text-rose-400 flex items-center justify-center transition opacity-0 group-hover:opacity-100"
+                    title="Eliminar trabajo"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </button>
+                </div>
+
+                <div className="p-2.5 space-y-1">
+                  <div className="text-[11px] font-extrabold text-white line-clamp-1">{work.estiloUtilizado}</div>
+                  <div className="flex items-center gap-1 text-[9px] text-zinc-500">
+                    <Calendar className="w-2.5 h-2.5 text-amber-400" />
+                    <span>{work.fecha}</span>
+                  </div>
+                  {work.notasOpcionales && (
+                    <p className="text-[9px] text-zinc-400 line-clamp-1">{work.notasOpcionales}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Modal: Subir Nuevo Trabajo */}
+      {isAddWorkModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+          <div className="bg-zinc-900 border border-zinc-750 rounded-3xl p-5 max-w-md w-full space-y-4 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400">
+                  <Scissors className="w-4 h-4" />
+                </span>
+                <h3 className="text-sm font-black text-white">Subir Trabajo al Portafolio</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddWorkModalOpen(false)}
+                className="text-zinc-500 hover:text-white text-xs font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!newWorkStyle.trim()) return;
+                StyleCatalogService.saveBarberWork(currentBusiness.id, {
+                  id: `work_${Date.now()}`,
+                  businessId: currentBusiness.id,
+                  barberId: barber.id,
+                  barberName: barber.fullName,
+                  fotoUrl: newWorkPhoto,
+                  estiloUtilizado: newWorkStyle.trim(),
+                  fecha: new Date().toISOString().split('T')[0],
+                  notasOpcionales: newWorkNotes.trim(),
+                  createdAt: new Date().toISOString()
+                });
+                setIsAddWorkModalOpen(false);
+                setNewWorkPhoto('');
+                setNewWorkNotes('');
+              }}
+              className="space-y-3 text-xs"
+            >
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-zinc-300">Estilo de Barba o Corte:</label>
+                <input
+                  type="text"
+                  required
+                  value={newWorkStyle}
+                  onChange={(e) => setNewWorkStyle(e.target.value)}
+                  placeholder="ej: Boxed Beard, Fade Bajo, Corte Clásico..."
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-zinc-200 focus:outline-none focus:border-amber-500"
+                />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-zinc-300">Fotografía del Trabajo:</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setNewWorkPhoto(reader.result as string);
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2 text-zinc-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-black hover:file:bg-amber-400 cursor-pointer"
+                />
+              </div>
+
+              {newWorkPhoto && (
+                <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">
+                  <img src={newWorkPhoto} alt="Preview" className="w-full h-full object-cover" />
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-zinc-300">Notas Opcionales:</label>
+                <textarea
+                  value={newWorkNotes}
+                  onChange={(e) => setNewWorkNotes(e.target.value)}
+                  placeholder="Detalles de la técnica, productos aplicados, etc..."
+                  rows={2}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2 text-zinc-200 focus:outline-none focus:border-amber-500 resize-none"
+                />
+              </div>
+
+              <div className="pt-2 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsAddWorkModalOpen(false)}
+                  className="flex-1 py-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black"
+                >
+                  Guardar Trabajo
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+

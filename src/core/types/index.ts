@@ -198,7 +198,42 @@ export interface StyleAngleViews {
   back?: string;
 }
 
+export interface BeardStyleItem {
+  id: string;
+  nombre: string;
+  tipo: string;
+  duracion: string;
+  mantenimiento: string;
+  descripcion: string;
+  imagen: string;
+  activo: boolean;
+}
+
+export interface BarberWorkItem {
+  id: string;
+  businessId: string;
+  barberId: string;
+  barberName: string;
+  fotoUrl: string;
+  estiloUtilizado: string;
+  fecha: string;
+  notasOpcionales?: string;
+  createdAt: string;
+}
+
+export interface LookbookItem {
+  id: string;
+  name: string;
+  category: string;
+  targetAudience?: 'adultos' | 'ninos' | 'todos' | string;
+  imageUrl: string;
+  tags?: string[];
+  description: string;
+}
+
+
 export interface StyleCatalogItem {
+
   id: string;
   name: string;
   category: 'corte' | 'ninos' | 'disenos' | 'barba' | 'combo';
@@ -211,17 +246,11 @@ export interface StyleCatalogItem {
   angles?: StyleAngleViews;
   faceShape?: string;
   technicalFormula?: string;
+  duracion?: string;
+  mantenimiento?: string;
+  tipo?: string;
 }
 
-export interface LookbookItem {
-  id: string;
-  name: string;
-  category: 'corte' | 'ninos' | 'barba' | 'disenos';
-  targetAudience: 'adultos' | 'ninos' | 'todos';
-  imageUrl: string;
-  tags: string[];
-  description: string;
-}
 
 export interface StyleTryOnRecord {
   id: string;

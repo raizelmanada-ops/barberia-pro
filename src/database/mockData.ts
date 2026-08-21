@@ -695,25 +695,5 @@ export const STYLE_CATALOG_ITEMS: StyleCatalogItem[] = [
   }
 ];
 
-export const LOOKBOOK_GALLERY_ITEMS: LookbookItem[] = [
-  { id: 'look_01', name: 'Fade Texturizado Urbano', category: 'corte', targetAudience: 'adultos', imageUrl: '/lookbook/look_01.jpg', tags: ['Fade', 'Urbano', 'Textura'], description: 'Corte moderno con degradado alto y textura despeinada mate.' },
-  { id: 'look_02', name: 'Pompadour Clásico & Barba', category: 'corte', targetAudience: 'adultos', imageUrl: '/lookbook/look_02.jpg', tags: ['Pompadour', 'Barba', 'Clásico'], description: 'Peinado hacia atrás con volumen y barba completa perfilada.' },
-  { id: 'look_03', name: 'Degradado Limpio Ejecutivo', category: 'corte', targetAudience: 'adultos', imageUrl: '/lookbook/look_03.jpg', tags: ['Ejecutivo', 'Limpio', 'Oficina'], description: 'Look profesional formal con laterales pulidos y peinado de lado.' },
-  { id: 'look_04', name: 'Crop Moderno con Flequillo', category: 'corte', targetAudience: 'todos', imageUrl: '/lookbook/look_04.jpg', tags: ['Crop', 'Flequillo', 'Tendencia'], description: 'Flequillo frontal con corte desfilado y laterales al 1.' },
-  { id: 'look_05', name: 'Rizos Definidos con Fade', category: 'corte', targetAudience: 'todos', imageUrl: '/lookbook/look_05.jpg', tags: ['Rizos', 'Afro', 'Fade'], description: 'Degradado limpio que realza la caída y textura de los rizos.' },
-  { id: 'look_06', name: 'Estilo Urbano Juvenil', category: 'corte', targetAudience: 'todos', imageUrl: '/lookbook/look_06.jpg', tags: ['Juvenil', 'Urbano', 'Fresco'], description: 'Estilo juvenil desenfadado con volumen superior.' },
-  { id: 'look_07', name: 'Taper Fade con Textura', category: 'corte', targetAudience: 'todos', imageUrl: '/lookbook/look_07.jpg', tags: ['Taper', 'Textura', 'Natural'], description: 'Desvanecido bajo en patillas con textura natural.' },
-  { id: 'look_08', name: 'Fade Alto y Barba Esculpida', category: 'barba', targetAudience: 'adultos', imageUrl: '/lookbook/look_08.jpg', tags: ['Barba', 'Fade', 'Navaja'], description: 'Líneas limpias de barba conectadas con fade lateral.' },
-  { id: 'look_09', name: 'Corte Infantil Deportivo', category: 'ninos', targetAudience: 'ninos', imageUrl: '/lookbook/look_09.jpg', tags: ['Niños', 'Deportivo', 'Fresco'], description: 'Corte fresco y cómodo para niños activos.' },
-  { id: 'look_10', name: 'Corte Escolar Juvenil', category: 'ninos', targetAudience: 'ninos', imageUrl: '/lookbook/look_10.jpg', tags: ['Niños', 'Escolar', 'Clásico'], description: 'Corte pulido ideal para normas escolares y colegios.' },
-  { id: 'look_11', name: 'Barba Vikinga y Rapado', category: 'barba', targetAudience: 'adultos', imageUrl: '/lookbook/look_11.jpg', tags: ['Vikingo', 'Barba Larga', 'Rapado'], description: 'Barba larga con laterales rapados para máxima actitud.' },
-  { id: 'look_12', name: 'Textura Mate Ondas', category: 'corte', targetAudience: 'adultos', imageUrl: '/lookbook/look_12.jpg', tags: ['Ondas', 'Mate', 'Textura'], description: 'Ondas con fijación mate y acabado sin brillo.' },
-  { id: 'look_13', name: 'Skin Fade Pulido con Raya', category: 'corte', targetAudience: 'adultos', imageUrl: '/lookbook/look_13.jpg', tags: ['Skin Fade', 'Raya', 'Pulido'], description: 'Línea marcada a navaja con fade a piel.' },
-  { id: 'look_14', name: 'Peinado Ejecutivo Lateral', category: 'corte', targetAudience: 'adultos', imageUrl: '/lookbook/look_14.jpg', tags: ['Ejecutivo', 'Lateral', 'Formal'], description: 'Peinado lateral clásico para eventos formales.' },
-  { id: 'look_15', name: 'Barba Completa & Fade', category: 'barba', targetAudience: 'adultos', imageUrl: '/lookbook/look_15.jpg', tags: ['Barba Completa', 'Fade'], description: 'Ritual de barba completa con toalla caliente.' },
-  { id: 'look_16', name: 'Fade Infantil con Ondas', category: 'ninos', targetAudience: 'ninos', imageUrl: '/lookbook/look_16.jpg', tags: ['Niños', 'Ondas', 'Kids Fade'], description: 'Fade suave para niños con cabello ondulado.' },
-  { id: 'look_17', name: 'Afro Taper con Esponja', category: 'corte', targetAudience: 'todos', imageUrl: '/lookbook/look_17.jpg', tags: ['Afro', 'Taper', 'Esponja'], description: 'Rizos afro definidos con técnica de esponja.' },
-  { id: 'look_18', name: 'Fade Moderno Deportivo', category: 'corte', targetAudience: 'todos', imageUrl: '/lookbook/look_18.jpg', tags: ['Deportivo', 'Fade', 'Moderno'], description: 'Degradado medio muy cómodo para el día a día.' },
-  { id: 'look_19', name: 'Diseño en Silla de Barbería', category: 'disenos', targetAudience: 'todos', imageUrl: '/lookbook/look_19.jpg', tags: ['Diseño', 'Navaja', 'Barbería'], description: 'Líneas y perfilados artísticos realizados a navaja.' },
-  { id: 'look_20', name: 'Perfilado de Navaja y Barba', category: 'barba', targetAudience: 'adultos', imageUrl: '/lookbook/look_20.jpg', tags: ['Navaja', 'Perfilado', 'Barba'], description: 'Acabado milimétrico de contornos faciales.' }
-];
+export const LOOKBOOK_GALLERY_ITEMS: LookbookItem[] = [];
+
