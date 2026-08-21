@@ -9,11 +9,68 @@ const BUCKET_NAME = 'barberia_media';
 
 export class ImageStorageService {
   /**
-   * Sube una imagen a Supabase Storage con aislamiento por businessId
-   * @param businessId ID del negocio activo (Tenant)
-   * @param file Archivo File, Blob o DataURL (Base64)
-   * @param folder Subcarpeta ('gallery', 'memories', 'works')
-   * @returns URL pública persistente de la imagen
+   * Comprime una imagen en el navegador usando HTML5 Canvas antes de subirla o guardarla.
+   * Reduce fotos pesadas de 4-10MB tomadas con celular a ~150-250KB en alta definición.
+   */
+  public static async compressImage(
+    fileOrDataUrl: File | Blob | string,
+    maxWidth = 1080,
+    quality = 0.82
+  ): Promise<Blob> {
+    const dataUrl = typeof fileOrDataUrl === 'string'
+      ? fileOrDataUrl
+      : await this.fileToDataUrl(fileOrDataUrl);
+
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        // Mantener relación de aspecto redimensionando a un ancho máximo de 1080px
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          this.dataUrlToBlob(dataUrl).then(resolve).catch(reject);
+          return;
+        }
+
+        // Dibujar con suavizado bilineal
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, width, height);
+
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              this.dataUrlToBlob(dataUrl).then(resolve).catch(reject);
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+
+      img.onerror = () => {
+        this.dataUrlToBlob(dataUrl).then(resolve).catch(reject);
+      };
+
+      img.src = dataUrl;
+    });
+  }
+
+  /**
+   * Sube una imagen a Supabase Storage con compresión previa y aislamiento por businessId
    */
   public static async uploadImage(
     businessId: string,
@@ -25,21 +82,15 @@ export class ImageStorageService {
     const fileName = `${timestamp}_${randomSuffix}.jpg`;
     const filePath = `${businessId}/${folder}/${fileName}`;
 
-    // Si tenemos Supabase configurado, subimos al bucket de almacenamiento
+    // 1. Comprimir siempre en cliente antes de enviar a Storage o procesar
+    const compressedBlob = await this.compressImage(file);
+
+    // 2. Si tenemos Supabase configurado, subimos al bucket
     if (isSupabaseConfigured()) {
       try {
-        let blob: Blob;
-
-        if (typeof file === 'string') {
-          // Convertir Base64 / DataURL a Blob binario optimizado
-          blob = await this.dataUrlToBlob(file);
-        } else {
-          blob = file;
-        }
-
         const { data, error } = await supabase.storage
           .from(BUCKET_NAME)
-          .upload(filePath, blob, {
+          .upload(filePath, compressedBlob, {
             contentType: 'image/jpeg',
             cacheControl: '31536000',
             upsert: true,
@@ -61,12 +112,8 @@ export class ImageStorageService {
       }
     }
 
-    // Fallback garantizado: si es un File, convertir a DataURL para uso inmediato
-    if (typeof file !== 'string') {
-      return await this.fileToDataUrl(file);
-    }
-
-    return file;
+    // 3. Fallback garantizado: DataURL comprimida
+    return await this.fileToDataUrl(compressedBlob);
   }
 
   /**
@@ -89,3 +136,4 @@ export class ImageStorageService {
     return await res.blob();
   }
 }
+
