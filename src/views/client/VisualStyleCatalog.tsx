@@ -186,39 +186,40 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
   }, [activeModalIndex, handlePrevStyle, handleNextStyle]);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-4 sm:py-6 space-y-6 animate-fade-in text-zinc-100 pb-28">
+    <div className="max-w-4xl mx-auto px-3 sm:px-4 py-2 sm:py-5 space-y-3.5 animate-fade-in text-zinc-100 pb-24">
       
-      {/* 1. Cabecera Principal */}
-      <div className="space-y-2 pt-1">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <span className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-inner">
-              <Sparkles className="w-5 h-5" />
-            </span>
-            <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight uppercase">
-              Biblioteca Visual de Estilos
+      {/* 1. Cabecera Compacta Móvil (Directa sin espacios muertos) */}
+      <div className="flex items-center justify-between gap-2 border-b border-zinc-800/80 pb-2.5">
+        <div className="flex items-center gap-2">
+          <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-inner shrink-0">
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+          </span>
+          <div>
+            <h1 className="text-base sm:text-xl font-black text-white tracking-tight uppercase leading-tight">
+              Biblioteca de Estilos
             </h1>
+            <span className="text-[11px] text-zinc-400 font-medium hidden sm:inline-block">
+              Selecciona tu diseño para solicitarlo en tu cita
+            </span>
           </div>
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="px-3.5 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white font-bold text-xs sm:text-sm flex items-center gap-1.5 transition cursor-pointer border border-zinc-700 shadow"
-            >
-              <ChevronLeft className="w-4 h-4" />
-              <span>Volver</span>
-            </button>
-          )}
         </div>
-        <p className="text-zinc-300 text-xs sm:text-sm max-w-2xl leading-relaxed">
-          Catálogo visual de referencias de corte y barbería. Selecciona cualquier diseño para inspeccionar sus características y solicitarlo en tu cita.
-        </p>
+
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white font-bold text-xs sm:text-sm flex items-center gap-1 transition cursor-pointer border border-zinc-700 shadow shrink-0"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span>Volver</span>
+          </button>
+        )}
       </div>
 
-      {/* 2. Pestañas Principales: Estilos de Cabello vs Estilos de Barba */}
-      <div className="flex p-1 bg-zinc-900/90 border border-zinc-800 rounded-2xl max-w-md shadow-lg">
+      {/* 2. Pestañas Principales: Cabello vs Barba */}
+      <div className="flex p-1 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-lg">
         <button
           onClick={() => handleDomainChange('cabello')}
-          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
             activeDomain === 'cabello'
               ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
@@ -229,7 +230,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
         </button>
         <button
           onClick={() => handleDomainChange('barba')}
-          className={`flex-1 py-3 px-4 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
             activeDomain === 'barba'
               ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
@@ -241,7 +242,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
       </div>
 
       {/* 3. Buscador y Filtros por Categoría */}
-      <div className="space-y-3">
+      <div className="space-y-2.5">
         {/* Buscador */}
         <div className="relative">
           <Search className="w-4 h-4 text-zinc-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -250,7 +251,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={`Buscar en ${activeDomain === 'cabello' ? 'cortes (ej: Taper, Fade, High Top, Curtains)' : 'barbas (ej: Balbo, Van Dyke, Stubble, Groomed)'}...`}
-            className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-10 pr-4 py-3.5 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 transition text-xs sm:text-sm shadow-inner"
+            className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-10 pr-4 py-2.5 sm:py-3 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 transition text-xs sm:text-sm shadow-inner"
           />
           {searchQuery && (
             <button
@@ -263,16 +264,16 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
         </div>
 
         {/* Píldoras de Categoría */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-          <span className="text-xs font-bold text-zinc-400 shrink-0 mr-1 flex items-center gap-1">
-            <SlidersHorizontal className="w-3.5 h-3.5 text-amber-400" />
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[11px] sm:text-xs font-bold text-zinc-400 shrink-0 mr-0.5 flex items-center gap-1">
+            <SlidersHorizontal className="w-3 h-3 text-amber-400" />
             Filtrar:
           </span>
           {categories.map((cat) => (
             <button
               key={cat.key}
               onClick={() => setSelectedCategory(cat.key)}
-              className={`px-4 py-2 rounded-xl font-bold whitespace-nowrap text-xs sm:text-sm transition cursor-pointer border ${
+              className={`px-3.5 py-1.5 rounded-xl font-bold whitespace-nowrap text-xs transition cursor-pointer border ${
                 selectedCategory === cat.key
                   ? 'bg-amber-500 text-black border-amber-400 shadow-md shadow-amber-500/20'
                   : 'bg-zinc-900 text-zinc-400 hover:text-white border-zinc-800 hover:border-zinc-700'
@@ -284,21 +285,21 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
         </div>
       </div>
 
-      {/* 4. Cuadrícula Responsive de Miniaturas (Móvil: 2 cols, Tablet: 3 cols, Escritorio: 4 cols) */}
+      {/* 4. Cuadrícula Responsive de Miniaturas (Las fotos empiezan arriba inmediatamente) */}
       {filteredStyles.length === 0 ? (
-        <div className="text-center py-16 bg-zinc-900/30 rounded-3xl border border-zinc-800/60 p-6 space-y-3">
-          <Scissors className="w-12 h-12 text-zinc-600 mx-auto" />
-          <h3 className="text-base font-bold text-zinc-200">No se encontraron estilos</h3>
-          <p className="text-zinc-400 text-xs sm:text-sm">Prueba con otro término de búsqueda o selecciona otra categoría.</p>
+        <div className="text-center py-12 bg-zinc-900/30 rounded-3xl border border-zinc-800/60 p-6 space-y-3">
+          <Scissors className="w-10 h-10 text-zinc-600 mx-auto" />
+          <h3 className="text-sm sm:text-base font-bold text-zinc-200">No se encontraron estilos</h3>
+          <p className="text-zinc-400 text-xs">Prueba con otro término de búsqueda o selecciona otra categoría.</p>
           <button
             onClick={() => { setSearchQuery(''); setSelectedCategory('todas'); }}
-            className="px-4 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-bold rounded-xl transition cursor-pointer text-xs sm:text-sm"
+            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-amber-400 font-bold rounded-xl transition cursor-pointer text-xs"
           >
             Ver todos los estilos
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 pt-1">
           {filteredStyles.map((style, index) => {
             const isSelected = selectedStyleId === style.id;
             return (
@@ -309,7 +310,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                   isSelected ? 'border-amber-500 ring-2 ring-amber-500/40' : 'border-zinc-800'
                 }`}
               >
-                {/* Imagen del estilo con renderizado reactivo */}
+                {/* Imagen del estilo */}
                 <div className="relative">
                   <LazyStyleImage
                     src={style.thumbnail}
@@ -319,43 +320,43 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                   />
 
                   {/* Badge de Categoría */}
-                  <div className="absolute top-2.5 left-2.5 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-extrabold text-amber-400 border border-amber-500/30 uppercase tracking-wider z-20 shadow">
+                  <div className="absolute top-2 left-2 bg-black/85 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] sm:text-[10px] font-extrabold text-amber-400 border border-amber-500/30 uppercase tracking-wider z-20 shadow">
                     {style.category}
                   </div>
 
                   {isSelected && (
-                    <div className="absolute top-2.5 right-2.5 bg-amber-500 text-black px-2.5 py-1 rounded-xl text-[10px] sm:text-[11px] font-black uppercase flex items-center gap-1 shadow-lg z-20">
-                      <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <div className="absolute top-2 right-2 bg-amber-500 text-black px-2 py-0.5 rounded-lg text-[9px] sm:text-[10px] font-black uppercase flex items-center gap-1 shadow-lg z-20">
+                      <Check className="w-3 h-3 stroke-[3]" />
                       <span>Elegido</span>
                     </div>
                   )}
 
-                  {/* Overlay sutil al pasar cursor */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5 sm:p-3 z-20 pointer-events-none">
-                    <span className="text-xs font-extrabold text-amber-300 flex items-center gap-1">
-                      <Eye className="w-3.5 h-3.5" /> Ver estilo
+                  {/* Overlay al pasar cursor */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2 sm:p-3 z-20 pointer-events-none">
+                    <span className="text-[11px] sm:text-xs font-extrabold text-amber-300 flex items-center gap-1">
+                      <Eye className="w-3 h-3" /> Ver estilo
                     </span>
                   </div>
                 </div>
 
                 {/* Información de la Tarjeta */}
-                <div className="p-3.5 sm:p-4 space-y-2.5 flex-1 flex flex-col justify-between">
+                <div className="p-2.5 sm:p-3.5 space-y-1.5 sm:space-y-2 flex-1 flex flex-col justify-between">
                   <div>
                     <h3 className="font-black text-white text-xs sm:text-sm group-hover:text-amber-400 transition leading-snug">
                       {style.name}
                     </h3>
-                    <p className="text-[11px] sm:text-xs text-zinc-300 line-clamp-2 mt-1 leading-relaxed">
+                    <p className="text-[10px] sm:text-xs text-zinc-300 line-clamp-2 mt-0.5 leading-relaxed">
                       {style.description}
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between pt-2.5 border-t border-zinc-800/80 text-[11px] sm:text-xs text-zinc-400">
-                    <div className="flex items-center gap-1.5 text-zinc-300 font-semibold">
-                      <Clock className="w-3.5 h-3.5 text-amber-400" />
+                  <div className="flex items-center justify-between pt-1.5 border-t border-zinc-800/80 text-[10px] sm:text-xs text-zinc-400">
+                    <div className="flex items-center gap-1 text-zinc-300 font-semibold">
+                      <Clock className="w-3 h-3 text-amber-400" />
                       <span>{style.duration}</span>
                     </div>
                     <span className="font-bold text-amber-400 group-hover:translate-x-0.5 transition flex items-center gap-0.5">
-                      Ver estilo <ChevronRight className="w-3.5 h-3.5" />
+                      Ver <ChevronRight className="w-3 h-3" />
                     </span>
                   </div>
                 </div>
@@ -367,22 +368,22 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
 
       {/* 5. Modal de Vista Ampliada e Inspección de Estilo */}
       {activeStyle && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 animate-fade-in">
           <div
             className="w-full max-w-2xl bg-zinc-900 border border-zinc-700/80 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] animate-scale-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Cabecera del Modal */}
-            <div className="p-4 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/95 sticky top-0 z-10">
-              <div className="flex items-center gap-2.5">
-                <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="p-3.5 sm:p-4 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/95 sticky top-0 z-10">
+              <div className="flex items-center gap-2">
+                <span className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
                   <Scissors className="w-4 h-4" />
                 </span>
                 <div>
-                  <h2 className="text-sm sm:text-base font-black text-white tracking-wide">
+                  <h2 className="text-sm sm:text-base font-black text-white tracking-wide leading-tight">
                     {activeStyle.name}
                   </h2>
-                  <span className="text-[11px] text-amber-400 font-bold uppercase">
+                  <span className="text-[10px] sm:text-[11px] text-amber-400 font-bold uppercase">
                     {activeStyle.category}
                   </span>
                 </div>
@@ -398,8 +399,8 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
               </button>
             </div>
 
-            {/* Cuerpo del Modal con Fotografía y Navegadores */}
-            <div className="overflow-y-auto p-4 sm:p-5 space-y-4 flex-1">
+            {/* Cuerpo del Modal con Fotografía en Primer Plano */}
+            <div className="overflow-y-auto p-3.5 sm:p-5 space-y-3.5 flex-1">
               
               {/* Contenedor Principal de la Imagen */}
               <div className="relative group">
@@ -416,7 +417,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                 {/* Botón Anterior */}
                 <button
                   onClick={handlePrevStyle}
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer z-30"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer z-30"
                   title="Estilo anterior (Flecha Izquierda)"
                 >
                   <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
@@ -425,23 +426,23 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                 {/* Botón Siguiente */}
                 <button
                   onClick={handleNextStyle}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer z-30"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer z-30"
                   title="Estilo siguiente (Flecha Derecha)"
                 >
                   <ChevronRight className="w-5 h-5 stroke-[2.5]" />
                 </button>
 
                 {/* Indicador de posición */}
-                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-md px-3.5 py-1 rounded-full text-xs font-bold text-zinc-200 border border-white/10 z-30">
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-md px-3 py-0.5 rounded-full text-[10px] sm:text-xs font-bold text-zinc-200 border border-white/10 z-30">
                   {activeModalIndex! + 1} de {filteredStyles.length}
                 </div>
               </div>
 
               {/* Ficha Técnica y Especificaciones del Estilo */}
-              <div className="space-y-3">
-                <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800/80 space-y-1.5">
+              <div className="space-y-2.5">
+                <div className="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800/80 space-y-1">
                   <h4 className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4" />
+                    <Sparkles className="w-3.5 h-3.5" />
                     Descripción del Estilo
                   </h4>
                   <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
@@ -450,9 +451,9 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                 </div>
 
                 {activeStyle.technicalFormula && (
-                  <div className="bg-zinc-950 p-4 rounded-2xl border border-zinc-800/80 space-y-1.5">
+                  <div className="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800/80 space-y-1">
                     <h4 className="text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers className="w-4 h-4 text-amber-400" />
+                      <Layers className="w-3.5 h-3.5 text-amber-400" />
                       Fórmula Técnica del Barbero
                     </h4>
                     <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-mono">
@@ -461,8 +462,8 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 gap-2.5 text-xs sm:text-sm">
-                  <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800/80 flex items-center gap-3">
+                <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                  <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80 flex items-center gap-2.5">
                     <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
                       <Clock className="w-4 h-4" />
                     </div>
@@ -472,7 +473,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                     </div>
                   </div>
 
-                  <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800/80 flex items-center gap-3">
+                  <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80 flex items-center gap-2.5">
                     <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
                       <ShieldCheck className="w-4 h-4" />
                     </div>
@@ -484,7 +485,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                 </div>
 
                 {activeStyle.faceShape && (
-                  <div className="bg-zinc-950 p-3.5 rounded-xl border border-zinc-800/80 flex items-center gap-2.5 text-xs sm:text-sm text-zinc-300">
+                  <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80 flex items-center gap-2 text-xs sm:text-sm text-zinc-300">
                     <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
                     <span>Visagismo: <strong className="text-white">{activeStyle.faceShape}</strong></span>
                   </div>
@@ -493,10 +494,10 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
             </div>
 
             {/* Pie del Modal con Acción de Selección */}
-            <div className="p-4 border-t border-zinc-800 bg-zinc-900/95 flex items-center justify-between gap-3">
+            <div className="p-3.5 sm:p-4 border-t border-zinc-800 bg-zinc-900/95 flex items-center justify-between gap-2.5">
               <button
                 onClick={handleCloseModal}
-                className="px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-750 transition cursor-pointer"
+                className="px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-750 transition cursor-pointer"
               >
                 Cerrar
               </button>
@@ -508,7 +509,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                   }
                   handleCloseModal();
                 }}
-                className="flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black text-black bg-amber-500 hover:bg-amber-400 shadow-lg shadow-amber-500/25 transition cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-black text-black bg-amber-500 hover:bg-amber-400 shadow-lg shadow-amber-500/25 transition cursor-pointer flex items-center justify-center gap-2"
               >
                 <Check className="w-4 h-4 stroke-[3]" />
                 <span>QUIERO ESTE ESTILO</span>
