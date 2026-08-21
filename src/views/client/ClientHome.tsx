@@ -285,7 +285,8 @@ export const ClientHome: React.FC = () => {
     }
   });
   const [isMemoryPhotoModalOpen, setIsMemoryPhotoModalOpen] = useState(false);
-  const activePhoto = customPhotoUrl || clientMemory?.photoUrl || '/styles/el-siete-colombiano.jpg';
+  const activePhoto = customPhotoUrl || clientMemory?.photoUrl || '/styles/Men_showcasing_taper_fade_haircut_202608201950.jpeg';
+
 
 
   const handleConfirmStylePhoto = async (dataUrlOrFile: string) => {
@@ -645,13 +646,14 @@ export const ClientHome: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-20 h-20 rounded-2xl overflow-hidden border border-amber-500/30 shadow-lg shrink-0 hidden sm:block">
+          <div className="w-20 h-20 rounded-2xl overflow-hidden border border-amber-500/30 shadow-lg shrink-0 hidden sm:block bg-zinc-950">
             <img
-              src="/styles/el-siete-colombiano.jpg"
-              alt="Corte El Siete"
+              src="/styles/Men_showcasing_taper_fade_haircut_202608201950.jpeg"
+              alt="Corte Taper Fade Pro"
               className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
             />
           </div>
+
         </div>
       </section>
 
