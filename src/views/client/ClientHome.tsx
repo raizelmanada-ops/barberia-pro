@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
+
 
 import { useTenant } from '../../core/tenant/TenantContext';
 import { useAuth } from '../../core/auth/AuthContext';
@@ -30,8 +31,11 @@ import {
   Mic,
   Bell,
   Lock,
-  Trash2
+  Trash2,
+  X
 } from 'lucide-react';
+
+
 
 
 
@@ -216,22 +220,42 @@ export const ClientHome: React.FC = () => {
     }
   };
 
-  // Estados para Dictado por Voz (Micrófono)
+  // Estados para Dictado por Voz (Micrófono) con soporte para Detener y Borrar
   const [isListeningLiked, setIsListeningLiked] = useState(false);
   const [isListeningAdjustment, setIsListeningAdjustment] = useState(false);
+  const [isListeningWalkIn, setIsListeningWalkIn] = useState(false);
+  const activeRecognitionRef = useRef<any>(null);
 
-  const startVoiceDictation = (target: 'liked' | 'adjustment') => {
+  const stopVoiceDictation = () => {
+    try {
+      if (activeRecognitionRef.current) {
+        activeRecognitionRef.current.stop();
+        activeRecognitionRef.current = null;
+      }
+    } catch (e) {
+      console.warn('Error stopping speech recognition', e);
+    }
+    setIsListeningLiked(false);
+    setIsListeningAdjustment(false);
+    setIsListeningWalkIn(false);
+  };
+
+  const startVoiceDictation = (target: 'liked' | 'adjustment' | 'walkin') => {
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (!SpeechRecognition) {
-      alert('Tu navegador no soporta reconocimiento de voz nativo. Puedes escribir tu estilo directamente en el cuadro de texto.');
+      alert('Tu navegador no soporta reconocimiento de voz nativo. Puedes escribir directamente en el cuadro de texto.');
       return;
     }
+
+    // Detener cualquier sesión previa activa
+    stopVoiceDictation();
 
     try {
       const recognition = new SpeechRecognition();
       recognition.lang = 'es-CO';
       recognition.continuous = false;
       recognition.interimResults = false;
+      activeRecognitionRef.current = recognition;
 
       if (target === 'liked') {
         setIsListeningLiked(true);
@@ -239,12 +263,14 @@ export const ClientHome: React.FC = () => {
           setDraftLiked(activeLiked);
           setIsEditingLiked(true);
         }
-      } else {
+      } else if (target === 'adjustment') {
         setIsListeningAdjustment(true);
         if (!isEditingAdjustment) {
           setDraftAdjustment(activeAdjustment);
           setIsEditingAdjustment(true);
         }
+      } else {
+        setIsListeningWalkIn(true);
       }
 
       recognition.onresult = (event: any) => {
@@ -252,30 +278,30 @@ export const ClientHome: React.FC = () => {
         if (transcript) {
           if (target === 'liked') {
             setDraftLiked((prev) => (prev ? `${prev} ${transcript}` : transcript));
-          } else {
+          } else if (target === 'adjustment') {
             setDraftAdjustment((prev) => (prev ? `${prev} ${transcript}` : transcript));
+          } else {
+            setWalkInNote((prev) => (prev ? `${prev} ${transcript}` : transcript));
           }
         }
       };
 
       recognition.onerror = (event: any) => {
         console.warn('Speech recognition error', event.error);
-        if (target === 'liked') setIsListeningLiked(false);
-        else setIsListeningAdjustment(false);
+        stopVoiceDictation();
       };
 
       recognition.onend = () => {
-        if (target === 'liked') setIsListeningLiked(false);
-        else setIsListeningAdjustment(false);
+        stopVoiceDictation();
       };
 
       recognition.start();
     } catch (err) {
       console.warn('Error starting speech recognition', err);
-      if (target === 'liked') setIsListeningLiked(false);
-      else setIsListeningAdjustment(false);
+      stopVoiceDictation();
     }
   };
+
 
   // Captura y actualización de foto de la memoria de estilo
   const [customPhotoUrl, setCustomPhotoUrl] = useState<string>(() => {
@@ -1942,44 +1968,93 @@ export const ClientHome: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
+                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-zinc-200 text-xs sm:text-sm">3. Instrucciones especiales para el barbero:</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-                        if (!SpeechRecognition) {
-                          alert('Reconocimiento de voz no disponible');
-                          return;
-                        }
-                        const recognition = new SpeechRecognition();
-                        recognition.lang = 'es-CO';
-                        recognition.start();
-                        recognition.onresult = (ev: any) => {
-                          const t = ev.results[0][0].transcript;
-                          if (t) setWalkInNote((prev) => (prev ? `${prev} ${t}` : t));
-                        };
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs flex items-center gap-1.5 transition cursor-pointer shadow-md shadow-amber-500/20 active:scale-95"
-                    >
-                      <Mic className="w-3.5 h-3.5 stroke-[2.5]" />
-                      <span>Dictar por Voz</span>
-                    </button>
+                    <div className="flex items-center gap-1.5">
+                      {walkInNote && (
+                        <button
+                          type="button"
+                          onClick={() => setWalkInNote('')}
+                          className="px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-750 text-zinc-300 hover:text-red-400 font-bold text-xs flex items-center gap-1 transition cursor-pointer border border-zinc-700 shadow"
+                          title="Borrar texto para comenzar de nuevo"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Borrar</span>
+                        </button>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (isListeningWalkIn) {
+                            stopVoiceDictation();
+                          } else {
+                            startVoiceDictation('walkin');
+                          }
+                        }}
+                        className={`px-3 py-1.5 rounded-xl font-black text-xs flex items-center gap-1.5 transition cursor-pointer shadow-md active:scale-95 ${
+                          isListeningWalkIn
+                            ? 'bg-red-500 hover:bg-red-600 text-white animate-pulse'
+                            : 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20'
+                        }`}
+                      >
+                        {isListeningWalkIn ? (
+                          <>
+                            <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+                            <span>⏹️ Detener</span>
+                          </>
+                        ) : (
+                          <>
+                            <Mic className="w-3.5 h-3.5 stroke-[2.5]" />
+                            <span>Dictar por Voz</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
+
+                  {isListeningWalkIn && (
+                    <div className="text-xs font-bold text-red-400 flex items-center justify-between animate-pulse bg-red-500/10 p-2.5 rounded-xl border border-red-500/30">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping shrink-0" />
+                        <span>🎙️ Escuchando... Habla claro a tu celular</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={stopVoiceDictation}
+                        className="px-2.5 py-0.5 rounded bg-red-500 hover:bg-red-400 text-white text-[10px] font-black cursor-pointer shadow"
+                      >
+                        Listo
+                      </button>
+                    </div>
+                  )}
 
                   <p className="text-[11px] text-zinc-400 leading-relaxed">
                     💡 Toca <strong>Dictar por Voz</strong> para hablarle a tu celular o escribe notas para {walkInBarber && walkInBarber !== 'Primer barbero libre' ? walkInBarber.split(' ')[0] : primaryBarberFirstName}.
                   </p>
 
-                  <input
-                    type="text"
-                    value={walkInNote}
-                    onChange={(e) => setWalkInNote(e.target.value)}
-                    placeholder="Ej: Degradado a la 1.5 y mantener 2 dedos arriba"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white text-xs focus:border-amber-400 outline-none"
-                  />
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={walkInNote}
+                      onChange={(e) => setWalkInNote(e.target.value)}
+                      placeholder="Ej: Degradado a la 1.5, desvanecido en V, no tocar patillas..."
+                      className="w-full bg-zinc-900 border border-zinc-700 rounded-xl p-3 pr-10 text-white text-xs sm:text-sm focus:border-amber-400 outline-none shadow-inner"
+                    />
+                    {walkInNote && (
+                      <button
+                        type="button"
+                        onClick={() => setWalkInNote('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-red-400 p-1 cursor-pointer transition"
+                        title="Borrar texto"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
                 </div>
+
 
                 <button
                   onClick={() => {
