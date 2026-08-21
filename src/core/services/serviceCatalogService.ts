@@ -24,6 +24,12 @@ export class ServiceCatalogService {
     return filtered;
   }
 
+  private static notifyUpdate(businessId: string): void {
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('barberia:services_updated', { detail: { businessId } }));
+    }
+  }
+
   /**
    * Add a new service to a tenant's catalog
    */
@@ -35,6 +41,7 @@ export class ServiceCatalogService {
     };
     StorageAdapter.set(SERVICES_STORAGE_KEY, [newService, ...all]);
     CloudRepository.saveService(newService, actor);
+    this.notifyUpdate(service.businessId);
     return newService;
   }
 
@@ -48,6 +55,7 @@ export class ServiceCatalogService {
       all[index] = service;
       StorageAdapter.set(SERVICES_STORAGE_KEY, all);
       CloudRepository.saveService(service, actor);
+      this.notifyUpdate(service.businessId);
     }
   }
 
@@ -61,13 +69,29 @@ export class ServiceCatalogService {
       all[index].isActive = !all[index].isActive;
       StorageAdapter.set(SERVICES_STORAGE_KEY, all);
       CloudRepository.saveService(all[index], actor);
+      this.notifyUpdate(businessId);
     }
   }
+
+  /**
+   * Delete a service from tenant's catalog
+   */
+  static deleteService(businessId: string, serviceId: string, _actor = 'Owner'): void {
+    const all = this.getAllServices();
+    const filtered = all.filter(s => !(s.id === serviceId && s.businessId === businessId));
+    StorageAdapter.set(SERVICES_STORAGE_KEY, filtered);
+    this.notifyUpdate(businessId);
+  }
+
 
   /**
    * Reset services to seed
    */
   static resetToSeed(): void {
     StorageAdapter.set(SERVICES_STORAGE_KEY, INITIAL_SERVICES);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('barberia:services_updated'));
+    }
   }
 }
+

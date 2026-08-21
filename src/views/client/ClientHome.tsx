@@ -92,15 +92,25 @@ export const ClientHome: React.FC = () => {
     }
   };
 
-  // Filtrar estrictamente servicios activos y barberos por el Tenant activo desde la capa de persistencia
-  const businessServices = useMemo(
-    () => ServiceCatalogService.getServicesByBusiness(currentBusiness.id).filter(s => s.isActive),
-    [currentBusiness.id]
+  // Servicios activos con sincronización en tiempo real ante ediciones del barbero o dueño
+  const [businessServices, setBusinessServices] = useState<Service[]>(() =>
+    ServiceCatalogService.getServicesByBusiness(currentBusiness.id).filter(s => s.isActive)
   );
+
+  useEffect(() => {
+    setBusinessServices(ServiceCatalogService.getServicesByBusiness(currentBusiness.id).filter(s => s.isActive));
+    const handleServicesUpdate = () => {
+      setBusinessServices(ServiceCatalogService.getServicesByBusiness(currentBusiness.id).filter(s => s.isActive));
+    };
+    window.addEventListener('barberia:services_updated', handleServicesUpdate);
+    return () => window.removeEventListener('barberia:services_updated', handleServicesUpdate);
+  }, [currentBusiness.id]);
+
   const businessBarbers = useMemo(
     () => TeamService.getTeamByBusiness(currentBusiness.id).filter(b => b.isActive),
     [currentBusiness.id]
   );
+
 
   // Generador dinámico de los próximos 7 días a partir de la fecha actual
   const availableDays = useMemo(() => {
