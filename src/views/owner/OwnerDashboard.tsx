@@ -118,6 +118,12 @@ export const OwnerDashboard: React.FC = () => {
   const [bizWhatsapp, setBizWhatsapp] = useState(currentBusiness.whatsapp);
   const [bizAddress, setBizAddress] = useState(currentBusiness.address);
   const [bizNeighborhood, setBizNeighborhood] = useState(currentBusiness.neighborhood || '');
+  const [bizInstagram, setBizInstagram] = useState(currentBusiness.instagramUrl || '');
+  const [bizTiktok, setBizTiktok] = useState(currentBusiness.tiktokUrl || '');
+  const [bizFacebook, setBizFacebook] = useState(currentBusiness.facebookUrl || '');
+  const [bizGoogleMaps, setBizGoogleMaps] = useState(currentBusiness.googleMapsUrl || '');
+  const [bizGoogleReview, setBizGoogleReview] = useState(currentBusiness.googleReviewUrl || '');
+
 
   // Loyalty Form State
   const [loyaltyThreshold, setLoyaltyThreshold] = useState(currentBusiness.loyalty.stampsThreshold);
@@ -370,9 +376,15 @@ export const OwnerDashboard: React.FC = () => {
       whatsapp: bizWhatsapp.trim(),
       address: bizAddress.trim() || 'Pendiente de configuración',
       neighborhood: bizNeighborhood.trim() || 'Pendiente de configuración',
+      instagramUrl: bizInstagram.trim(),
+      tiktokUrl: bizTiktok.trim(),
+      facebookUrl: bizFacebook.trim(),
+      googleMapsUrl: bizGoogleMaps.trim(),
+      googleReviewUrl: bizGoogleReview.trim(),
     };
     updateBusiness(updated);
-    triggerSuccess('¡Identidad y datos del local actualizados y guardados en Cloud!');
+    triggerSuccess('¡Identidad, redes y datos del local actualizados y guardados en Cloud!');
+
   };
 
   const handleSaveLoyalty = (e: React.FormEvent) => {
@@ -1858,24 +1870,80 @@ export const OwnerDashboard: React.FC = () => {
                 type="text"
                 value={bizNeighborhood}
                 onChange={(e) => setBizNeighborhood(e.target.value)}
-                placeholder="Pendiente de configuración"
+                placeholder="Ej: Cedritos / Usaquén"
                 className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white"
               />
+            </div>
+
+            <div>
+              <label className="font-bold text-zinc-300 block mb-1">📸 Enlace / Usuario de Instagram:</label>
+              <input
+                type="text"
+                value={bizInstagram}
+                onChange={(e) => setBizInstagram(e.target.value)}
+                placeholder="https://instagram.com/tu_barberia"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-zinc-300 block mb-1">🎵 Enlace / Usuario de TikTok:</label>
+              <input
+                type="text"
+                value={bizTiktok}
+                onChange={(e) => setBizTiktok(e.target.value)}
+                placeholder="https://tiktok.com/@tu_barberia"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-zinc-300 block mb-1">👥 Enlace de Facebook:</label>
+              <input
+                type="text"
+                value={bizFacebook}
+                onChange={(e) => setBizFacebook(e.target.value)}
+                placeholder="https://facebook.com/tu_barberia"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs"
+              />
+            </div>
+
+            <div>
+              <label className="font-bold text-zinc-300 block mb-1">📍 Enlace de Google Maps / Ruta:</label>
+              <input
+                type="text"
+                value={bizGoogleMaps}
+                onChange={(e) => setBizGoogleMaps(e.target.value)}
+                placeholder="https://maps.google.com/?q=..."
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs"
+              />
+            </div>
+
+            <div className="sm:col-span-2">
+              <label className="font-bold text-zinc-300 block mb-1">⭐ Enlace para Calificar en Google / Reseñas:</label>
+              <input
+                type="text"
+                value={bizGoogleReview}
+                onChange={(e) => setBizGoogleReview(e.target.value)}
+                placeholder="https://g.page/r/.../review (Link directo de reseñas de Google)"
+                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white text-xs"
+              />
               <span className="text-[10px] text-zinc-500 mt-0.5 block">
-                {bizNeighborhood === 'Pendiente de configuración' || !bizNeighborhood ? '🟡 Pendiente de completar por el Owner' : '✓ Barrio configurado'}
+                * Los clientes verán un botón de lujo en su pantalla principal para calificar la barbería en Google con 5 estrellas.
               </span>
             </div>
           </div>
 
           <button
             type="submit"
-            className="px-5 py-2.5 rounded-xl font-bold text-black shadow-lg transition flex items-center gap-2"
+            className="px-6 py-3 rounded-xl font-black text-black shadow-lg transition flex items-center gap-2 cursor-pointer hover:scale-105 active:scale-95"
             style={{ backgroundColor: 'var(--brand-primary)' }}
           >
-            <Save className="w-4 h-4" /> Guardar Configuración del Negocio
+            <Save className="w-4 h-4" /> Guardar Todos los Datos & Redes Sociales
           </button>
         </form>
       )}
+
 
       {/* TAB 3: CATÁLOGO DE SERVICIOS & PRECIOS (AUTONOMÍA TOTAL) */}
       {activeTab === 'services' && (

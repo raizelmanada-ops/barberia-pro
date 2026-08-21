@@ -32,8 +32,13 @@ import {
   Bell,
   Lock,
   Trash2,
-  X
+  X,
+  MapPin,
+  MessageCircle,
+  ExternalLink
 } from 'lucide-react';
+
+
 
 
 
@@ -1146,8 +1151,141 @@ export const ClientHome: React.FC = () => {
         </div>
       </section>
 
+      {/* 📍 7. UBICACIÓN, CONTACTO OFICIAL, REDES SOCIALES & CALIFICAR BARBERÍA */}
+      <section className="rounded-3xl p-5 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800 shadow-xl space-y-4">
+        <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+          <div className="flex items-center gap-2.5">
+            <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
+              <Store className="w-5 h-5" />
+            </span>
+            <div>
+              <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-wider">
+                {currentBusiness.name}
+              </h3>
+              <p className="text-xs text-zinc-400">
+                {currentBusiness.slogan || 'Elegancia, precisión y estilo clásico.'}
+              </p>
+            </div>
+          </div>
+          {currentBusiness.googleReviewUrl && (
+            <a
+              href={currentBusiness.googleReviewUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs flex items-center gap-1.5 transition shadow cursor-pointer"
+            >
+              <Star className="w-3.5 h-3.5 fill-black" />
+              <span>Calificar en Google</span>
+            </a>
+          )}
+        </div>
+
+        {/* Dirección y WhatsApp */}
+        <div className="grid sm:grid-cols-2 gap-3 text-xs sm:text-sm">
+          {/* Dirección */}
+          <div className="p-3.5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <MapPin className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <div>
+                <div className="font-bold text-white">Ubicación & Dirección:</div>
+                <p className="text-zinc-300 mt-0.5">
+                  {currentBusiness.address && currentBusiness.address !== 'Pendiente de configuración'
+                    ? currentBusiness.address
+                    : 'Bogotá, Colombia'}
+                  {currentBusiness.neighborhood && currentBusiness.neighborhood !== 'Pendiente de configuración'
+                    ? ` • ${currentBusiness.neighborhood}`
+                    : ''}
+                </p>
+              </div>
+            </div>
+            {currentBusiness.googleMapsUrl && (
+              <a
+                href={currentBusiness.googleMapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-2.5 py-1 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-amber-400 text-xs font-bold shrink-0 flex items-center gap-1 transition"
+              >
+                <span>Mapa</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
+            )}
+          </div>
+
+          {/* WhatsApp de Atención */}
+          <div className="p-3.5 rounded-2xl bg-zinc-950/70 border border-zinc-800/80 flex items-start justify-between gap-3">
+            <div className="flex items-start gap-2.5">
+              <MessageCircle className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <div>
+                <div className="font-bold text-white">WhatsApp Oficial & Reservas:</div>
+                <p className="text-zinc-300 mt-0.5">{currentBusiness.whatsapp || currentBusiness.phone || '+57 310 236 5163'}</p>
+              </div>
+            </div>
+            <a
+              href={`https://wa.me/${(currentBusiness.whatsapp || currentBusiness.phone || '573102365163').replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Hola ${currentBusiness.name}, me gustaría consultar sobre los servicios y citas.`)}`}
+              target="_blank"
+              rel="noreferrer"
+              className="px-3 py-1 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-black shrink-0 flex items-center gap-1 transition shadow cursor-pointer"
+            >
+              <span>Escribir</span>
+            </a>
+          </div>
+        </div>
+
+        {/* Redes Sociales y Calificación */}
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-zinc-800/60">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs text-zinc-400 font-medium">Síguenos:</span>
+            {currentBusiness.instagramUrl ? (
+              <a
+                href={currentBusiness.instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1 rounded-xl bg-zinc-800 hover:bg-pink-600/20 text-zinc-300 hover:text-pink-400 border border-zinc-700 hover:border-pink-500/30 text-xs font-bold flex items-center gap-1.5 transition"
+              >
+                <svg className="w-3.5 h-3.5 text-pink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                  <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                </svg>
+                <span>Instagram</span>
+              </a>
+
+            ) : null}
+            {currentBusiness.tiktokUrl ? (
+              <a
+                href={currentBusiness.tiktokUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white border border-zinc-700 text-xs font-bold flex items-center gap-1.5 transition"
+              >
+                <span>🎵 TikTok</span>
+              </a>
+            ) : null}
+            {currentBusiness.facebookUrl ? (
+              <a
+                href={currentBusiness.facebookUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="px-3 py-1 rounded-xl bg-zinc-800 hover:bg-blue-600/20 text-zinc-300 hover:text-blue-400 border border-zinc-700 hover:border-blue-500/30 text-xs font-bold flex items-center gap-1.5 transition"
+              >
+                <span>👥 Facebook</span>
+              </a>
+            ) : null}
+          </div>
+
+          <button
+            onClick={() => setActiveTab('feedback')}
+            className="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-750 border border-amber-500/30 transition cursor-pointer shadow"
+          >
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            <span>⭐ Calificar Barbería</span>
+          </button>
+        </div>
+      </section>
+
       {/* 6. MODAL / TAB DE RESERVAS */}
       {activeTab === 'booking' && (
+
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
           <div className="w-full max-w-lg bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl my-0">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">

@@ -85,7 +85,12 @@ export interface Business {
   phone: string;
   whatsapp: string;
   instagramUrl?: string;
+  tiktokUrl?: string;
+  facebookUrl?: string;
+  googleMapsUrl?: string;
+  googleReviewUrl?: string;
   ownerName?: string;
+
   ownerEmail?: string;
   ownerPhone?: string;
   theme: ThemeConfig;
