@@ -507,8 +507,9 @@ export const ClientHome: React.FC = () => {
 
         {/* Modal de PIN del Dueño */}
         {staffTargetRole && (
-          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="w-full max-w-xs bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl animate-fade-in text-xs text-left">
+          <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+            <div className="w-full sm:max-w-xs bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl text-xs text-left">
+
               <div className="flex items-center justify-between border-b border-zinc-800 pb-2">
                 <span className="font-black text-white flex items-center gap-1.5">
                   <Lock className="w-4 h-4 text-amber-400" />
@@ -1369,8 +1370,9 @@ export const ClientHome: React.FC = () => {
 
       {/* 7. MODAL DE FEEDBACK MULTIDIMENSIONAL */}
       {activeTab === 'feedback' && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg bg-zinc-900 border border-zinc-700 rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+          <div className="w-full sm:max-w-lg bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[92vh] overflow-y-auto shadow-2xl">
+
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400">
@@ -1532,8 +1534,9 @@ export const ClientHome: React.FC = () => {
 
       {/* 9. MODAL DE DETALLES DE ÚLTIMA VISITA REGISTRADA */}
       {isVisitDetailsModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+          <div className="w-full sm:max-w-md bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -1613,8 +1616,8 @@ export const ClientHome: React.FC = () => {
 
       {/* 9.5 MODAL DE REGISTRO RÁPIDO PARA ACTIVAR TARJETA DE SELLOS */}
       {isLoyaltyRegisterModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-zinc-900 border-2 border-amber-500/60 rounded-3xl p-5 space-y-4 shadow-2xl animate-fade-in text-xs">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+          <div className="w-full sm:max-w-sm bg-zinc-900 border-t sm:border-2 border-amber-500/60 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl text-xs max-h-[92vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-xl bg-amber-500 text-black font-black">
@@ -1692,8 +1695,9 @@ export const ClientHome: React.FC = () => {
 
       {/* 10. MODAL DE TARJETA DIGITAL DE FIDELIZACIÓN & SELLOS */}
       {isLoyaltyModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+          <div className="w-full sm:max-w-md bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+
             {/* Header del Modal */}
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
