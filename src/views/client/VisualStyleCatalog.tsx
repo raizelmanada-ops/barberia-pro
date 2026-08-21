@@ -29,13 +29,66 @@ interface VisualStyleCatalogProps {
   defaultDomain?: StyleDomain;
 }
 
+// Componente de Imagen con carga reactiva y z-index garantizado
+const LazyStyleImage: React.FC<{
+  src: string;
+  alt: string;
+  name: string;
+  category: string;
+  isModal?: boolean;
+}> = ({ src, alt, name, category, isModal = false }) => {
+  const [hasError, setHasError] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  // Resetear estados al cambiar de estilo
+  useEffect(() => {
+    setHasError(false);
+    setIsLoaded(false);
+  }, [src]);
+
+  return (
+    <div
+      className={`relative aspect-[4/3] w-full overflow-hidden bg-zinc-950 flex items-center justify-center ${
+        isModal ? 'rounded-2xl border border-zinc-800' : 'border-b border-zinc-800/60'
+      }`}
+    >
+      {/* 1. Placeholder que solo se muestra si hay error o mientras carga */}
+      {(!isLoaded || hasError) && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-b from-zinc-900 to-zinc-950 z-0">
+          <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 mb-2 shadow-inner">
+            <Scissors className="w-5 h-5 stroke-[2]" />
+          </div>
+          <span className="text-[10px] font-black text-white uppercase tracking-wider line-clamp-1">{name}</span>
+          <span className="text-[9px] text-amber-400 font-bold uppercase mt-0.5">{category}</span>
+        </div>
+      )}
+
+      {/* 2. Imagen Real en Z-INDEX 10 */}
+      {!hasError && (
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          onLoad={() => setIsLoaded(true)}
+          onError={() => setHasError(true)}
+          className={`w-full h-full ${
+            isModal ? 'object-contain' : 'object-cover group-hover:scale-105'
+          } transition-all duration-500 relative z-10 ${
+            isLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+        />
+      )}
+    </div>
+  );
+};
+
 export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
   onBack,
   onSelectStyle,
   selectedStyleId,
   defaultDomain = 'cabello',
 }) => {
-
   const [activeDomain, setActiveDomain] = useState<StyleDomain>(defaultDomain);
   const [selectedCategory, setSelectedCategory] = useState<string>('todas');
   const [searchQuery, setSearchQuery] = useState('');
@@ -135,7 +188,6 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
         </p>
       </div>
 
-
       {/* 2. Pestañas Principales: Estilos de Cabello vs Estilos de Barba */}
       <div className="flex p-1 bg-zinc-900/90 border border-zinc-800 rounded-2xl max-w-md shadow-lg">
         <button
@@ -171,7 +223,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={`Buscar en ${activeDomain === 'cabello' ? 'cortes (ej: Siete, Fade, Crop, Pompadour)' : 'barbas (ej: Boxed, Garibaldi, Van Dyke)'}...`}
+            placeholder={`Buscar en ${activeDomain === 'cabello' ? 'cortes (ej: Taper, Fade, High Top, Curtains)' : 'barbas (ej: Balbo, Van Dyke, Stubble, Groomed)'}...`}
             className="w-full bg-zinc-900/90 border border-zinc-800 rounded-2xl pl-10 pr-4 py-3 text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-amber-500/50 transition text-xs shadow-inner"
           />
           {searchQuery && (
@@ -231,43 +283,29 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                   isSelected ? 'border-amber-500 ring-1 ring-amber-500/40' : 'border-zinc-800'
                 }`}
               >
-                {/* Contenedor de Miniatura con Dimensiones Definidas y Lazy Loading */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-950 flex items-center justify-center border-b border-zinc-800/60">
-                  {/* Imagen Real con Lazy Loading */}
-                  <img
+                {/* Imagen del estilo con renderizado reactivo */}
+                <div className="relative">
+                  <LazyStyleImage
                     src={style.thumbnail}
                     alt={style.name}
-                    loading="lazy"
-                    decoding="async"
-                    onError={(e) => {
-                      (e.target as HTMLElement).style.display = 'none';
-                    }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 z-0"
+                    name={style.name}
+                    category={style.category}
                   />
 
-                  {/* Placeholder elegante cuando la foto está en preparación */}
-                  <div className="absolute inset-0 flex flex-col items-center justify-center p-3 text-center bg-gradient-to-b from-zinc-900 to-zinc-950 pointer-events-none -z-0">
-                    <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 mb-1.5 shadow-inner group-hover:scale-110 group-hover:border-amber-400 transition">
-                      <Scissors className="w-5 h-5 stroke-[2]" />
-                    </div>
-                    <span className="text-[10px] font-black text-white uppercase tracking-wider line-clamp-1">{style.name}</span>
-                    <span className="text-[8px] text-amber-400/80 font-bold uppercase mt-0.5">{style.category}</span>
-                  </div>
-
                   {/* Badge de Categoría */}
-                  <div className="absolute top-2.5 left-2.5 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-xl text-[9px] font-extrabold text-amber-400 border border-amber-500/30 uppercase tracking-wider z-10 shadow">
+                  <div className="absolute top-2.5 left-2.5 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-xl text-[9px] font-extrabold text-amber-400 border border-amber-500/30 uppercase tracking-wider z-20 shadow">
                     {style.category}
                   </div>
 
                   {isSelected && (
-                    <div className="absolute top-2.5 right-2.5 bg-amber-500 text-black px-2.5 py-1 rounded-xl text-[9px] font-black uppercase flex items-center gap-1 shadow-lg z-10">
+                    <div className="absolute top-2.5 right-2.5 bg-amber-500 text-black px-2.5 py-1 rounded-xl text-[9px] font-black uppercase flex items-center gap-1 shadow-lg z-20">
                       <Check className="w-3 h-3 stroke-[3]" />
                       <span>Elegido</span>
                     </div>
                   )}
 
                   {/* Overlay sutil al pasar cursor */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5 sm:p-3 z-10 pointer-events-none">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5 sm:p-3 z-20 pointer-events-none">
                     <span className="text-[10px] font-extrabold text-amber-300 flex items-center gap-1">
                       <Eye className="w-3 h-3" /> Ver estilo
                     </span>
@@ -338,33 +376,19 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
             <div className="overflow-y-auto p-4 sm:p-5 space-y-4 flex-1">
               
               {/* Contenedor Principal de la Imagen */}
-              <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-800 flex items-center justify-center shadow-inner group">
-                <img
+              <div className="relative group">
+                <LazyStyleImage
                   src={activeStyle.image}
                   alt={activeStyle.name}
-                  decoding="async"
-                  onError={(e) => {
-                    (e.target as HTMLElement).style.display = 'none';
-                  }}
-                  className="w-full h-full object-contain z-0"
+                  name={activeStyle.name}
+                  category={activeStyle.category}
+                  isModal={true}
                 />
-
-                {/* Placeholder de Respaldo si no hay imagen física */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-zinc-900 via-zinc-950 to-zinc-950 -z-0 pointer-events-none">
-                  <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3 shadow-lg">
-                    <Scissors className="w-7 h-7 stroke-[2]" />
-                  </div>
-                  <h3 className="text-sm font-black text-white uppercase tracking-wider">{activeStyle.name}</h3>
-                  <span className="text-[10px] text-amber-400 font-bold uppercase mt-1">{activeStyle.category}</span>
-                  <p className="text-[10px] text-zinc-500 max-w-xs mt-1">
-                    Referencia técnica para tu cita de corte o barbería.
-                  </p>
-                </div>
 
                 {/* Botón Anterior */}
                 <button
                   onClick={handlePrevStyle}
-                  className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer z-30"
                   title="Estilo anterior (Flecha Izquierda)"
                 >
                   <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
@@ -373,14 +397,14 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                 {/* Botón Siguiente */}
                 <button
                   onClick={handleNextStyle}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer z-30"
                   title="Estilo siguiente (Flecha Derecha)"
                 >
                   <ChevronRight className="w-5 h-5 stroke-[2.5]" />
                 </button>
 
                 {/* Indicador de posición */}
-                <div className="absolute bottom-2.5 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-zinc-300 border border-white/10">
+                <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 bg-black/70 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-zinc-300 border border-white/10 z-30">
                   {activeModalIndex! + 1} de {filteredStyles.length}
                 </div>
               </div>
