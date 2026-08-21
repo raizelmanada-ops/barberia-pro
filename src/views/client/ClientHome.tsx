@@ -29,8 +29,10 @@ import {
   Store,
   Mic,
   Bell,
-  Lock
+  Lock,
+  Trash2
 } from 'lucide-react';
+
 
 
 import { SubscriptionService } from '../../core/services/subscriptionService';
@@ -311,6 +313,27 @@ export const ClientHome: React.FC = () => {
       console.error('Error guardando foto de memoria de estilo:', err);
     }
   };
+
+  const handleDeleteStylePhoto = () => {
+    setCustomPhotoUrl('');
+    try {
+      localStorage.removeItem(`barberia_photo_${currentBusiness.id}`);
+    } catch {
+      /* ignore */
+    }
+
+    const clientId = currentUser.phone?.replace(/\s+/g, '') || currentUser.id || 'guest';
+    ClientHistoryService.upsertStyleMemory(currentBusiness.id, {
+      clientId,
+      photoUrl: '',
+      likedAspects: ['Degradado lateral limpio', 'Textura superior pulida'],
+      keepAspects: ['Volumen superior'],
+      changeAspects: ['Mantener corte regular'],
+      technicalFormula: 'Fade 1.5 a 3 con tijera texturizada arriba',
+      consentPhotoGranted: true,
+    });
+  };
+
 
 
 
@@ -762,9 +785,25 @@ export const ClientHome: React.FC = () => {
               >
                 <Camera className="w-3.5 h-3.5" />
               </button>
+
+              {customPhotoUrl && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDeleteStylePhoto();
+                  }}
+                  className="absolute top-1.5 left-1.5 p-1.5 rounded-lg bg-red-600/90 hover:bg-red-500 text-white flex items-center justify-center cursor-pointer shadow-md transition hover:scale-105 active:scale-95 z-20 border border-red-400/30"
+                  title="Eliminar esta foto de mi memoria"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              )}
+
               <div className="absolute bottom-1.5 left-1.5 bg-black/80 px-2 py-0.5 rounded text-[10px] font-semibold text-zinc-300">
                 Foto del Corte
               </div>
+
             </div>
 
             {/* Preferencias aprendidas */}
@@ -1481,9 +1520,12 @@ export const ClientHome: React.FC = () => {
         isOpen={isMemoryPhotoModalOpen}
         onClose={() => setIsMemoryPhotoModalOpen(false)}
         onConfirmPhoto={handleConfirmStylePhoto}
+        onDeletePhoto={handleDeleteStylePhoto}
+        hasExistingPhoto={!!customPhotoUrl}
         title="Tu Memoria de Estilo Capilar"
         subtitle="Toma una foto en vivo con la cámara o selecciona una imagen desde la galería."
       />
+
 
 
       {/* 9. MODAL DE DETALLES DE ÚLTIMA VISITA REGISTRADA */}

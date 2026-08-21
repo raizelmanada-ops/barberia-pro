@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Camera, RefreshCw, Check, X, Image as ImageIcon, AlertCircle } from 'lucide-react';
+import { Camera, RefreshCw, Check, X, Image as ImageIcon, AlertCircle, Trash2 } from 'lucide-react';
 
 interface CameraCaptureModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirmPhoto: (dataUrl: string) => void;
+  onDeletePhoto?: () => void;
+  hasExistingPhoto?: boolean;
   title?: string;
   subtitle?: string;
 }
@@ -13,9 +15,12 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
   isOpen,
   onClose,
   onConfirmPhoto,
+  onDeletePhoto,
+  hasExistingPhoto = false,
   title = 'Captura de Foto de Estilo',
   subtitle = 'Toma una foto en vivo o selecciona una imagen desde la galería de tu dispositivo.',
 }) => {
+
   const [cameraActive, setCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [cameraFacing, setCameraFacing] = useState<'user' | 'environment'>('user');
@@ -286,22 +291,33 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
         {/* Acciones */}
         <div className="space-y-2 pt-1">
           {capturedImage ? (
-            <div className="grid grid-cols-2 gap-2">
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={handleRetake}
+                  className="py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold flex items-center justify-center gap-2 border border-zinc-700 transition cursor-pointer text-xs"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  <span>Repetir Foto</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleConfirm}
+                  className="py-3 px-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 transition shadow cursor-pointer text-xs"
+                >
+                  <Check className="w-4 h-4 stroke-[3]" />
+                  <span>Aceptar y Guardar</span>
+                </button>
+              </div>
+
               <button
                 type="button"
-                onClick={handleRetake}
-                className="py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold flex items-center justify-center gap-2 border border-zinc-700 transition cursor-pointer text-xs"
+                onClick={() => setCapturedImage(null)}
+                className="w-full py-2.5 px-3 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-red-400 font-bold flex items-center justify-center gap-2 border border-zinc-800 transition cursor-pointer text-xs"
               >
-                <RefreshCw className="w-4 h-4" />
-                <span>Repetir Foto</span>
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirm}
-                className="py-3 px-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 transition shadow cursor-pointer text-xs"
-              >
-                <Check className="w-4 h-4 stroke-[3]" />
-                <span>Aceptar y Guardar</span>
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>Descartar esta captura</span>
               </button>
             </div>
           ) : cameraActive ? (
@@ -342,9 +358,24 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 <ImageIcon className="w-4 h-4 text-amber-400" />
                 <span>🖼️ Elegir desde la Galería</span>
               </button>
+
+              {hasExistingPhoto && onDeletePhoto && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onDeletePhoto();
+                    handleClose();
+                  }}
+                  className="w-full py-2.5 px-3 rounded-2xl bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 font-bold flex items-center justify-center gap-2 border border-red-500/30 transition cursor-pointer text-xs"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Eliminar Foto Guardada de mi Memoria</span>
+                </button>
+              )}
             </div>
           )}
         </div>
+
 
         {/* Inputs ocultos para captura nativa y galería */}
         <input
