@@ -50,7 +50,8 @@ import { ImageStorageService } from '../../core/services/imageStorageService';
 
 export const ClientHome: React.FC = () => {
   const { currentBusiness } = useTenant();
-  const { currentUser, setIsAuthModalOpen, setRole, loginAsClient } = useAuth();
+  const { currentUser, setRole, loginAsClient } = useAuth();
+
   const isOperational = SubscriptionService.isBusinessOperational(currentBusiness);
   const subStatus = SubscriptionService.getComputedStatus(currentBusiness);
 
@@ -629,144 +630,121 @@ export const ClientHome: React.FC = () => {
             className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-black bg-amber-500 hover:bg-amber-400 border border-amber-400 shadow-lg shadow-amber-500/20 transition hover:scale-105 active:scale-95 cursor-pointer"
           >
             <Scissors className="w-4 h-4" />
-            <span>Biblioteca Visual</span>
+            <span>Biblioteca</span>
           </button>
         </div>
 
       </div>
 
-
-
-      {/* 🎁 BANNER DESTACADO DEL CLUB DE FIDELIZACIÓN: 1 CORTE GRATIS */}
-      <section
-        onClick={() => {
-          if (currentUser.id === 'guest' || currentUser.fullName === 'Cliente Invitado') {
-            setIsLoyaltyRegisterModalOpen(true);
-          } else {
-            setIsLoyaltyModalOpen(true);
-          }
-        }}
-        className="rounded-3xl p-5 bg-gradient-to-r from-amber-500/25 via-zinc-900 to-amber-950/40 border-2 border-amber-500/60 shadow-2xl relative overflow-hidden group cursor-pointer hover:border-amber-400 transition"
-      >
-        <div className="flex items-center justify-between gap-3.5">
-          <div className="space-y-2 flex-1">
-            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-black bg-amber-500 px-3 py-0.5 rounded-full shadow">
-              <Gift className="w-3.5 h-3.5" /> Promoción Oficial de la Barbería
-            </div>
-            <h3 className="text-base sm:text-lg font-black text-white group-hover:text-amber-400 transition flex items-center gap-1.5">
-              <span>¡Acumula {currentBusiness.loyalty.stampsThreshold || 6} sellos y llévate 1 CORTE GRATIS!</span>
-              <span className="text-base">✂️🎁</span>
-            </h3>
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              Registra tu nombre y teléfono, y pídele a tu barbero que te estampe tu sello digital cada vez que te cortes el cabello.
-            </p>
-            <div className="pt-1.5 flex items-center gap-2 text-xs sm:text-sm font-black text-amber-400">
-              <span>
-                {currentUser.id !== 'guest' && currentUser.fullName !== 'Cliente Invitado'
-                  ? '⭐ Ver Mi Tarjeta de Sellos Digital'
-                  : '👉 Registrar mi Nombre y Activar Mi Tarjeta de Sellos'}
-              </span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-            </div>
-          </div>
-
-          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-amber-500/15 border-2 border-amber-500/50 flex flex-col items-center justify-center text-amber-400 shrink-0 shadow-xl group-hover:scale-105 transition">
-            <Gift className="w-8 h-8 text-amber-400 animate-bounce" />
-            <span className="text-[10px] sm:text-xs font-black text-white mt-1 uppercase">Gratis</span>
-          </div>
-        </div>
-      </section>
-
-
-      {/* 💈 EXPLORADOR VISUAL DE CORTES, BARBAS & COMBOS */}
+      {/* 🌟 1. ELEGIR ESTILO — EL GRAN ACCESO PRINCIPAL A LA BIBLIOTECA VISUAL */}
       <section
         onClick={() => setActiveTab('catalog')}
-        className="rounded-3xl p-5 bg-gradient-to-r from-amber-500/15 via-zinc-900 to-zinc-900 border border-amber-500/30 shadow-xl relative overflow-hidden group cursor-pointer hover:border-amber-500 transition"
+        className="rounded-3xl p-5 sm:p-6 bg-gradient-to-r from-amber-500/20 via-zinc-900 to-zinc-900 border-2 border-amber-500/50 shadow-2xl relative overflow-hidden group cursor-pointer hover:border-amber-400 transition"
       >
-        <div className="flex items-center justify-between gap-3.5">
-          <div className="space-y-1.5 flex-1">
-            <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-3 py-0.5 rounded-full border border-amber-500/20">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-2 flex-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-black bg-amber-500 px-3 py-1 rounded-full shadow">
               <Sparkles className="w-3.5 h-3.5" /> Biblioteca Visual Oficial
             </div>
-            <h3 className="text-base sm:text-lg font-black text-white group-hover:text-amber-400 transition">
+            <h3 className="text-lg sm:text-xl font-black text-white group-hover:text-amber-400 transition">
               Catálogo de Cortes, Barbas y Combos
             </h3>
-            <p className="text-xs sm:text-sm text-zinc-300 max-w-md leading-relaxed">
-              Explora más de 40 estilos profesionales con fotos reales (El Siete, Fades, Barbas y Diseños). Elige el tuyo y resérvalo directamente.
+            <p className="text-xs sm:text-sm text-zinc-300 max-w-lg leading-relaxed">
+              Explora más de 40 estilos profesionales con fotos reales en alta definición (Fades, Taper, Clásicos, Barbas perfiladas y Combos). Elige el tuyo y solicítalo en tu cita.
             </p>
-            <div className="pt-2 flex items-center gap-2 text-xs sm:text-sm font-bold text-amber-400">
-              <span>Explorar Biblioteca Completa</span>
-              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-            </div>
-          </div>
 
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-amber-500/30 shadow-lg shrink-0 hidden sm:block bg-zinc-950">
-            <img
-              src="/styles/hair_01.jpg"
-              alt="Corte Taper Fade Pro"
-              className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* 1.1 MODO SALA DE ESPERA / SIN CITA EN VIVO: "QUIERO ESTE CORTE" */}
-      <section
-        onClick={() => {
-          setWalkInSent(false);
-          setIsWalkInModalOpen(true);
-        }}
-        className="rounded-2xl p-4.5 bg-gradient-to-r from-amber-500/20 via-zinc-900 to-zinc-900 border border-amber-500/40 hover:border-amber-500 transition shadow-lg flex items-center justify-between cursor-pointer group"
-      >
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 group-hover:scale-105 transition shrink-0">
-            <Bell className="w-5 h-5 animate-bounce" />
-          </div>
-          <div>
-            <div className="text-sm sm:text-base font-black text-white flex items-center gap-2">
-              <span>¿Llegaste a la barbería sin cita?</span>
-              <span className="text-[10px] sm:text-xs font-black px-2 py-0.5 rounded bg-amber-500 text-black">
-                TURNO EN VIVO
+            {/* Píldoras rápidas de categorías */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 flex items-center gap-1">
+                <Scissors className="w-3 h-3 text-amber-400" /> Cortes & Fades
+              </span>
+              <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-amber-400" /> Barbas Perfiladas
+              </span>
+              <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-300 flex items-center gap-1">
+                <Gift className="w-3 h-3 text-amber-400" /> Combos & Rituales
               </span>
             </div>
-            <p className="text-xs sm:text-sm text-zinc-300 mt-1">
-              Toca aquí para avisar a {primaryBarberFirstName}: <strong>"Ya llegué, quiero este corte"</strong>.
-            </p>
+
+            <div className="pt-2 flex items-center gap-2 text-xs sm:text-sm font-black text-amber-400 group-hover:translate-x-1 transition">
+              <span>👉 Explorar Catálogo Completo y Elegir Estilo</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
           </div>
 
+          <div className="grid grid-cols-2 gap-2 shrink-0 sm:w-48">
+            <div className="aspect-square rounded-2xl overflow-hidden border border-amber-500/30 shadow-md bg-zinc-950">
+              <img
+                src="/styles/hair_01.jpg"
+                alt="Corte Taper"
+                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+            </div>
+            <div className="aspect-square rounded-2xl overflow-hidden border border-amber-500/30 shadow-md bg-zinc-950">
+              <img
+                src="/styles/beard_01.jpg"
+                alt="Barba Perfilada"
+                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+              />
+            </div>
+          </div>
         </div>
-        <ChevronRight className="w-5 h-5 text-amber-400 group-hover:translate-x-1 transition shrink-0" />
       </section>
 
+      {/* 📅 2. SERVICIOS DISPONIBLES & RESERVAS DIRECTAS */}
+      <section className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
+            <Scissors className="w-4 h-4 text-amber-400" />
+            <span>Servicios & Precios ({businessServices.length})</span>
+          </h3>
+          {currentBusiness.address && currentBusiness.address !== 'Pendiente de configuración' && (
+            <span className="text-xs text-zinc-400">{currentBusiness.address}</span>
+          )}
+        </div>
 
-      {/* Guest Identification Prompt if not logged in */}
-      {currentUser.fullName === 'Cliente Invitado' && (
-        <section
-          onClick={() => {}}
-          className="rounded-2xl p-4 bg-zinc-900/90 border border-amber-500/30 flex items-center justify-between gap-3 shadow-lg"
-        >
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-400 shrink-0">
-              <Sparkles className="w-5 h-5" />
+        <div className="space-y-2.5">
+          {businessServices.map((srv) => (
+            <div
+              key={srv.id}
+              onClick={() => {
+                setSelectedService(srv);
+                setBookingMode('standard');
+                setActiveTab('booking');
+              }}
+              className="p-4 rounded-2xl bg-zinc-900/80 hover:bg-zinc-850 border border-zinc-800 hover:border-amber-500/40 cursor-pointer transition flex items-center justify-between shadow-md"
+            >
+              <div className="space-y-1">
+                <div className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                  <span>{srv.name}</span>
+                  {srv.isPopular && (
+                    <span className="text-[10px] sm:text-xs font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                      Popular
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs sm:text-sm text-zinc-300 max-w-sm leading-relaxed">{srv.description}</p>
+                <div className="flex items-center gap-3.5 text-xs text-zinc-400 pt-1">
+                  <span className="flex items-center gap-1 font-semibold">
+                    <Clock className="w-3.5 h-3.5 text-amber-400" /> {srv.durationMinutes} min
+                  </span>
+                  <span className="font-black text-amber-400 text-xs sm:text-sm">
+                    ${srv.priceCOP.toLocaleString('es-CO')} COP
+                  </span>
+                </div>
+              </div>
+              <button
+                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-black text-black transition shadow hover:scale-105 active:scale-95 cursor-pointer"
+                style={{ backgroundColor: 'var(--brand-primary)' }}
+              >
+                Reservar
+              </button>
             </div>
-            <div>
-              <div className="text-xs font-bold text-white">¿Es tu primera visita o ya nos conoces?</div>
-              <p className="text-[11px] text-zinc-400 mt-0.5">
-                Identifícate con tu WhatsApp para recordar tu corte y tus beneficios.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setIsAuthModalOpen(true)}
-            className="px-3 py-1.5 rounded-lg text-xs font-bold text-black shrink-0 shadow transition cursor-pointer"
-            style={{ backgroundColor: 'var(--brand-primary)' }}
-          >
-            Identificarme
-          </button>
-        </section>
-      )}
+          ))}
+        </div>
+      </section>
 
-      {/* 2. CORE DIFFERENTIATOR: "TU BARBERÍA TE CONOCE" - VISUAL MEMORY CARD */}
+      {/* 📸 3. TU MEMORIA DE ESTILO CAPILAR */}
       {clientMemory ? (
         <section className="rounded-2xl p-4.5 bg-gradient-to-br from-zinc-900 to-zinc-900/70 border border-zinc-800 shadow-xl relative overflow-hidden">
           {/* Subtle Accent Glow */}
@@ -1017,118 +995,76 @@ export const ClientHome: React.FC = () => {
         </section>
       )}
 
-      {/* 3. FIDELIZACIÓN INTERACTIVA */}
+      {/* 🎁 4. CLUB DE FIDELIZACIÓN: 1 CORTE GRATIS */}
       <section
-        onClick={() => setIsLoyaltyModalOpen(true)}
-        className="rounded-2xl p-4 bg-zinc-900 border border-zinc-800 hover:border-amber-500/50 flex items-center justify-between transition cursor-pointer group shadow-md"
+        onClick={() => {
+          if (currentUser.id === 'guest' || currentUser.fullName === 'Cliente Invitado') {
+            setIsLoyaltyRegisterModalOpen(true);
+          } else {
+            setIsLoyaltyModalOpen(true);
+          }
+        }}
+        className="rounded-3xl p-5 bg-gradient-to-r from-amber-500/20 via-zinc-900 to-amber-950/30 border border-amber-500/40 shadow-xl relative overflow-hidden group cursor-pointer hover:border-amber-400 transition"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/10 group-hover:bg-amber-500/20 flex items-center justify-center text-amber-400 transition">
-            <Gift className="w-5 h-5" />
+        <div className="flex items-center justify-between gap-3.5">
+          <div className="space-y-1.5 flex-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-black bg-amber-500 px-3 py-0.5 rounded-full shadow">
+              <Gift className="w-3.5 h-3.5" /> Club de Fidelización
+            </div>
+            <h3 className="text-base sm:text-lg font-black text-white group-hover:text-amber-400 transition flex items-center gap-1.5">
+              <span>¡Acumula {currentBusiness.loyalty.stampsThreshold || 6} sellos y llévate 1 CORTE GRATIS!</span>
+              <span className="text-base">✂️🎁</span>
+            </h3>
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+              Por cada visita y servicio, tu barbero estampa tu tarjeta digital en su panel. En tu visita #{currentBusiness.loyalty.stampsThreshold || 6} recibes tu premio sin costo.
+            </p>
+            <div className="pt-1 flex items-center gap-2 text-xs sm:text-sm font-black text-amber-400">
+              <span>
+                {currentUser.id !== 'guest' && currentUser.fullName !== 'Cliente Invitado'
+                  ? '⭐ Ver Mi Tarjeta de Sellos Digital'
+                  : '👉 Activar Mi Tarjeta de Sellos'}
+              </span>
+              <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+            </div>
+          </div>
+
+          <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-amber-500/15 border-2 border-amber-500/50 flex flex-col items-center justify-center text-amber-400 shrink-0 shadow-xl group-hover:scale-105 transition">
+            <Gift className="w-7 h-7 text-amber-400 animate-bounce" />
+            <span className="text-[10px] sm:text-xs font-black text-white mt-1 uppercase">Gratis</span>
+          </div>
+        </div>
+      </section>
+
+      {/* 🛎️ 5. SALA DE ESPERA / TURNO EN VIVO SIN CITA */}
+      <section
+        onClick={() => {
+          setWalkInSent(false);
+          setIsWalkInModalOpen(true);
+        }}
+        className="rounded-2xl p-4 bg-gradient-to-r from-amber-500/15 via-zinc-900 to-zinc-900 border border-zinc-800 hover:border-amber-500/50 transition shadow-lg flex items-center justify-between cursor-pointer group"
+      >
+        <div className="flex items-center gap-3.5">
+          <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 group-hover:scale-105 transition shrink-0">
+            <Bell className="w-5 h-5 animate-bounce" />
           </div>
           <div>
-            <div className="text-xs font-bold text-white flex items-center gap-1.5 group-hover:text-amber-400 transition">
-              <span>Club de Fidelización {currentBusiness.name}</span>
-              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                1 / {currentBusiness.loyalty.stampsThreshold || 8} Sellos
+            <div className="text-sm font-black text-white flex items-center gap-2">
+              <span>¿Llegaste a la barbería sin cita?</span>
+              <span className="text-[10px] font-black px-2 py-0.5 rounded bg-amber-500 text-black">
+                TURNO EN VIVO
               </span>
             </div>
-            <p className="text-[11px] text-amber-400 font-semibold mt-0.5">
-              {currentBusiness.loyalty.rewardDescription}
+            <p className="text-xs text-zinc-400 mt-0.5">
+              Toca aquí para avisar a {primaryBarberFirstName}: <strong>"Ya llegué, quiero este corte"</strong>.
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="flex gap-1">
-            {[...Array(currentBusiness.loyalty.stampsThreshold || 8)].map((_, idx) => (
-              <div
-                key={idx}
-                className={`w-2.5 h-2.5 rounded-full ${idx < 1 ? 'bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.5)]' : 'bg-zinc-700'}`}
-              />
-            ))}
-          </div>
-          <ChevronRight className="w-4 h-4 text-zinc-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition" />
-        </div>
+        <ChevronRight className="w-5 h-5 text-amber-400 group-hover:translate-x-1 transition shrink-0" />
       </section>
 
-      {/* 4. CATÁLOGO VISUAL DE ESTILOS DE BARBA BANNER */}
-      <section
-        onClick={() => setActiveTab('catalog')}
-        className="rounded-2xl p-4 bg-gradient-to-r from-zinc-900 via-zinc-800/80 to-zinc-900 border border-zinc-700 cursor-pointer hover:border-amber-500/50 transition flex items-center justify-between group"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
-            <Scissors className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xs font-black text-white flex items-center gap-1.5">
-              <span>Biblioteca Visual de Estilos</span>
-              <span className="text-[9px] font-black px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 uppercase">Cabello & Barba</span>
-            </div>
-            <p className="text-[11px] text-zinc-400 mt-0.5">
-              Explora nuestra colección oficial de cortes y barbas con referencias técnicas.
-            </p>
-          </div>
-
-        </div>
-        <ChevronRight className="w-5 h-5 text-zinc-500 group-hover:text-amber-400 group-hover:translate-x-0.5 transition" />
-      </section>
-
-
-      {/* 5. SERVICIOS & BARBEROS DISPONIBLES (AISLADOS POR TENANT) */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-zinc-300">
-            Servicios Disponibles ({businessServices.length})
-          </h3>
-          {currentBusiness.address && currentBusiness.address !== 'Pendiente de configuración' && (
-            <span className="text-xs text-zinc-400">{currentBusiness.address}</span>
-          )}
-        </div>
-
-        <div className="space-y-2.5">
-          {businessServices.map((srv) => (
-            <div
-              key={srv.id}
-              onClick={() => {
-                setSelectedService(srv);
-                setBookingMode('standard');
-                setActiveTab('booking');
-              }}
-              className="p-4 rounded-2xl bg-zinc-900/80 hover:bg-zinc-850 border border-zinc-800 hover:border-amber-500/40 cursor-pointer transition flex items-center justify-between shadow-md"
-            >
-              <div className="space-y-1">
-                <div className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-                  <span>{srv.name}</span>
-                  {srv.isPopular && (
-                    <span className="text-[10px] sm:text-xs font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
-                      Popular
-                    </span>
-                  )}
-                </div>
-                <p className="text-xs sm:text-sm text-zinc-300 max-w-sm leading-relaxed">{srv.description}</p>
-                <div className="flex items-center gap-3.5 text-xs text-zinc-400 pt-1">
-                  <span className="flex items-center gap-1 font-semibold">
-                    <Clock className="w-3.5 h-3.5 text-amber-400" /> {srv.durationMinutes} min
-                  </span>
-                  <span className="font-black text-amber-400 text-xs sm:text-sm">
-                    ${srv.priceCOP.toLocaleString('es-CO')} COP
-                  </span>
-                </div>
-              </div>
-              <button
-                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-black text-black transition shadow hover:scale-105 active:scale-95"
-                style={{ backgroundColor: 'var(--brand-primary)' }}
-              >
-                Reservar
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* 5.1 EQUIPO DE COLABORADORES & CALIFICACIONES EN VIVO */}
+      {/* 👥 6. EQUIPO DE COLABORADORES & CALIFICACIONES EN VIVO */}
       <section className="space-y-3 pt-2">
+
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">

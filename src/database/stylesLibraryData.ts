@@ -3,7 +3,7 @@
 // 44 Referencias Visuales Limpias con Rutas Estandarizadas
 // ==========================================================================
 
-export type StyleDomain = 'cabello' | 'barba';
+export type StyleDomain = 'cabello' | 'barba' | 'combos';
 
 export interface VisualStyleItem {
   id: string;
@@ -34,6 +34,14 @@ export const BEARD_CATEGORIES = [
   { key: 'perfiladas', label: 'Perfiladas & Balbo / Van Dyke' },
   { key: 'completas', label: 'Completas & Groomed' },
 ] as const;
+
+export const COMBO_CATEGORIES = [
+  { key: 'todas', label: 'Todos los Combos' },
+  { key: 'corte_barba', label: 'Corte + Barba' },
+  { key: 'corte_cejas', label: 'Corte + Cejas' },
+  { key: 'corte_ritual', label: 'Corte + Ritual Barboterapia' },
+] as const;
+
 
 export const OFFICIAL_STYLES_LIBRARY: VisualStyleItem[] = [
   // =========================================================================
@@ -448,9 +456,57 @@ export const OFFICIAL_STYLES_LIBRARY: VisualStyleItem[] = [
     image: '/styles/beard_07.jpg',
     technicalFormula: 'Toalla caliente • Navaja en ángulo de 30° • Masaje con tónico capilar',
     faceShape: 'Perfecta para eventos formales y oficina.',
+  },
+
+  // =========================================================================
+  // 🔥 COMBOS & RITUALES
+  // =========================================================================
+  {
+    id: 'combo_01',
+    domain: 'combos',
+    name: 'Combo Pro: Corte + Barba Perfilada',
+    category: 'Corte + Barba',
+    categoryKey: 'corte_barba',
+    description: 'El combo estrella: Corte de cabello degradado o clásico con diseño y perfilado de barba a navaja.',
+    duration: '55–65 min',
+    maintenance: '2 semanas',
+    thumbnail: '/styles/hair_01.jpg',
+    image: '/styles/hair_01.jpg',
+    technicalFormula: 'Fade personalizado + Perfilado de barba a navaja con toalla caliente',
+    faceShape: 'Transformación visual completa para todo tipo de rostro.',
+  },
+  {
+    id: 'combo_02',
+    domain: 'combos',
+    name: 'Combo Urbano: Corte + Cejas con Navaja',
+    category: 'Corte + Cejas',
+    categoryKey: 'corte_cejas',
+    description: 'Degradado limpio o Mid Fade acompañado de limpieza y definición de cejas con navaja.',
+    duration: '40–50 min',
+    maintenance: '10–14 días',
+    thumbnail: '/styles/hair_04.jpg',
+    image: '/styles/hair_04.jpg',
+    technicalFormula: 'Mid Fade a navaja + Limpieza simétrica de cejas sin perder naturalidad',
+    faceShape: 'Resalta la mirada y define los rasgos faciales.',
+  },
+  {
+    id: 'combo_03',
+    domain: 'combos',
+    name: 'Ritual Maestro: Corte + Barboterapia Spa',
+    category: 'Corte + Ritual Barboterapia',
+    categoryKey: 'corte_ritual',
+    description: 'Experiencia premium completa: Corte, toalla vaporizada, exfoliación facial, perfilado y masaje relajante.',
+    duration: '70–80 min',
+    maintenance: '3 semanas',
+    thumbnail: '/styles/hair_12.jpg',
+    image: '/styles/hair_12.jpg',
+    technicalFormula: 'Corte a tijera o máquina + Doble toalla vaporizada + Aceites esenciales y bálsamo',
+    faceShape: 'La máxima experiencia de relajación y estilo para caballeros exigentes.',
   }
 ];
 
 export type BeardStyle = VisualStyleItem;
 export const OFFICIAL_BEARD_STYLES = OFFICIAL_STYLES_LIBRARY.filter(s => s.domain === 'barba');
 export const OFFICIAL_HAIR_STYLES = OFFICIAL_STYLES_LIBRARY.filter(s => s.domain === 'cabello');
+export const OFFICIAL_COMBO_STYLES = OFFICIAL_STYLES_LIBRARY.filter(s => s.domain === 'combos');
+

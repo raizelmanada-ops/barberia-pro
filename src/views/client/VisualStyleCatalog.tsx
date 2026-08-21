@@ -21,8 +21,10 @@ import {
   StyleDomain,
   HAIR_CATEGORIES,
   BEARD_CATEGORIES,
+  COMBO_CATEGORIES,
   OFFICIAL_STYLES_LIBRARY
 } from '../../database/stylesLibraryData';
+
 
 interface VisualStyleCatalogProps {
   onBack?: () => void;
@@ -124,7 +126,12 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
     setIsModalZoomed(false);
   };
 
-  const categories = activeDomain === 'cabello' ? HAIR_CATEGORIES : BEARD_CATEGORIES;
+  const categories = activeDomain === 'cabello' 
+    ? HAIR_CATEGORIES 
+    : activeDomain === 'barba' 
+    ? BEARD_CATEGORIES 
+    : COMBO_CATEGORIES;
+
 
   // Filtrado reactivo por dominio, categoría y búsqueda
   const filteredStyles = useMemo(() => {
@@ -216,31 +223,43 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
 
       </div>
 
-      {/* 2. Pestañas Principales: Cabello vs Barba */}
-      <div className="flex p-1 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-lg">
+      {/* 2. Pestañas Principales: Cortes vs Barba vs Combos */}
+      <div className="grid grid-cols-3 p-1 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-lg gap-1">
         <button
           onClick={() => handleDomainChange('cabello')}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+          className={`py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-1.5 cursor-pointer ${
             activeDomain === 'cabello'
               ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
           }`}
         >
           <Scissors className="w-4 h-4" />
-          <span>Estilos de Cabello</span>
+          <span>Cortes</span>
         </button>
         <button
           onClick={() => handleDomainChange('barba')}
-          className={`flex-1 py-2.5 px-3 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-2 cursor-pointer ${
+          className={`py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-1.5 cursor-pointer ${
             activeDomain === 'barba'
               ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
               : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
           }`}
         >
           <Sparkles className="w-4 h-4" />
-          <span>Estilos de Barba</span>
+          <span>Barbas</span>
+        </button>
+        <button
+          onClick={() => handleDomainChange('combos')}
+          className={`py-2.5 px-2 rounded-xl font-black text-xs sm:text-sm transition flex items-center justify-center gap-1.5 cursor-pointer ${
+            activeDomain === 'combos'
+              ? 'bg-amber-500 text-black shadow-md shadow-amber-500/20'
+              : 'text-zinc-400 hover:text-white hover:bg-zinc-800/50'
+          }`}
+        >
+          <Layers className="w-4 h-4" />
+          <span>Combos</span>
         </button>
       </div>
+
 
       {/* 3. Buscador y Filtros por Categoría */}
       <div className="space-y-2.5">
