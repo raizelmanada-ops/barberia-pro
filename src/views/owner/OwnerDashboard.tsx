@@ -7,7 +7,9 @@ import { ServiceCatalogService } from '../../core/services/serviceCatalogService
 import { TeamService } from '../../core/services/teamService';
 import { ShiftCommissionService } from '../../core/services/shiftCommissionService';
 import { StyleCatalogService } from '../../core/services/styleCatalogService';
+import { ImageStorageService } from '../../core/services/imageStorageService';
 import { CashRegisterService } from '../../core/services/cashRegisterService';
+
 import { ClientHistoryService, ClientProfileDetail } from '../../core/services/clientHistoryService';
 import { WalkInService, WalkInTicket } from '../../core/services/walkinService';
 import { AuthService } from '../../core/services/authService';
@@ -540,32 +542,33 @@ export const OwnerDashboard: React.FC = () => {
     }
   };
 
-  const handleStylePhotoUpload = (styleId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleStylePhotoUpload = async (styleId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        StyleCatalogService.updateStylePhoto(currentBusiness.id, styleId, result);
+      try {
+        const publicUrl = await ImageStorageService.uploadImage(currentBusiness.id, file, 'gallery');
+        StyleCatalogService.updateStylePhoto(currentBusiness.id, styleId, publicUrl);
         setStyleCatalog(StyleCatalogService.getStyles(currentBusiness.id));
-        triggerSuccess('¡Foto real del corte subida y actualizada en el catálogo visual!');
-      };
-      reader.readAsDataURL(file);
+        triggerSuccess('¡Foto real del estilo subida y sincronizada en Supabase Storage!');
+      } catch (err) {
+        console.error('Error subiendo foto de estilo:', err);
+      }
     }
   };
 
-  const handleNewStylePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewStylePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const result = reader.result as string;
-        setNewStylePhoto(result);
-        triggerSuccess('¡Foto del corte seleccionada!');
-      };
-      reader.readAsDataURL(file);
+      try {
+        const publicUrl = await ImageStorageService.uploadImage(currentBusiness.id, file, 'gallery');
+        setNewStylePhoto(publicUrl);
+        triggerSuccess('¡Foto del corte seleccionada y lista para publicar!');
+      } catch (err) {
+        console.error('Error subiendo nueva foto:', err);
+      }
     }
   };
+
 
   const handleAddCustomStyle = (e: React.FormEvent) => {
     e.preventDefault();

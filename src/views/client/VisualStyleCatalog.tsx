@@ -197,51 +197,49 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                 }`}
               >
                 {/* Contenedor de Miniatura con Dimensiones Definidas y Lazy Loading */}
-                <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-950 flex items-center justify-center">
+                <div className="relative aspect-[4/3] w-full overflow-hidden bg-zinc-950 flex items-center justify-center border-b border-zinc-800/60">
+                  {/* Imagen Real (si existe) */}
                   <img
                     src={style.thumbnail}
                     alt={style.name}
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
-                      // Fallback elegante a la imagen principal o silueta si no existe miniatura
-                      const target = e.target as HTMLImageElement;
-                      if (target.src !== style.image && style.image) {
-                        target.src = style.image;
-                      } else {
-                        target.style.display = 'none';
-                      }
+                      // Ocultar imagen rota limpiamente para que quede visible el placeholder de lujo
+                      (e.target as HTMLElement).style.display = 'none';
                     }}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 z-0"
                   />
 
-                  {/* Placeholder estético para cuando la imagen esté en carga/preparación */}
-                  <div className="absolute inset-0 -z-10 flex flex-col items-center justify-center p-3 text-center bg-zinc-950">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 mb-1">
-                      <Scissors className="w-5 h-5" />
+                  {/* Placeholder estético premium cuando la imagen aún no se ha subido */}
+                  <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-b from-zinc-900 to-zinc-950 pointer-events-none -z-0">
+                    <div className="w-11 h-11 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 mb-2 shadow-inner group-hover:scale-110 group-hover:border-amber-400 transition">
+                      <Scissors className="w-5 h-5 stroke-[2]" />
                     </div>
-                    <span className="text-[10px] font-bold text-zinc-400 uppercase line-clamp-1">{style.name}</span>
+                    <span className="text-[10px] font-black text-white uppercase tracking-wider line-clamp-1">{style.name}</span>
+                    <span className="text-[9px] text-zinc-500 mt-0.5 font-semibold">Foto Oficial 4:3</span>
                   </div>
 
                   {/* Badge de Categoría */}
-                  <div className="absolute top-2 left-2 bg-black/80 backdrop-blur-md px-2 py-0.5 rounded-lg text-[9px] font-extrabold text-amber-400 border border-amber-500/20 uppercase tracking-wider">
+                  <div className="absolute top-2.5 left-2.5 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded-xl text-[9px] font-extrabold text-amber-400 border border-amber-500/30 uppercase tracking-wider z-10 shadow">
                     {style.category}
                   </div>
 
                   {isSelected && (
-                    <div className="absolute top-2 right-2 bg-amber-500 text-black px-2 py-0.5 rounded-lg text-[9px] font-black uppercase flex items-center gap-1 shadow-md">
+                    <div className="absolute top-2.5 right-2.5 bg-amber-500 text-black px-2.5 py-1 rounded-xl text-[9px] font-black uppercase flex items-center gap-1 shadow-lg z-10">
                       <Check className="w-3 h-3 stroke-[3]" />
                       <span>Elegido</span>
                     </div>
                   )}
 
                   {/* Overlay sutil al pasar cursor */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2 sm:p-3">
-                    <span className="text-[10px] font-bold text-amber-300 flex items-center gap-1">
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5 sm:p-3 z-10 pointer-events-none">
+                    <span className="text-[10px] font-extrabold text-amber-300 flex items-center gap-1">
                       <Eye className="w-3 h-3" /> Ver detalles
                     </span>
                   </div>
                 </div>
+
 
                 {/* Información de la Tarjeta */}
                 <div className="p-3 sm:p-4 space-y-2 flex-1 flex flex-col justify-between">
@@ -324,13 +322,23 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                   alt={activeStyle.name}
                   decoding="async"
                   onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    if (target.src !== activeStyle.thumbnail) {
-                      target.src = activeStyle.thumbnail;
-                    }
+                    (e.target as HTMLElement).style.display = 'none';
                   }}
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain z-0"
                 />
+
+                {/* Placeholder de Lujo para Modal */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-b from-zinc-900 via-zinc-950 to-zinc-950 -z-0 pointer-events-none">
+                  <div className="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 mb-3 shadow-lg">
+                    <Scissors className="w-7 h-7 stroke-[2]" />
+                  </div>
+                  <h3 className="text-sm font-black text-white uppercase tracking-wider">{activeStyle.name}</h3>
+                  <span className="text-[10px] text-amber-400 font-bold uppercase mt-1">{activeStyle.category}</span>
+                  <p className="text-[10px] text-zinc-500 max-w-xs mt-1">
+                    Vistas oficiales (Frontal, Lateral y Posterior) listas para renderizar.
+                  </p>
+                </div>
+
 
                 {/* Botón Anterior */}
                 <button

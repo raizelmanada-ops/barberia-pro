@@ -5,7 +5,9 @@ import { TeamService } from '../../core/services/teamService';
 import { WalkInService, WalkInTicket } from '../../core/services/walkinService';
 import { ShiftCommissionService, BarberDailySummary } from '../../core/services/shiftCommissionService';
 import { StyleCatalogService } from '../../core/services/styleCatalogService';
+import { ImageStorageService } from '../../core/services/imageStorageService';
 import { BarberWorkItem } from '../../core/types';
+
 import {
   Star,
   ThumbsUp,
@@ -720,19 +722,21 @@ export const BarberDashboard: React.FC = () => {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     const file = e.target.files?.[0];
                     if (file) {
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setNewWorkPhoto(reader.result as string);
-                      };
-                      reader.readAsDataURL(file);
+                      try {
+                        const publicUrl = await ImageStorageService.uploadImage(currentBusiness.id, file, 'works');
+                        setNewWorkPhoto(publicUrl);
+                      } catch (err) {
+                        console.error('Error subiendo foto de trabajo:', err);
+                      }
                     }
                   }}
                   className="w-full bg-zinc-950 border border-zinc-800 rounded-xl p-2 text-zinc-400 file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-500 file:text-black hover:file:bg-amber-400 cursor-pointer"
                 />
               </div>
+
 
               {newWorkPhoto && (
                 <div className="relative aspect-[4/3] w-full rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950">

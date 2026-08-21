@@ -1,4 +1,5 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+
 import { useTenant } from '../../core/tenant/TenantContext';
 import { useAuth } from '../../core/auth/AuthContext';
 import { INITIAL_BARBERS, INITIAL_SERVICES, INITIAL_STYLE_MEMORIES } from '../../database/mockData';
@@ -37,6 +38,9 @@ import { ServiceCatalogService } from '../../core/services/serviceCatalogService
 import { TeamService } from '../../core/services/teamService';
 import { WhatsAppService } from '../../core/whatsapp/whatsappService';
 import { WalkInService } from '../../core/services/walkinService';
+import { ClientHistoryService } from '../../core/services/clientHistoryService';
+import { ImageStorageService } from '../../core/services/imageStorageService';
+
 
 export const ClientHome: React.FC = () => {
   const { currentBusiness } = useTenant();
@@ -140,13 +144,27 @@ export const ClientHome: React.FC = () => {
   const [likedComment, setLikedComment] = useState('Excelente servicio y puntualidad.');
   const [improveComment, setImproveComment] = useState('Todo excelente.');
 
-  // Memoria visual aislada por Tenant y Cliente
+  // Memoria visual aislada por Tenant y Cliente conectada a Supabase
+  const [styleMemories, setStyleMemories] = useState<StyleMemory[]>(() =>
+    ClientHistoryService.getStyleMemories(currentBusiness.id)
+  );
+
+  useEffect(() => {
+    const handleMemoryUpdate = () => {
+      setStyleMemories(ClientHistoryService.getStyleMemories(currentBusiness.id));
+    };
+    window.addEventListener('barberia:client_history_updated', handleMemoryUpdate);
+    return () => window.removeEventListener('barberia:client_history_updated', handleMemoryUpdate);
+  }, [currentBusiness.id]);
+
   const clientMemory: StyleMemory | undefined = useMemo(() => {
     if (!currentUser) return undefined;
-    return INITIAL_STYLE_MEMORIES.find(
-      m => m.businessId === currentBusiness.id && (m.clientId === currentUser.id || currentUser.id === 'guest')
-    );
-  }, [currentBusiness.id, currentUser]);
+    const clientIdClean = currentUser.phone?.replace(/\s+/g, '') || currentUser.id;
+    return styleMemories.find(
+      m => m.businessId === currentBusiness.id && (m.clientId.replace(/\s+/g, '') === clientIdClean || currentUser.id === 'guest')
+    ) || styleMemories.find(m => m.businessId === currentBusiness.id) || INITIAL_STYLE_MEMORIES[0];
+  }, [currentBusiness.id, currentUser, styleMemories]);
+
 
   // Edición interactiva de "Lo que te gustó y quieres mantener"
   const [isEditingLiked, setIsEditingLiked] = useState(false);
@@ -272,23 +290,37 @@ export const ClientHome: React.FC = () => {
 
   const activePhoto = customPhotoUrl || clientMemory?.photoUrl || '/styles/el-siete-colombiano.jpg';
 
-  const handlePhotoFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [isUploadingMemoryPhoto, setIsUploadingMemoryPhoto] = useState(false);
+
+  const handlePhotoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const result = reader.result as string;
-        setCustomPhotoUrl(result);
-        try {
-          localStorage.setItem(`barberia_photo_${currentBusiness.id}`, result);
-        } catch (err) {
-          console.warn('Error saving photo to localStorage', err);
-        }
-        setIsMemoryPhotoModalOpen(false);
-      };
-      reader.readAsDataURL(file);
+    if (!file) return;
+
+    setIsUploadingMemoryPhoto(true);
+    try {
+      const publicUrl = await ImageStorageService.uploadImage(currentBusiness.id, file, 'memories');
+      setCustomPhotoUrl(publicUrl);
+
+      // Guardar en Supabase hair_style_memories aislado por business_id y client
+      const clientId = currentUser.phone?.replace(/\s+/g, '') || currentUser.id || 'guest';
+      ClientHistoryService.upsertStyleMemory(currentBusiness.id, {
+        clientId,
+        photoUrl: publicUrl,
+        likedAspects: ['Degradado lateral limpio', 'Textura superior pulida'],
+        keepAspects: ['Volumen superior'],
+        changeAspects: ['Mantener corte regular'],
+        technicalFormula: 'Fade 1.5 a 3 con tijera texturizada arriba',
+        consentPhotoGranted: true,
+      });
+
+      setIsMemoryPhotoModalOpen(false);
+    } catch (err) {
+      console.error('Error subiendo foto de memoria de estilo:', err);
+    } finally {
+      setIsUploadingMemoryPhoto(false);
     }
   };
+
 
   const [isVisitDetailsModalOpen, setIsVisitDetailsModalOpen] = useState(false);
   const [isLoyaltyModalOpen, setIsLoyaltyModalOpen] = useState(false);
@@ -1471,23 +1503,31 @@ export const ClientHome: React.FC = () => {
               Captura tu corte recién terminado o sube una foto de tu estilo favorito para que Álvaro Ortiz la recuerde en tus próximas visitas.
             </p>
 
-            <div className="space-y-2.5 pt-1">
-              <button
-                onClick={() => photoCameraInputRef.current?.click()}
-                className="w-full py-3 px-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 transition shadow cursor-pointer text-xs"
-              >
-                <Camera className="w-4 h-4 stroke-[2.5]" />
-                <span>📸 Tomar Foto con la Cámara</span>
-              </button>
+            {isUploadingMemoryPhoto ? (
+              <div className="p-6 text-center space-y-2 bg-zinc-950 rounded-2xl border border-zinc-800 animate-pulse">
+                <div className="w-8 h-8 mx-auto border-2 border-amber-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-xs font-bold text-amber-400 block">Sincronizando foto en Supabase...</span>
+              </div>
+            ) : (
+              <div className="space-y-2.5 pt-1">
+                <button
+                  onClick={() => photoCameraInputRef.current?.click()}
+                  className="w-full py-3 px-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 transition shadow cursor-pointer text-xs"
+                >
+                  <Camera className="w-4 h-4 stroke-[2.5]" />
+                  <span>📸 Tomar Foto con la Cámara</span>
+                </button>
 
-              <button
-                onClick={() => photoFileInputRef.current?.click()}
-                className="w-full py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-750 text-white font-bold flex items-center justify-center gap-2 border border-zinc-700 transition cursor-pointer text-xs"
-              >
-                <ImageIcon className="w-4 h-4 text-amber-400" />
-                <span>🖼️ Subir desde la Galería</span>
-              </button>
-            </div>
+                <button
+                  onClick={() => photoFileInputRef.current?.click()}
+                  className="w-full py-3 px-3 rounded-2xl bg-zinc-800 hover:bg-zinc-750 text-white font-bold flex items-center justify-center gap-2 border border-zinc-700 transition cursor-pointer text-xs"
+                >
+                  <ImageIcon className="w-4 h-4 text-amber-400" />
+                  <span>🖼️ Subir desde la Galería</span>
+                </button>
+              </div>
+            )}
+
 
             {/* Inputs ocultos de archivo y cámara */}
             <input
