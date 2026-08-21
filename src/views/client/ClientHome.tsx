@@ -616,21 +616,21 @@ export const ClientHome: React.FC = () => {
             setIsLoyaltyModalOpen(true);
           }
         }}
-        className="rounded-3xl p-4.5 bg-gradient-to-r from-amber-500/25 via-zinc-900 to-amber-950/40 border-2 border-amber-500/60 shadow-2xl relative overflow-hidden group cursor-pointer hover:border-amber-400 transition"
+        className="rounded-3xl p-5 bg-gradient-to-r from-amber-500/25 via-zinc-900 to-amber-950/40 border-2 border-amber-500/60 shadow-2xl relative overflow-hidden group cursor-pointer hover:border-amber-400 transition"
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="space-y-1.5 flex-1">
-            <div className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-black bg-amber-500 px-2.5 py-0.5 rounded-full shadow">
-              <Gift className="w-3 h-3" /> Promoción Oficial de la Barbería
+        <div className="flex items-center justify-between gap-3.5">
+          <div className="space-y-2 flex-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-black bg-amber-500 px-3 py-0.5 rounded-full shadow">
+              <Gift className="w-3.5 h-3.5" /> Promoción Oficial de la Barbería
             </div>
-            <h3 className="text-base font-black text-white group-hover:text-amber-400 transition flex items-center gap-1.5">
+            <h3 className="text-base sm:text-lg font-black text-white group-hover:text-amber-400 transition flex items-center gap-1.5">
               <span>¡Acumula {currentBusiness.loyalty.stampsThreshold || 6} sellos y llévate 1 CORTE GRATIS!</span>
-              <span className="text-sm">✂️🎁</span>
+              <span className="text-base">✂️🎁</span>
             </h3>
-            <p className="text-xs text-zinc-300">
+            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
               Registra tu nombre y teléfono, y pídele a tu barbero que te estampe tu sello digital cada vez que te cortes el cabello.
             </p>
-            <div className="pt-1.5 flex items-center gap-2 text-xs font-black text-amber-400">
+            <div className="pt-1.5 flex items-center gap-2 text-xs sm:text-sm font-black text-amber-400">
               <span>
                 {currentUser.id !== 'guest' && currentUser.fullName !== 'Cliente Invitado'
                   ? '⭐ Ver Mi Tarjeta de Sellos Digital'
@@ -640,43 +640,43 @@ export const ClientHome: React.FC = () => {
             </div>
           </div>
 
-          <div className="w-16 h-16 rounded-2xl bg-amber-500/15 border-2 border-amber-500/50 flex flex-col items-center justify-center text-amber-400 shrink-0 shadow-xl group-hover:scale-105 transition">
-            <Gift className="w-7 h-7 text-amber-400 animate-bounce" />
-            <span className="text-[8px] font-black text-white mt-0.5 uppercase">Gratis</span>
+          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-2xl bg-amber-500/15 border-2 border-amber-500/50 flex flex-col items-center justify-center text-amber-400 shrink-0 shadow-xl group-hover:scale-105 transition">
+            <Gift className="w-8 h-8 text-amber-400 animate-bounce" />
+            <span className="text-[10px] sm:text-xs font-black text-white mt-1 uppercase">Gratis</span>
           </div>
         </div>
       </section>
+
 
       {/* 💈 EXPLORADOR VISUAL DE CORTES, BARBAS & COMBOS */}
       <section
         onClick={() => setActiveTab('catalog')}
         className="rounded-3xl p-5 bg-gradient-to-r from-amber-500/15 via-zinc-900 to-zinc-900 border border-amber-500/30 shadow-xl relative overflow-hidden group cursor-pointer hover:border-amber-500 transition"
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="space-y-1.5">
-            <div className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-              <Sparkles className="w-3 h-3" /> Biblioteca Visual Oficial
+        <div className="flex items-center justify-between gap-3.5">
+          <div className="space-y-1.5 flex-1">
+            <div className="inline-flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-amber-400 bg-amber-500/10 px-3 py-0.5 rounded-full border border-amber-500/20">
+              <Sparkles className="w-3.5 h-3.5" /> Biblioteca Visual Oficial
             </div>
-            <h3 className="text-base font-black text-white group-hover:text-amber-400 transition">
+            <h3 className="text-base sm:text-lg font-black text-white group-hover:text-amber-400 transition">
               Catálogo de Cortes, Barbas y Combos
             </h3>
-            <p className="text-xs text-zinc-400 max-w-md">
-              Explora 11 estilos profesionales con fotos reales (El Siete, Fades, Barbas y Combos). Elige el tuyo y resérvalo directamente.
+            <p className="text-xs sm:text-sm text-zinc-300 max-w-md leading-relaxed">
+              Explora más de 40 estilos profesionales con fotos reales (El Siete, Fades, Barbas y Diseños). Elige el tuyo y resérvalo directamente.
             </p>
-            <div className="pt-2 flex items-center gap-2 text-xs font-bold text-amber-400">
+            <div className="pt-2 flex items-center gap-2 text-xs sm:text-sm font-bold text-amber-400">
               <span>Explorar Biblioteca Completa</span>
               <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
             </div>
           </div>
 
-          <div className="w-20 h-20 rounded-2xl overflow-hidden border border-amber-500/30 shadow-lg shrink-0 hidden sm:block bg-zinc-950">
+          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border border-amber-500/30 shadow-lg shrink-0 hidden sm:block bg-zinc-950">
             <img
-              src="/styles/Men_showcasing_taper_fade_haircut_202608201950.jpeg"
+              src="/styles/hair_01.jpg"
               alt="Corte Taper Fade Pro"
               className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
             />
           </div>
-
         </div>
       </section>
 
@@ -686,26 +686,27 @@ export const ClientHome: React.FC = () => {
           setWalkInSent(false);
           setIsWalkInModalOpen(true);
         }}
-        className="rounded-2xl p-4 bg-gradient-to-r from-amber-500/20 via-zinc-900 to-zinc-900 border border-amber-500/40 hover:border-amber-500 transition shadow-lg flex items-center justify-between cursor-pointer group"
+        className="rounded-2xl p-4.5 bg-gradient-to-r from-amber-500/20 via-zinc-900 to-zinc-900 border border-amber-500/40 hover:border-amber-500 transition shadow-lg flex items-center justify-between cursor-pointer group"
       >
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 group-hover:scale-105 transition shrink-0">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 group-hover:scale-105 transition shrink-0">
             <Bell className="w-5 h-5 animate-bounce" />
           </div>
           <div>
-            <div className="text-xs font-black text-white flex items-center gap-1.5">
+            <div className="text-sm sm:text-base font-black text-white flex items-center gap-2">
               <span>¿Llegaste a la barbería sin cita?</span>
-              <span className="text-[9px] font-black px-1.5 py-0.5 rounded bg-amber-500 text-black">
+              <span className="text-[10px] sm:text-xs font-black px-2 py-0.5 rounded bg-amber-500 text-black">
                 TURNO EN VIVO
               </span>
             </div>
-            <p className="text-[11px] text-zinc-300 mt-0.5">
+            <p className="text-xs sm:text-sm text-zinc-300 mt-1">
               Toca aquí para avisar a Álvaro: <strong>"Ya llegué, quiero este corte"</strong>.
             </p>
           </div>
         </div>
         <ChevronRight className="w-5 h-5 text-amber-400 group-hover:translate-x-1 transition shrink-0" />
       </section>
+
 
       {/* Guest Identification Prompt if not logged in */}
       {currentUser.fullName === 'Cliente Invitado' && (
@@ -743,30 +744,30 @@ export const ClientHome: React.FC = () => {
             style={{ backgroundColor: 'var(--brand-primary)' }}
           />
 
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <span className="p-1.5 rounded-lg bg-amber-500/10 text-amber-400">
+          <div className="flex items-center justify-between mb-3.5">
+            <div className="flex items-center gap-2.5">
+              <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400">
                 <Sparkles className="w-4 h-4" />
               </span>
               <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Tu Memoria de Estilo</h3>
-                <p className="text-[11px] text-zinc-400">
+                <h3 className="text-sm sm:text-base font-black text-white uppercase tracking-wider">Tu Memoria de Estilo</h3>
+                <p className="text-xs text-zinc-300">
                   {currentBusiness.name} recuerda cómo te gusta tu corte
                 </p>
               </div>
             </div>
             <button
               onClick={() => setIsVisitDetailsModalOpen(true)}
-              className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-zinc-800 hover:bg-zinc-750 text-amber-400 border border-amber-500/30 flex items-center gap-1 transition shadow cursor-pointer"
+              className="text-xs font-bold px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-750 text-amber-400 border border-amber-500/30 flex items-center gap-1.5 transition shadow cursor-pointer"
             >
               <span>📅 Ver Última Visita</span>
-              <ChevronRight className="w-3 h-3 text-amber-400" />
+              <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
             </button>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-3.5 mt-2">
             {/* Foto del último corte con botón de cámara interactivo */}
-            <div className="relative rounded-xl overflow-hidden aspect-square border border-zinc-800 bg-zinc-950 group">
+            <div className="relative rounded-2xl overflow-hidden aspect-square border border-zinc-800 bg-zinc-950 group shadow-inner">
               <img
                 src={activePhoto}
                 alt="Último corte"
@@ -774,16 +775,16 @@ export const ClientHome: React.FC = () => {
               />
               <button
                 onClick={() => setIsMemoryPhotoModalOpen(true)}
-                className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-1.5 transition text-amber-400 font-extrabold text-[11px] cursor-pointer"
+                className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center gap-2 transition text-amber-400 font-black text-xs sm:text-sm cursor-pointer p-2 text-center"
               >
-                <Camera className="w-6 h-6 text-amber-400" />
+                <Camera className="w-7 h-7 text-amber-400" />
                 <span>Tomar / Cambiar Foto</span>
               </button>
               <button
                 onClick={() => setIsMemoryPhotoModalOpen(true)}
-                className="absolute top-1.5 right-1.5 p-1.5 rounded-lg bg-black/80 backdrop-blur-md text-amber-400 border border-amber-500/30 flex sm:hidden items-center justify-center cursor-pointer shadow"
+                className="absolute top-2 right-2 p-2 rounded-xl bg-black/85 backdrop-blur-md text-amber-400 border border-amber-500/30 flex sm:hidden items-center justify-center cursor-pointer shadow"
               >
-                <Camera className="w-3.5 h-3.5" />
+                <Camera className="w-4 h-4" />
               </button>
 
               {customPhotoUrl && (
@@ -793,37 +794,36 @@ export const ClientHome: React.FC = () => {
                     e.stopPropagation();
                     handleDeleteStylePhoto();
                   }}
-                  className="absolute top-1.5 left-1.5 p-1.5 rounded-lg bg-red-600/90 hover:bg-red-500 text-white flex items-center justify-center cursor-pointer shadow-md transition hover:scale-105 active:scale-95 z-20 border border-red-400/30"
+                  className="absolute top-2 left-2 p-2 rounded-xl bg-red-600/90 hover:bg-red-500 text-white flex items-center justify-center cursor-pointer shadow-md transition hover:scale-105 active:scale-95 z-20 border border-red-400/30"
                   title="Eliminar esta foto de mi memoria"
                 >
-                  <Trash2 className="w-3.5 h-3.5" />
+                  <Trash2 className="w-4 h-4" />
                 </button>
               )}
 
-              <div className="absolute bottom-1.5 left-1.5 bg-black/80 px-2 py-0.5 rounded text-[10px] font-semibold text-zinc-300">
+              <div className="absolute bottom-2 left-2 bg-black/85 px-2.5 py-0.5 rounded-lg text-xs font-bold text-zinc-200">
                 Foto del Corte
               </div>
-
             </div>
 
             {/* Preferencias aprendidas */}
-            <div className="sm:col-span-2 space-y-2 text-xs">
-              <div className="bg-zinc-950/60 p-2.5 rounded-xl border border-zinc-800/80 space-y-1.5">
+            <div className="sm:col-span-2 space-y-2.5 text-xs sm:text-sm">
+              <div className="bg-zinc-950/60 p-3 rounded-2xl border border-zinc-800/80 space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1">
-                    <ThumbsUp className="w-3 h-3" /> Lo que te gustó y quieres mantener:
+                  <div className="text-xs font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
+                    <ThumbsUp className="w-3.5 h-3.5" /> Lo que te gustó y quieres mantener:
                   </div>
                   <div className="flex items-center gap-1.5">
                     <button
                       onClick={() => startVoiceDictation('liked')}
-                      className={`text-[10px] font-bold flex items-center gap-1 px-2 py-0.5 rounded-lg border transition cursor-pointer ${
+                      className={`text-xs font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition cursor-pointer ${
                         isListeningLiked
                           ? 'bg-red-500 text-white border-red-400 animate-pulse'
                           : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/20'
                       }`}
                       title="Hablar por micrófono para dictar lo que te gustó"
                     >
-                      <Mic className="w-2.5 h-2.5" />
+                      <Mic className="w-3 h-3" />
                       <span>{isListeningLiked ? 'Escuchando...' : '🎙️ Dictar'}</span>
                     </button>
 
@@ -833,14 +833,15 @@ export const ClientHome: React.FC = () => {
                           setDraftLiked(activeLiked);
                           setIsEditingLiked(true);
                         }}
-                        className="text-[10px] text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 transition cursor-pointer"
+                        className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-500/10 border border-emerald-500/20 transition cursor-pointer"
                       >
-                        <Pencil className="w-2.5 h-2.5" />
+                        <Pencil className="w-3 h-3" />
                         <span>Editar</span>
                       </button>
                     )}
                   </div>
                 </div>
+
 
                 {isListeningLiked && (
                   <div className="text-[10px] font-bold text-red-400 flex items-center gap-1.5 animate-pulse bg-red-500/10 p-1.5 rounded-lg border border-red-500/20">
@@ -1052,15 +1053,15 @@ export const ClientHome: React.FC = () => {
       {/* 5. SERVICIOS & BARBEROS DISPONIBLES (AISLADOS POR TENANT) */}
       <section className="space-y-3">
         <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400">
+          <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-zinc-300">
             Servicios Disponibles ({businessServices.length})
           </h3>
           {currentBusiness.address && currentBusiness.address !== 'Pendiente de configuración' && (
-            <span className="text-[11px] text-zinc-500">{currentBusiness.address}</span>
+            <span className="text-xs text-zinc-400">{currentBusiness.address}</span>
           )}
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-2.5">
           {businessServices.map((srv) => (
             <div
               key={srv.id}
@@ -1069,29 +1070,29 @@ export const ClientHome: React.FC = () => {
                 setBookingMode('standard');
                 setActiveTab('booking');
               }}
-              className="p-3.5 rounded-xl bg-zinc-900/70 hover:bg-zinc-800/90 border border-zinc-800 hover:border-zinc-700 cursor-pointer transition flex items-center justify-between"
+              className="p-4 rounded-2xl bg-zinc-900/80 hover:bg-zinc-850 border border-zinc-800 hover:border-amber-500/40 cursor-pointer transition flex items-center justify-between shadow-md"
             >
-              <div className="space-y-0.5">
-                <div className="text-sm font-bold text-white flex items-center gap-2">
+              <div className="space-y-1">
+                <div className="text-sm sm:text-base font-bold text-white flex items-center gap-2">
                   <span>{srv.name}</span>
                   {srv.isPopular && (
-                    <span className="text-[9px] font-semibold px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-400">
+                    <span className="text-[10px] sm:text-xs font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30">
                       Popular
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-zinc-400 max-w-sm">{srv.description}</p>
-                <div className="flex items-center gap-3 text-[11px] text-zinc-500 pt-1">
-                  <span className="flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {srv.durationMinutes} min
+                <p className="text-xs sm:text-sm text-zinc-300 max-w-sm leading-relaxed">{srv.description}</p>
+                <div className="flex items-center gap-3.5 text-xs text-zinc-400 pt-1">
+                  <span className="flex items-center gap-1 font-semibold">
+                    <Clock className="w-3.5 h-3.5 text-amber-400" /> {srv.durationMinutes} min
                   </span>
-                  <span className="font-semibold text-zinc-300">
+                  <span className="font-black text-amber-400 text-xs sm:text-sm">
                     ${srv.priceCOP.toLocaleString('es-CO')} COP
                   </span>
                 </div>
               </div>
               <button
-                className="px-3 py-1.5 rounded-lg text-xs font-bold text-black transition"
+                className="px-4 py-2 rounded-xl text-xs sm:text-sm font-black text-black transition shadow hover:scale-105 active:scale-95"
                 style={{ backgroundColor: 'var(--brand-primary)' }}
               >
                 Reservar
@@ -1105,15 +1106,16 @@ export const ClientHome: React.FC = () => {
       <section className="space-y-3 pt-2">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
-              <Scissors className="w-3.5 h-3.5 text-amber-400" />
+            <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
+              <Scissors className="w-4 h-4 text-amber-400" />
               <span>Nuestros Barberos & Colaboradores ({businessBarbers.length})</span>
             </h3>
-            <p className="text-[11px] text-zinc-500 mt-0.5">
+            <p className="text-xs text-zinc-400 mt-0.5">
               Conoce a los profesionales de {currentBusiness.name} y califica su atención.
             </p>
           </div>
         </div>
+
 
         <div className="grid sm:grid-cols-2 gap-3">
           {businessBarbers.map((barber) => (
