@@ -1178,8 +1178,8 @@ export const ClientHome: React.FC = () => {
 
       {/* 6. MODAL / TAB DE RESERVAS */}
       {activeTab === 'booking' && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="w-full max-w-lg bg-zinc-900 border border-zinc-700 rounded-t-3xl sm:rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto animate-fade-in">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
+          <div className="w-full max-w-lg bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl my-0">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div>
                 <h3 className="text-base font-bold text-white">
@@ -1534,9 +1534,8 @@ export const ClientHome: React.FC = () => {
 
       {/* 9. MODAL DE DETALLES DE ÚLTIMA VISITA REGISTRADA */}
       {isVisitDetailsModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="w-full sm:max-w-md bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
-
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
+          <div className="w-full sm:max-w-md bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl my-0">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
@@ -1616,8 +1615,8 @@ export const ClientHome: React.FC = () => {
 
       {/* 9.5 MODAL DE REGISTRO RÁPIDO PARA ACTIVAR TARJETA DE SELLOS */}
       {isLoyaltyRegisterModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="w-full sm:max-w-sm bg-zinc-900 border-t sm:border-2 border-amber-500/60 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl text-xs max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
+          <div className="w-full sm:max-w-sm bg-zinc-900 border-2 border-amber-500/60 rounded-3xl p-5 space-y-4 shadow-2xl text-xs my-0">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-xl bg-amber-500 text-black font-black">
@@ -1695,8 +1694,9 @@ export const ClientHome: React.FC = () => {
 
       {/* 10. MODAL DE TARJETA DIGITAL DE FIDELIZACIÓN & SELLOS */}
       {isLoyaltyModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-          <div className="w-full sm:max-w-md bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-3xl p-5 space-y-4 shadow-2xl max-h-[92vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
+          <div className="w-full sm:max-w-md bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl my-0">
+
 
             {/* Header del Modal */}
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
@@ -1838,8 +1838,8 @@ export const ClientHome: React.FC = () => {
 
       {/* 11. MODAL DE TURNO EN VIVO / SALA DE ESPERA: "QUIERO ESTE CORTE" */}
       {isWalkInModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl animate-fade-in max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
+          <div className="w-full max-w-md bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl my-0">
             {/* Header */}
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
@@ -1996,8 +1996,9 @@ export const ClientHome: React.FC = () => {
 
       {/* 12. MODAL DE CONTROL DE ACCESO PRIVADO CON PIN DE SEGURIDAD */}
       {staffTargetRole && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="w-full max-w-sm bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl animate-fade-in text-xs">
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
+          <div className="w-full max-w-sm bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl text-xs my-0">
+
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
               <div className="flex items-center gap-2">
                 <span className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">

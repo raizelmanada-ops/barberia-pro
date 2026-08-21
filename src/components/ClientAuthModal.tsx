@@ -19,8 +19,9 @@ export const ClientAuthModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
-      <div className="w-full sm:max-w-sm bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-3xl p-6 space-y-5 shadow-2xl relative overflow-hidden text-xs max-h-[92vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
+      <div className="w-full sm:max-w-sm bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl relative overflow-hidden text-xs my-0">
+
 
         {/* Subtle Ambient Glow */}
         <div

@@ -28,8 +28,9 @@ export const QRCodeModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
-      <div className="w-full max-w-md bg-zinc-900 border-2 border-amber-500/50 rounded-3xl p-6 space-y-5 shadow-2xl text-center relative overflow-hidden max-h-[95vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
+      <div className="w-full max-w-md bg-zinc-900 border-2 border-amber-500/50 rounded-3xl p-6 space-y-5 shadow-2xl text-center relative overflow-hidden my-0">
+
         {/* Ambient Glow */}
         <div
           className="absolute -top-12 -right-12 w-44 h-44 rounded-full blur-3xl opacity-30 pointer-events-none"
