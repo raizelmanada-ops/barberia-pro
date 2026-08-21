@@ -12,7 +12,9 @@ import {
   Eye,
   ShieldCheck,
   HelpCircle,
-  Layers
+  Layers,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react';
 import {
   VisualStyleItem,
@@ -36,7 +38,9 @@ const LazyStyleImage: React.FC<{
   name: string;
   category: string;
   isModal?: boolean;
-}> = ({ src, alt, name, category, isModal = false }) => {
+  isZoomed?: boolean;
+  onToggleZoom?: () => void;
+}> = ({ src, alt, name, category, isModal = false, isZoomed = false, onToggleZoom }) => {
   const [hasError, setHasError] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -48,8 +52,9 @@ const LazyStyleImage: React.FC<{
 
   return (
     <div
+      onClick={isModal ? onToggleZoom : undefined}
       className={`relative aspect-[4/3] w-full overflow-hidden bg-zinc-950 flex items-center justify-center ${
-        isModal ? 'rounded-2xl border border-zinc-800' : 'border-b border-zinc-800/60'
+        isModal ? 'rounded-2xl border border-zinc-800 cursor-zoom-in' : 'border-b border-zinc-800/60'
       }`}
     >
       {/* 1. Placeholder que solo se muestra si hay error o mientras carga */}
@@ -63,7 +68,7 @@ const LazyStyleImage: React.FC<{
         </div>
       )}
 
-      {/* 2. Imagen Real en Z-INDEX 10 */}
+      {/* 2. Imagen Real en Z-INDEX 10 con soporte de Zoom */}
       {!hasError && (
         <img
           src={src}
@@ -73,11 +78,22 @@ const LazyStyleImage: React.FC<{
           onLoad={() => setIsLoaded(true)}
           onError={() => setHasError(true)}
           className={`w-full h-full ${
-            isModal ? 'object-contain' : 'object-cover group-hover:scale-105'
+            isModal
+              ? isZoomed
+                ? 'scale-150 cursor-zoom-out object-contain'
+                : 'object-contain cursor-zoom-in'
+              : 'object-cover group-hover:scale-105'
           } transition-all duration-500 relative z-10 ${
             isLoaded ? 'opacity-100' : 'opacity-0'
           }`}
         />
+      )}
+
+      {isModal && isLoaded && (
+        <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-xl text-[10px] font-bold text-zinc-300 border border-white/10 z-20 flex items-center gap-1 pointer-events-none">
+          {isZoomed ? <ZoomOut className="w-3 h-3 text-amber-400" /> : <ZoomIn className="w-3 h-3 text-amber-400" />}
+          <span>{isZoomed ? 'Alejar' : 'Toca para Zoom'}</span>
+        </div>
       )}
     </div>
   );
@@ -93,12 +109,19 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
   const [selectedCategory, setSelectedCategory] = useState<string>('todas');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeModalIndex, setActiveModalIndex] = useState<number | null>(null);
+  const [isModalZoomed, setIsModalZoomed] = useState(false);
+
+  // Garantizar que al abrir la galería siempre inicie en la parte superior absoluta
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  }, []);
 
   // Resetear categoría al cambiar de pestaña entre Cabello y Barba
   const handleDomainChange = (domain: StyleDomain) => {
     setActiveDomain(domain);
     setSelectedCategory('todas');
     setActiveModalIndex(null);
+    setIsModalZoomed(false);
   };
 
   const categories = activeDomain === 'cabello' ? HAIR_CATEGORIES : BEARD_CATEGORIES;
@@ -132,18 +155,21 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
   // Navegación dentro del modal
   const handlePrevStyle = useCallback(() => {
     if (activeModalIndex !== null && filteredStyles.length > 0) {
+      setIsModalZoomed(false);
       setActiveModalIndex((prev) => (prev! > 0 ? prev! - 1 : filteredStyles.length - 1));
     }
   }, [activeModalIndex, filteredStyles.length]);
 
   const handleNextStyle = useCallback(() => {
     if (activeModalIndex !== null && filteredStyles.length > 0) {
+      setIsModalZoomed(false);
       setActiveModalIndex((prev) => (prev! < filteredStyles.length - 1 ? prev! + 1 : 0));
     }
   }, [activeModalIndex, filteredStyles.length]);
 
   const handleCloseModal = () => {
     setActiveModalIndex(null);
+    setIsModalZoomed(false);
   };
 
   // Controles de teclado para el visor
@@ -160,10 +186,10 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
   }, [activeModalIndex, handlePrevStyle, handleNextStyle]);
 
   return (
-    <div className="space-y-6 animate-fade-in text-zinc-100 pb-10">
+    <div className="max-w-4xl mx-auto px-4 py-4 sm:py-6 space-y-6 animate-fade-in text-zinc-100 pb-28">
       
       {/* 1. Cabecera Principal */}
-      <div className="space-y-2">
+      <div className="space-y-2 pt-1">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <span className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-inner">
@@ -383,6 +409,8 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                   name={activeStyle.name}
                   category={activeStyle.category}
                   isModal={true}
+                  isZoomed={isModalZoomed}
+                  onToggleZoom={() => setIsModalZoomed((prev) => !prev)}
                 />
 
                 {/* Botón Anterior */}
