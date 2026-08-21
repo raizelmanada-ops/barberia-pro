@@ -54,7 +54,7 @@ const LazyStyleImage: React.FC<{
     <div
       onClick={isModal ? onToggleZoom : undefined}
       className={`relative aspect-[4/3] w-full overflow-hidden bg-zinc-950 flex items-center justify-center ${
-        isModal ? 'rounded-2xl border border-zinc-800 cursor-zoom-in' : 'border-b border-zinc-800/60'
+        isModal ? 'cursor-zoom-in' : 'border-b border-zinc-800/60'
       }`}
     >
       {/* 1. Placeholder que solo se muestra si hay error o mientras carga */}
@@ -90,8 +90,8 @@ const LazyStyleImage: React.FC<{
       )}
 
       {isModal && isLoaded && (
-        <div className="absolute top-2.5 right-2.5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-xl text-[10px] font-bold text-zinc-300 border border-white/10 z-20 flex items-center gap-1 pointer-events-none">
-          {isZoomed ? <ZoomOut className="w-3 h-3 text-amber-400" /> : <ZoomIn className="w-3 h-3 text-amber-400" />}
+        <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-bold text-zinc-200 border border-white/10 z-20 flex items-center gap-1 pointer-events-none shadow-lg">
+          {isZoomed ? <ZoomOut className="w-3.5 h-3.5 text-amber-400" /> : <ZoomIn className="w-3.5 h-3.5 text-amber-400" />}
           <span>{isZoomed ? 'Alejar' : 'Toca para Zoom'}</span>
         </div>
       )}
@@ -188,7 +188,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
   return (
     <div className="max-w-4xl mx-auto px-3 sm:px-4 py-2 sm:py-5 space-y-3.5 animate-fade-in text-zinc-100 pb-24">
       
-      {/* 1. Cabecera Compacta Móvil (Directa sin espacios muertos) */}
+      {/* 1. Cabecera Compacta Móvil */}
       <div className="flex items-center justify-between gap-2 border-b border-zinc-800/80 pb-2.5">
         <div className="flex items-center gap-2">
           <span className="p-2 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-inner shrink-0">
@@ -285,7 +285,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
         </div>
       </div>
 
-      {/* 4. Cuadrícula Responsive de Miniaturas (Las fotos empiezan arriba inmediatamente) */}
+      {/* 4. Cuadrícula Responsive de Miniaturas */}
       {filteredStyles.length === 0 ? (
         <div className="text-center py-12 bg-zinc-900/30 rounded-3xl border border-zinc-800/60 p-6 space-y-3">
           <Scissors className="w-10 h-10 text-zinc-600 mx-auto" />
@@ -366,138 +366,138 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
         </div>
       )}
 
-      {/* 5. Modal de Vista Ampliada e Inspección de Estilo */}
+      {/* 5. VISOR DE ESTILO EN PANTALLA COMPLETA NATIVA (100% FULLSCREEN SIN ESPACIO OSCURO ARRIBA) */}
       {activeStyle && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-2.5 sm:p-4 animate-fade-in">
-          <div
-            className="w-full max-w-2xl bg-zinc-900 border border-zinc-700/80 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] animate-scale-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Cabecera del Modal */}
-            <div className="p-3.5 sm:p-4 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/95 sticky top-0 z-10">
-              <div className="flex items-center gap-2">
-                <span className="p-1.5 rounded-xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  <Scissors className="w-4 h-4" />
-                </span>
-                <div>
-                  <h2 className="text-sm sm:text-base font-black text-white tracking-wide leading-tight">
-                    {activeStyle.name}
-                  </h2>
-                  <span className="text-[10px] sm:text-[11px] text-amber-400 font-bold uppercase">
-                    {activeStyle.category}
-                  </span>
-                </div>
-              </div>
+        <div className="fixed inset-0 z-50 bg-zinc-950 flex flex-col w-full h-[100dvh] overflow-hidden animate-fade-in text-zinc-100">
+          
+          {/* Cabecera Superior Fija */}
+          <div className="p-3 sm:p-4 flex items-center justify-between border-b border-zinc-800 bg-zinc-900/95 sticky top-0 z-30 shrink-0">
+            <button
+              onClick={handleCloseModal}
+              className="px-3 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 hover:text-white flex items-center gap-1 text-xs font-bold transition cursor-pointer border border-zinc-700 shadow"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Volver</span>
+            </button>
 
-              {/* Botón Cerrar */}
-              <button
-                onClick={handleCloseModal}
-                className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center text-xs font-bold transition cursor-pointer border border-zinc-700"
-                title="Cerrar (Esc)"
-              >
-                <X className="w-4 h-4" />
-              </button>
+            <div className="text-center px-2">
+              <h2 className="text-sm sm:text-base font-black text-white tracking-wide leading-tight line-clamp-1">
+                {activeStyle.name}
+              </h2>
+              <span className="text-[10px] sm:text-xs text-amber-400 font-bold uppercase">
+                {activeStyle.category}
+              </span>
             </div>
 
-            {/* Cuerpo del Modal con Fotografía en Primer Plano */}
-            <div className="overflow-y-auto p-3.5 sm:p-5 space-y-3.5 flex-1">
-              
-              {/* Contenedor Principal de la Imagen */}
-              <div className="relative group">
-                <LazyStyleImage
-                  src={activeStyle.image}
-                  alt={activeStyle.name}
-                  name={activeStyle.name}
-                  category={activeStyle.category}
-                  isModal={true}
-                  isZoomed={isModalZoomed}
-                  onToggleZoom={() => setIsModalZoomed((prev) => !prev)}
-                />
+            <button
+              onClick={handleCloseModal}
+              className="w-8 h-8 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white flex items-center justify-center text-xs font-bold transition cursor-pointer border border-zinc-700"
+              title="Cerrar (Esc)"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
-                {/* Botón Anterior */}
-                <button
-                  onClick={handlePrevStyle}
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer z-30"
-                  title="Estilo anterior (Flecha Izquierda)"
-                >
-                  <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
-                </button>
+          {/* Cuerpo Desplazable de Pantalla Completa con la Foto Gigante en Primer Plano */}
+          <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-3.5 max-w-2xl mx-auto w-full">
+            
+            {/* Contenedor Principal de la Imagen (Grande, Ocupa todo el ancho sin márgenes oscuros) */}
+            <div className="relative group w-full rounded-2xl overflow-hidden shadow-2xl border border-zinc-800 bg-zinc-900">
+              <LazyStyleImage
+                src={activeStyle.image}
+                alt={activeStyle.name}
+                name={activeStyle.name}
+                category={activeStyle.category}
+                isModal={true}
+                isZoomed={isModalZoomed}
+                onToggleZoom={() => setIsModalZoomed((prev) => !prev)}
+              />
 
-                {/* Botón Siguiente */}
-                <button
-                  onClick={handleNextStyle}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/75 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-xl cursor-pointer z-30"
-                  title="Estilo siguiente (Flecha Derecha)"
-                >
-                  <ChevronRight className="w-5 h-5 stroke-[2.5]" />
-                </button>
+              {/* Botón Anterior */}
+              <button
+                onClick={handlePrevStyle}
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/80 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-2xl cursor-pointer z-30"
+                title="Estilo anterior (Flecha Izquierda)"
+              >
+                <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
+              </button>
 
-                {/* Indicador de posición */}
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/75 backdrop-blur-md px-3 py-0.5 rounded-full text-[10px] sm:text-xs font-bold text-zinc-200 border border-white/10 z-30">
-                  {activeModalIndex! + 1} de {filteredStyles.length}
-                </div>
+              {/* Botón Siguiente */}
+              <button
+                onClick={handleNextStyle}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/80 hover:bg-amber-500 hover:text-black text-white border border-white/20 hover:border-amber-400 flex items-center justify-center transition shadow-2xl cursor-pointer z-30"
+                title="Estilo siguiente (Flecha Derecha)"
+              >
+                <ChevronRight className="w-5 h-5 stroke-[2.5]" />
+              </button>
+
+              {/* Indicador de posición */}
+              <div className="absolute bottom-2.5 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-zinc-200 border border-white/10 z-30 shadow">
+                {activeModalIndex! + 1} de {filteredStyles.length}
+              </div>
+            </div>
+
+            {/* Ficha Técnica y Especificaciones del Estilo */}
+            <div className="space-y-2.5 pb-4">
+              <div className="bg-zinc-900/90 p-3.5 rounded-2xl border border-zinc-800 space-y-1 shadow">
+                <h4 className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Descripción del Estilo
+                </h4>
+                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                  {activeStyle.description}
+                </p>
               </div>
 
-              {/* Ficha Técnica y Especificaciones del Estilo */}
-              <div className="space-y-2.5">
-                <div className="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800/80 space-y-1">
-                  <h4 className="text-xs sm:text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    Descripción del Estilo
+              {activeStyle.technicalFormula && (
+                <div className="bg-zinc-900/90 p-3.5 rounded-2xl border border-zinc-800 space-y-1 shadow">
+                  <h4 className="text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Layers className="w-3.5 h-3.5 text-amber-400" />
+                    Fórmula Técnica del Barbero
                   </h4>
-                  <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-                    {activeStyle.description}
+                  <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-mono">
+                    {activeStyle.technicalFormula}
                   </p>
                 </div>
+              )}
 
-                {activeStyle.technicalFormula && (
-                  <div className="bg-zinc-950 p-3.5 rounded-2xl border border-zinc-800/80 space-y-1">
-                    <h4 className="text-xs sm:text-sm font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                      <Layers className="w-3.5 h-3.5 text-amber-400" />
-                      Fórmula Técnica del Barbero
-                    </h4>
-                    <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed font-mono">
-                      {activeStyle.technicalFormula}
-                    </p>
+              <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
+                <div className="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800 flex items-center gap-2.5 shadow">
+                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+                    <Clock className="w-4 h-4" />
                   </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-2 text-xs sm:text-sm">
-                  <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80 flex items-center gap-2.5">
-                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
-                      <Clock className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-zinc-500 block uppercase font-bold">Tiempo en Sillón</span>
-                      <span className="font-bold text-white text-xs sm:text-sm">{activeStyle.duration}</span>
-                    </div>
-                  </div>
-
-                  <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80 flex items-center gap-2.5">
-                    <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
-                      <ShieldCheck className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] text-zinc-500 block uppercase font-bold">Mantenimiento</span>
-                      <span className="font-bold text-white text-xs sm:text-sm">{activeStyle.maintenance}</span>
-                    </div>
+                  <div>
+                    <span className="text-[10px] text-zinc-500 block uppercase font-bold">Tiempo en Sillón</span>
+                    <span className="font-bold text-white text-xs sm:text-sm">{activeStyle.duration}</span>
                   </div>
                 </div>
 
-                {activeStyle.faceShape && (
-                  <div className="bg-zinc-950 p-3 rounded-xl border border-zinc-800/80 flex items-center gap-2 text-xs sm:text-sm text-zinc-300">
-                    <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
-                    <span>Visagismo: <strong className="text-white">{activeStyle.faceShape}</strong></span>
+                <div className="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800 flex items-center gap-2.5 shadow">
+                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-400">
+                    <ShieldCheck className="w-4 h-4" />
                   </div>
-                )}
+                  <div>
+                    <span className="text-[10px] text-zinc-500 block uppercase font-bold">Mantenimiento</span>
+                    <span className="font-bold text-white text-xs sm:text-sm">{activeStyle.maintenance}</span>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            {/* Pie del Modal con Acción de Selección */}
-            <div className="p-3.5 sm:p-4 border-t border-zinc-800 bg-zinc-900/95 flex items-center justify-between gap-2.5">
+              {activeStyle.faceShape && (
+                <div className="bg-zinc-900/90 p-3 rounded-xl border border-zinc-800 flex items-center gap-2 text-xs sm:text-sm text-zinc-300 shadow">
+                  <HelpCircle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>Visagismo: <strong className="text-white">{activeStyle.faceShape}</strong></span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Pie Fijo con Botón Gigante "QUIERO ESTE ESTILO" */}
+          <div className="p-3 sm:p-4 border-t border-zinc-800 bg-zinc-900/95 sticky bottom-0 z-30 shrink-0">
+            <div className="max-w-2xl mx-auto flex items-center justify-between gap-3">
               <button
                 onClick={handleCloseModal}
-                className="px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-750 transition cursor-pointer"
+                className="px-4 py-3 rounded-xl text-xs sm:text-sm font-bold text-zinc-400 hover:text-white bg-zinc-800 hover:bg-zinc-750 transition cursor-pointer"
               >
                 Cerrar
               </button>
@@ -509,7 +509,7 @@ export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
                   }
                   handleCloseModal();
                 }}
-                className="flex-1 py-2.5 px-3.5 rounded-xl text-xs sm:text-sm font-black text-black bg-amber-500 hover:bg-amber-400 shadow-lg shadow-amber-500/25 transition cursor-pointer flex items-center justify-center gap-2"
+                className="flex-1 py-3 px-4 rounded-xl text-xs sm:text-sm font-black text-black bg-amber-500 hover:bg-amber-400 shadow-xl shadow-amber-500/25 transition cursor-pointer flex items-center justify-center gap-2 active:scale-98"
               >
                 <Check className="w-4 h-4 stroke-[3]" />
                 <span>QUIERO ESTE ESTILO</span>
