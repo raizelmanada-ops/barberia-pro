@@ -648,17 +648,18 @@ export const ClientHome: React.FC = () => {
             <span>Biblioteca</span>
           </button>
 
-          {/* Acceso para el Administrador / Personal */}
+          {/* Acceso para el Personal y Administrador */}
           <button
             onClick={() => setStaffTargetRole('owner')}
             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-amber-400 border border-zinc-800 hover:border-amber-500/40 transition cursor-pointer shadow text-xs font-bold"
-            title="Ingreso al Dashboard de Administración (PIN)"
+            title="Ingreso de Barberos y Administrador (PIN)"
           >
             <Lock className="w-3.5 h-3.5 text-amber-400" />
-            <span>Admin</span>
+            <span>Equipo / Admin</span>
           </button>
         </div>
       </div>
+
 
 
 
@@ -2214,9 +2215,9 @@ export const ClientHome: React.FC = () => {
                   <Lock className="w-4 h-4" />
                 </span>
                 <div>
-                  <h3 className="text-sm font-bold text-white">Acceso Restringido para el Personal</h3>
-                  <span className="text-[10px] text-amber-400 font-bold uppercase">
-                    {staffTargetRole === 'owner' ? 'Panel del Propietario' : 'Panel de Barberos en Sillón'}
+                  <h3 className="text-sm font-bold text-white">Acceso al Personal / Administración</h3>
+                  <span className="text-[10px] text-zinc-400 font-medium">
+                    Ingreso exclusivo para el equipo de {currentBusiness.name}
                   </span>
                 </div>
               </div>
@@ -2232,10 +2233,48 @@ export const ClientHome: React.FC = () => {
               </button>
             </div>
 
+            {/* Selector de Rol: Barbero vs Administrador */}
+            <div className="grid grid-cols-2 gap-2 bg-zinc-950 p-1.5 rounded-2xl border border-zinc-800">
+              <button
+                type="button"
+                onClick={() => {
+                  setStaffTargetRole('barber');
+                  setStaffPinError('');
+                }}
+                className={`py-2 px-2.5 rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  staffTargetRole === 'barber'
+                    ? 'bg-amber-500 text-black shadow font-black'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+              >
+                <Scissors className="w-3.5 h-3.5" />
+                <span>✂️ Soy Barbero</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setStaffTargetRole('owner');
+                  setStaffPinError('');
+                }}
+                className={`py-2 px-2.5 rounded-xl font-bold text-[11px] flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  staffTargetRole === 'owner'
+                    ? 'bg-amber-500 text-black shadow font-black'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-900'
+                }`}
+              >
+                <Store className="w-3.5 h-3.5" />
+                <span>🔐 Soy Dueño</span>
+              </button>
+            </div>
+
             <form onSubmit={handleVerifyStaffPin} className="space-y-3">
               <p className="text-[11px] text-zinc-400 leading-relaxed">
-                Este panel contiene herramientas de gestión privada. Introduce el PIN de seguridad de <strong>{currentBusiness.name}</strong> para ingresar:
+                {staffTargetRole === 'barber'
+                  ? 'Acceso a la cola en vivo, sillón, cámara de fotos finales y comisiones del día.'
+                  : 'Acceso a finanzas, catálogo de servicios, precios en COP, arqueo de caja y equipo.'}
               </p>
+
 
               <div>
                 <label className="font-bold text-zinc-300 block mb-1.5">PIN de Seguridad del Local:</label>
