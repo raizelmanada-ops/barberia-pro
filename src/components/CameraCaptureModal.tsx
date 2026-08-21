@@ -25,18 +25,22 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const nativeCameraInputRef = useRef<HTMLInputElement | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Detener la cámara y liberar recursos
+  // Detener la cámara y liberar hardware
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
     setCameraActive(false);
   }, []);
 
-  // Iniciar la cámara en vivo con permisos
+  // Iniciar la cámara en vivo asegurando montaje del video
   const startCamera = async (facing: 'user' | 'environment' = cameraFacing) => {
     setErrorMessage(null);
     setCapturedImage(null);
@@ -44,40 +48,58 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
 
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Tu navegador o dispositivo no soporta acceso directo a la cámara.');
+        // Dispositivo sin soporte de webcam directa -> redirigir a cámara nativa móvil
+        nativeCameraInputRef.current?.click();
+        return;
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
           facingMode: facing,
-          width: { ideal: 1280 },
-          height: { ideal: 960 },
+          width: { ideal: 1280, min: 640 },
+          height: { ideal: 960, min: 480 },
         },
         audio: false,
       });
 
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play().catch(() => {});
-      }
       setCameraActive(true);
 
-      // Detectar si hay más de una cámara (móvil frontal/trasera)
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const videoDevices = devices.filter((d) => d.kind === 'videoinput');
-      setHasMultipleCameras(videoDevices.length > 1);
+      // Esperar al siguiente tick para que el video element esté garantizado en el DOM
+      setTimeout(() => {
+        if (videoRef.current && streamRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+          videoRef.current.play().catch((err) => {
+            console.warn('Error al reproducir video stream:', err);
+          });
+        }
+      }, 50);
+
+      // Detectar si hay más de una cámara (frontal / trasera)
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const videoDevices = devices.filter((d) => d.kind === 'videoinput');
+        setHasMultipleCameras(videoDevices.length > 1);
+      } catch {
+        /* ignore */
+      }
     } catch (err: unknown) {
-      console.warn('Error al iniciar cámara:', err);
-      const msg = err instanceof Error ? err.message : 'No se pudo acceder a la cámara.';
-      setErrorMessage(
-        msg.includes('NotAllowedError') || msg.includes('Permission')
-          ? 'Permiso de cámara denegado. Puedes subir una foto desde tu galería.'
-          : 'Cámara no disponible. Puedes seleccionar una foto desde tu galería.'
-      );
-      setCameraActive(false);
+      console.warn('Error al iniciar cámara web directa:', err);
+      // Si la cámara web directa falla por permisos o hardware, ofrecemos cámara nativa
+      setErrorMessage('Acceso web restringido. Abriendo cámara de tu teléfono...');
+      setTimeout(() => {
+        nativeCameraInputRef.current?.click();
+      }, 300);
     }
   };
+
+  // Asignar srcObject si el video se monta
+  useEffect(() => {
+    if (cameraActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => {});
+    }
+  }, [cameraActive]);
 
   // Alternar entre cámara frontal y trasera
   const handleToggleCamera = () => {
@@ -86,16 +108,19 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     startCamera(nextFacing);
   };
 
-  // Tomar instantánea
+  // Tomar instantánea garantizando decodificación de frame
   const handleCaptureSnapshot = () => {
     if (!videoRef.current) return;
     setIsCapturing(true);
 
     try {
       const video = videoRef.current;
+      const width = video.videoWidth || video.clientWidth || 640;
+      const height = video.videoHeight || video.clientHeight || 480;
+
       const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 640;
-      canvas.height = video.videoHeight || 480;
+      canvas.width = width;
+      canvas.height = height;
 
       const ctx = canvas.getContext('2d');
       if (ctx) {
@@ -105,13 +130,13 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
           ctx.scale(-1, 1);
         }
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
         setCapturedImage(dataUrl);
         stopCamera();
       }
     } catch (err) {
       console.error('Error capturando imagen:', err);
-      setErrorMessage('Error al capturar la imagen. Intenta de nuevo.');
+      setErrorMessage('Error al procesar la instantánea. Usa la cámara de tu dispositivo.');
     } finally {
       setIsCapturing(false);
     }
@@ -123,7 +148,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     startCamera(cameraFacing);
   };
 
-  // Confirmar y enviar foto seleccionada/capturada
+  // Confirmar y enviar foto
   const handleConfirm = () => {
     if (capturedImage) {
       onConfirmPhoto(capturedImage);
@@ -131,8 +156,8 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
     }
   };
 
-  // Subir desde galería local
-  const handleGalleryFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Captura desde archivo o cámara nativa
+  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -189,15 +214,15 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
           </button>
         </div>
 
-        {/* Mensaje de error si falla la cámara */}
+        {/* Mensaje de aviso */}
         {errorMessage && (
-          <div className="p-3 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2">
+          <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0" />
             <span>{errorMessage}</span>
           </div>
         )}
 
-        {/* Visor de Cámara / Preview de Imagen / Opciones Iniciales */}
+        {/* Visor de Cámara / Preview de Imagen / Opciones */}
         <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-black border border-zinc-800 flex items-center justify-center shadow-inner">
           
           {/* 1. Vista de Foto Capturada (Revisión) */}
@@ -206,58 +231,61 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
               <img src={capturedImage} alt="Captura" className="w-full h-full object-cover" />
               <div className="absolute top-2 left-2 bg-emerald-500 text-black px-2 py-0.5 rounded-lg text-[10px] font-black uppercase flex items-center gap-1 shadow">
                 <Check className="w-3 h-3 stroke-[3]" />
-                <span>Foto Lista</span>
+                <span>Foto Capturada</span>
               </div>
             </div>
           ) : cameraActive ? (
             /* 2. Stream en vivo de la Cámara */
-            <div className="w-full h-full relative">
+            <div className="w-full h-full relative bg-zinc-950 flex items-center justify-center">
               <video
                 ref={videoRef}
                 autoPlay
                 playsInline
                 muted
+                onLoadedMetadata={(e) => {
+                  (e.target as HTMLVideoElement).play().catch(() => {});
+                }}
                 className={`w-full h-full object-cover ${cameraFacing === 'user' ? 'scale-x-[-1]' : ''}`}
               />
               
-              {/* Botón cambiar cámara si hay múltiple */}
+              {/* Botón cambiar cámara */}
               {hasMultipleCameras && (
                 <button
+                  type="button"
                   onClick={handleToggleCamera}
-                  className="absolute top-3 right-3 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white border border-white/20 transition cursor-pointer shadow"
+                  className="absolute top-3 right-3 p-2 rounded-full bg-black/70 hover:bg-black text-white border border-white/20 transition cursor-pointer shadow z-20"
                   title="Cambiar cámara"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </button>
               )}
 
-              {/* Guía visual para centrado */}
-              <div className="absolute inset-4 border border-dashed border-amber-400/40 rounded-2xl pointer-events-none flex items-end justify-center pb-2">
-                <span className="text-[10px] bg-black/60 px-2 py-0.5 rounded text-amber-300 font-semibold">
-                  Centra el estilo en el encuadre
+              {/* Guía de encuadre */}
+              <div className="absolute inset-4 border border-dashed border-amber-400/40 rounded-2xl pointer-events-none flex items-end justify-center pb-2 z-10">
+                <span className="text-[10px] bg-black/70 px-2 py-0.5 rounded text-amber-300 font-semibold">
+                  Centra el corte en el encuadre
                 </span>
               </div>
             </div>
           ) : (
-            /* 3. Estado Inicial / Opciones */
+            /* 3. Estado Inicial */
             <div className="text-center p-6 space-y-3">
               <div className="w-14 h-14 mx-auto rounded-2xl bg-zinc-800/80 border border-zinc-700 flex items-center justify-center text-amber-400">
                 <Camera className="w-7 h-7" />
               </div>
               <div>
-                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Elige el método de captura</h4>
+                <h4 className="text-xs font-bold text-white uppercase tracking-wider">Foto de Memoria de Estilo</h4>
                 <p className="text-[11px] text-zinc-400 max-w-xs mx-auto mt-1">
-                  Usa la cámara en vivo para capturar tu corte al instante o selecciona una foto desde tu galería.
+                  Captura tu corte en vivo con la cámara o selecciona una imagen de tu galería.
                 </p>
               </div>
             </div>
           )}
         </div>
 
-        {/* Acciones del Modal */}
+        {/* Acciones */}
         <div className="space-y-2 pt-1">
           {capturedImage ? (
-            /* Acciones al tener una foto lista para guardar */
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -277,7 +305,6 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
               </button>
             </div>
           ) : cameraActive ? (
-            /* Botón Disparador de Cámara */
             <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -297,7 +324,6 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
               </button>
             </div>
           ) : (
-            /* Botones de Selección Inicial: Cámara o Galería */
             <div className="space-y-2">
               <button
                 type="button"
@@ -305,7 +331,7 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
                 className="w-full py-3 px-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 transition shadow cursor-pointer text-xs"
               >
                 <Camera className="w-4 h-4 stroke-[2.5]" />
-                <span>📸 Tomar Foto con la Cámara</span>
+                <span>📸 Tomar Foto en Vivo</span>
               </button>
 
               <button
@@ -320,12 +346,20 @@ export const CameraCaptureModal: React.FC<CameraCaptureModalProps> = ({
           )}
         </div>
 
-        {/* Input oculto para galería */}
+        {/* Inputs ocultos para captura nativa y galería */}
+        <input
+          type="file"
+          ref={nativeCameraInputRef}
+          accept="image/*"
+          capture="user"
+          onChange={handleFileInputChange}
+          className="hidden"
+        />
         <input
           type="file"
           ref={galleryInputRef}
           accept="image/*"
-          onChange={handleGalleryFileChange}
+          onChange={handleFileInputChange}
           className="hidden"
         />
       </div>
