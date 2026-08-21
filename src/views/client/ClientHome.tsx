@@ -627,7 +627,7 @@ export const ClientHome: React.FC = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-5 space-y-6 pb-28 animate-fade-in">
+    <div className="max-w-2xl mx-auto px-4 py-5 space-y-6 pb-32 animate-fade-in">
       {/* 1. Welcome & Client Identity Header */}
       <div className="flex items-center justify-between gap-2">
         <div>
@@ -642,14 +642,23 @@ export const ClientHome: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setActiveTab('catalog')}
-            className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-black text-black bg-amber-500 hover:bg-amber-400 border border-amber-400 shadow-lg shadow-amber-500/20 transition hover:scale-105 active:scale-95 cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/40 transition hover:scale-105 active:scale-95 cursor-pointer shadow-sm"
           >
-            <Scissors className="w-4 h-4" />
+            <Scissors className="w-3.5 h-3.5" />
             <span>Biblioteca</span>
           </button>
-        </div>
 
+          {/* Acceso discreto para el equipo / barbero */}
+          <button
+            onClick={() => setStaffTargetRole('owner')}
+            className="p-2 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-400 hover:text-amber-400 border border-zinc-800 transition cursor-pointer shadow"
+            title="Acceso Personal / Administración"
+          >
+            <Lock className="w-3.5 h-3.5" />
+          </button>
+        </div>
       </div>
+
 
       {/* 🌟 1. ELEGIR ESTILO — EL GRAN ACCESO PRINCIPAL A LA BIBLIOTECA VISUAL */}
       <section
@@ -761,7 +770,8 @@ export const ClientHome: React.FC = () => {
 
       {/* 📸 3. TU MEMORIA DE ESTILO CAPILAR */}
       {clientMemory ? (
-        <section className="rounded-2xl p-4.5 bg-gradient-to-br from-zinc-900 to-zinc-900/70 border border-zinc-800 shadow-xl relative overflow-hidden">
+        <section id="memory-section" className="rounded-2xl p-4.5 bg-gradient-to-br from-zinc-900 to-zinc-900/70 border border-zinc-800 shadow-xl relative overflow-hidden">
+
           {/* Subtle Accent Glow */}
           <div
             className="absolute -right-8 -top-8 w-32 h-32 rounded-full blur-3xl opacity-20 pointer-events-none"
@@ -782,10 +792,10 @@ export const ClientHome: React.FC = () => {
             </div>
             <button
               onClick={() => setIsVisitDetailsModalOpen(true)}
-              className="text-xs font-bold px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-750 text-amber-400 border border-amber-500/30 flex items-center gap-1.5 transition shadow cursor-pointer"
+              className="text-xs font-bold px-3 py-1.5 rounded-full bg-zinc-800 hover:bg-zinc-750 text-zinc-300 hover:text-white border border-zinc-700 flex items-center gap-1.5 transition shadow cursor-pointer"
             >
               <span>📅 Ver Última Visita</span>
-              <ChevronRight className="w-3.5 h-3.5 text-amber-400" />
+              <ChevronRight className="w-3.5 h-3.5 text-zinc-400" />
             </button>
           </div>
 
@@ -835,15 +845,15 @@ export const ClientHome: React.FC = () => {
               <div className="bg-zinc-950/70 p-3.5 rounded-2xl border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="text-xs sm:text-sm font-black uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                    <ThumbsUp className="w-4 h-4" /> Lo que te gustó y quieres mantener:
+                    <ThumbsUp className="w-4 h-4" /> Lo que te gustó:
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => startVoiceDictation('liked')}
-                      className={`text-xs font-black flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition cursor-pointer shadow ${
+                      className={`text-xs font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition cursor-pointer shadow-sm ${
                         isListeningLiked
                           ? 'bg-red-500 text-white border-red-400 animate-pulse'
-                          : 'bg-emerald-500 hover:bg-emerald-400 text-black border-emerald-400'
+                          : 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/40'
                       }`}
                       title="Hablar por micrófono para dictar lo que te gustó"
                     >
@@ -857,7 +867,7 @@ export const ClientHome: React.FC = () => {
                           setDraftLiked(activeLiked);
                           setIsEditingLiked(true);
                         }}
-                        className="text-xs text-zinc-300 hover:text-white font-bold flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition cursor-pointer"
+                        className="text-xs text-zinc-300 hover:text-white font-medium flex items-center gap-1 px-2 py-1 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700 transition cursor-pointer"
                       >
                         <Pencil className="w-3 h-3" />
                         <span>Editar</span>
@@ -879,7 +889,7 @@ export const ClientHome: React.FC = () => {
                       rows={2}
                       value={draftLiked}
                       onChange={(e) => setDraftLiked(e.target.value)}
-                      placeholder="Escribe o dicta lo que te encanta de tu corte (ej: El degradado a piel, la navaja en contornos, la textura superior...)"
+                      placeholder="Escribe o dicta lo que te encanta de tu corte..."
                       className="w-full bg-zinc-900 border border-emerald-500/50 rounded-xl p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-400 shadow-inner"
                       autoFocus
                     />
@@ -909,15 +919,15 @@ export const ClientHome: React.FC = () => {
               <div className="bg-zinc-950/70 p-3.5 rounded-2xl border border-zinc-800 space-y-2">
                 <div className="flex items-center justify-between">
                   <div className="text-xs sm:text-sm font-black uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                    <AlertCircle className="w-4 h-4" /> Ajuste indicado para la próxima:
+                    <AlertCircle className="w-4 h-4" /> Ajuste para la próxima:
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => startVoiceDictation('adjustment')}
-                      className={`text-xs font-black flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition cursor-pointer shadow ${
+                      className={`text-xs font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-xl border transition cursor-pointer shadow-sm ${
                         isListeningAdjustment
                           ? 'bg-red-500 text-white border-red-400 animate-pulse'
-                          : 'bg-amber-500 hover:bg-amber-400 text-black border-amber-400'
+                          : 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border-amber-500/40'
                       }`}
                       title="Hablar por micrófono para dictar el ajuste para tu barbero"
                     >
@@ -931,7 +941,7 @@ export const ClientHome: React.FC = () => {
                           setDraftAdjustment(activeAdjustment);
                           setIsEditingAdjustment(true);
                         }}
-                        className="text-xs text-zinc-300 hover:text-white font-bold flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 transition cursor-pointer"
+                        className="text-xs text-zinc-300 hover:text-white font-medium flex items-center gap-1 px-2 py-1 rounded-xl bg-zinc-800/80 hover:bg-zinc-700 border border-zinc-700 transition cursor-pointer"
                       >
                         <Pencil className="w-3 h-3" />
                         <span>Editar</span>
@@ -953,7 +963,7 @@ export const ClientHome: React.FC = () => {
                       rows={2}
                       value={draftAdjustment}
                       onChange={(e) => setDraftAdjustment(e.target.value)}
-                      placeholder={`Escribe o dicta tu ajuste especial para ${primaryBarberFirstName} (ej: Dejar más largo arriba, no tocar patillas, subir fade...)`}
+                      placeholder={`Escribe o dicta tu ajuste especial para ${primaryBarberFirstName}...`}
                       className="w-full bg-zinc-900 border border-amber-500/50 rounded-xl p-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-amber-400 shadow-inner"
                       autoFocus
                     />
@@ -980,19 +990,31 @@ export const ClientHome: React.FC = () => {
                 )}
               </div>
             </div>
-
           </div>
 
-          {/* Quick CTA: REPETIR MI ESTILO CON AJUSTES */}
-          <div className="mt-3.5 pt-3.5 border-t border-zinc-800/80 flex items-center justify-between gap-3">
-            <div className="text-[11px] text-zinc-400 hidden sm:block">
-              Fórmula técnica: <span className="font-mono text-zinc-300">{clientMemory.technicalFormula}</span>
-            </div>
+          {/* Acordeón colapsable: Ficha técnica para el barbero */}
+          {clientMemory.technicalFormula && (
+            <details className="group bg-zinc-950/60 rounded-2xl border border-zinc-800/80 p-3 mt-3">
+              <summary className="text-xs font-bold text-amber-400 flex items-center justify-between cursor-pointer list-none select-none">
+                <span className="flex items-center gap-1.5">
+                  <Scissors className="w-3.5 h-3.5" />
+                  <span>✂️ Ficha técnica para el barbero (Ver fórmula)</span>
+                </span>
+                <ChevronRight className="w-4 h-4 text-zinc-400 group-open:rotate-90 transition-transform" />
+              </summary>
+              <div className="pt-2 text-xs font-mono text-zinc-300 border-t border-zinc-800/60 mt-2 leading-relaxed">
+                {clientMemory.technicalFormula}
+              </div>
+            </details>
+          )}
+
+          {/* CTA PRIMARIO: REPETIR MI ESTILO CON AJUSTES */}
+          <div className="mt-3.5 pt-3.5 border-t border-zinc-800/80">
             <button
               onClick={handleRepeatStyle}
-              className="w-full sm:w-auto px-5 py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 transition cursor-pointer active:scale-98"
+              className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black text-sm sm:text-base flex items-center justify-center gap-2 shadow-xl shadow-amber-500/20 transition cursor-pointer active:scale-98"
             >
-              <RotateCcw className="w-4 h-4 stroke-[2.5]" />
+              <RotateCcw className="w-4 h-4 stroke-[3]" />
               <span>Repetir mi estilo con ajustes</span>
             </button>
           </div>
@@ -1000,6 +1022,7 @@ export const ClientHome: React.FC = () => {
       ) : (
         /* Empty State si el cliente aún no tiene memoria guardada */
         <section className="rounded-2xl p-4 bg-zinc-900/60 border border-zinc-800 text-center space-y-2">
+
           <div className="w-10 h-10 mx-auto rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center border border-amber-500/20">
             <Scissors className="w-5 h-5" />
           </div>
@@ -1077,27 +1100,27 @@ export const ClientHome: React.FC = () => {
         <ChevronRight className="w-5 h-5 text-amber-400 group-hover:translate-x-1 transition shrink-0" />
       </section>
 
-      {/* 👥 6. EQUIPO DE COLABORADORES & CALIFICACIONES EN VIVO */}
+      {/* 👥 6. EQUIPO DE COLABORADORES & CALIFICACIONES EN VIVO (CARRUSEL HORIZONTAL) */}
       <section className="space-y-3 pt-2">
-
         <div className="flex items-center justify-between">
+
           <div>
             <h3 className="text-xs sm:text-sm font-black uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
               <Scissors className="w-4 h-4 text-amber-400" />
-              <span>Nuestros Barberos & Colaboradores ({businessBarbers.length})</span>
+              <span>Nuestros Barberos ({businessBarbers.length})</span>
             </h3>
             <p className="text-xs text-zinc-400 mt-0.5">
-              Conoce a los profesionales de {currentBusiness.name} y califica su atención.
+              Desliza para conocer a los profesionales de {currentBusiness.name}
             </p>
           </div>
+          <span className="text-[11px] text-amber-400/80 font-bold hidden sm:inline-block">← Desliza lateralmente →</span>
         </div>
 
-
-        <div className="grid sm:grid-cols-2 gap-3">
+        <div className="flex gap-3.5 overflow-x-auto pb-3 pt-1 snap-x snap-mandatory scrollbar-none">
           {businessBarbers.map((barber) => (
             <div
               key={barber.id}
-              className="p-4 rounded-2xl bg-zinc-900/80 border border-zinc-800 hover:border-amber-500/40 transition shadow-lg space-y-3"
+              className="w-72 shrink-0 snap-start p-4 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-amber-500/40 transition shadow-lg space-y-3"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -1114,7 +1137,7 @@ export const ClientHome: React.FC = () => {
                         <Star className="w-2.5 h-2.5 fill-amber-400 text-amber-400" /> {barber.ratingAverage.toFixed(1)} / 5.0
                       </span>
                       <span className="text-[10px] text-emerald-400 font-semibold">
-                        {barber.happyClientsPct}% Clientes Satisfechos
+                        {barber.happyClientsPct}% Satisfechos
                       </span>
                     </div>
                   </div>
@@ -1127,10 +1150,10 @@ export const ClientHome: React.FC = () => {
                     setSelectedBarber(barber);
                     setActiveTab('feedback');
                   }}
-                  className="py-2 px-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-750 text-zinc-200 hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 border border-zinc-700 transition cursor-pointer"
+                  className="py-2 px-2 rounded-xl bg-zinc-800 hover:bg-zinc-750 text-zinc-300 hover:text-white font-medium text-xs flex items-center justify-center gap-1 border border-zinc-700 transition cursor-pointer"
                 >
                   <Star className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Calificar Barbero</span>
+                  <span>Calificar</span>
                 </button>
 
                 <button
@@ -1140,7 +1163,7 @@ export const ClientHome: React.FC = () => {
                     setBookingMode('standard');
                     setActiveTab('booking');
                   }}
-                  className="py-2 px-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs flex items-center justify-center gap-1.5 shadow transition cursor-pointer"
+                  className="py-2 px-2.5 rounded-xl bg-amber-500/15 hover:bg-amber-500 text-amber-400 hover:text-black font-bold text-xs flex items-center justify-center gap-1.5 border border-amber-500/40 shadow-sm transition cursor-pointer"
                 >
                   <Calendar className="w-3.5 h-3.5" />
                   <span>Agendar Cita</span>
@@ -1150,6 +1173,7 @@ export const ClientHome: React.FC = () => {
           ))}
         </div>
       </section>
+
 
       {/* 📍 7. VISÍTANOS / CONTACTO */}
       <section className="rounded-3xl p-5 sm:p-6 bg-gradient-to-br from-zinc-900 via-zinc-900 to-zinc-950 border border-zinc-800 shadow-xl space-y-4">
@@ -2263,31 +2287,84 @@ export const ClientHome: React.FC = () => {
         </div>
       )}
 
-      {/* Footer B2B & Acceso Directo a los Paneles de Trabajo (Protegido por PIN) */}
-      <div className="text-center pt-6 pb-2 text-xs text-zinc-500 space-y-3 border-t border-zinc-900 mt-6">
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <button
-            onClick={() => setStaffTargetRole('barber')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-bold border border-zinc-800 hover:border-amber-500/40 transition shadow cursor-pointer text-[11px]"
-          >
-            <Scissors className="w-3.5 h-3.5 text-amber-400" />
-            <span>✂️ App del Barbero / Colaborador (Sillón & Cola en Vivo)</span>
-          </button>
-
-          <button
-            onClick={() => setStaffTargetRole('owner')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-amber-400 hover:text-amber-300 font-bold border border-zinc-800 hover:border-amber-500/40 transition shadow cursor-pointer text-[11px]"
-          >
-            <Store className="w-3.5 h-3.5" />
-            <span>🔐 App del Dueño (Administración & Precios)</span>
-          </button>
+      {/* Footer Público Limpio */}
+      <div className="text-center pt-8 pb-4 text-xs text-zinc-400 space-y-2 border-t border-zinc-850 mt-8">
+        <div className="flex items-center justify-center gap-2">
+          <Store className="w-4 h-4 text-amber-400" />
+          <span className="font-bold text-zinc-200">{currentBusiness.name}</span>
         </div>
-
-        <div className="space-y-0.5 text-[10px]">
-          <div>ARIZSHOP BARBER — Plataforma Oficial</div>
-          <div className="text-zinc-600">Sistema Multi-Tenant y Reservas en Vivo</div>
+        <p className="text-[11px] text-zinc-400 max-w-sm mx-auto">
+          {currentBusiness.slogan || 'Elegancia, precisión y estilo clásico.'}
+        </p>
+        <div className="text-[10px] text-zinc-500 pt-1">
+          © {new Date().getFullYear()} {currentBusiness.name} • Sistema Oficial de Reservas & Estilo
         </div>
       </div>
+
+      {/* 📱 BARRA INFERIOR FIJA (STICKY BOTTOM NAVIGATION) */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-zinc-950/95 backdrop-blur-lg border-t border-zinc-800/80 px-2 sm:px-4 py-2 sm:hidden flex items-center justify-around shadow-2xl">
+        <button
+          onClick={() => {
+            setActiveTab('home');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+          className={`flex flex-col items-center gap-0.5 text-[10px] font-bold transition cursor-pointer p-1.5 ${
+            activeTab === 'home' ? 'text-amber-400' : 'text-zinc-400 hover:text-white'
+          }`}
+        >
+          <Store className="w-4 h-4" />
+          <span>Inicio</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('catalog')}
+          className="flex flex-col items-center gap-0.5 text-[10px] font-bold text-zinc-400 hover:text-amber-400 transition cursor-pointer p-1.5"
+        >
+          <Scissors className="w-4 h-4" />
+          <span>Catálogo</span>
+        </button>
+
+
+        <button
+          onClick={() => {
+            setActiveTab('home');
+            const el = document.getElementById('memory-section');
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth' });
+            }
+          }}
+          className="flex flex-col items-center gap-0.5 text-[10px] font-bold text-zinc-400 hover:text-white transition cursor-pointer p-1.5"
+        >
+          <Sparkles className="w-4 h-4" />
+          <span>Mi Estilo</span>
+        </button>
+
+        <button
+          onClick={() => {
+            setWalkInSent(false);
+            setIsWalkInModalOpen(true);
+          }}
+          className="flex flex-col items-center gap-0.5 text-[10px] font-black text-amber-400 transition cursor-pointer p-1.5"
+        >
+          <Bell className="w-4 h-4 animate-bounce" />
+          <span>Turno en Vivo</span>
+        </button>
+
+        <button
+          onClick={() => {
+            if (currentUser.id === 'guest' || currentUser.fullName === 'Cliente Invitado') {
+              setIsLoyaltyRegisterModalOpen(true);
+            } else {
+              setIsLoyaltyModalOpen(true);
+            }
+          }}
+          className="flex flex-col items-center gap-0.5 text-[10px] font-bold text-zinc-400 hover:text-white transition cursor-pointer p-1.5"
+        >
+          <Gift className="w-4 h-4" />
+          <span>Sellos</span>
+        </button>
+      </nav>
     </div>
   );
 };
+
