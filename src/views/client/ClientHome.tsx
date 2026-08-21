@@ -1879,50 +1879,59 @@ export const ClientHome: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="space-y-3 text-xs">
-                <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
+              <div className="space-y-3.5 text-xs">
+                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2.5">
                   <span className="font-bold text-zinc-300 block">1. Estilo / Corte que deseas hoy:</span>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2.5">
                     <button
                       type="button"
                       onClick={() => setWalkInStyle('Mi Estilo de Memoria (El Siete Colombiano)')}
-                      className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition ${
+                      className={`p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition cursor-pointer ${
                         walkInStyle.includes('Memoria')
-                          ? 'bg-amber-500/20 border-amber-500 text-white font-bold'
+                          ? 'bg-amber-500/20 border-amber-500 text-white font-bold ring-1 ring-amber-500/40'
                           : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
                       }`}
                     >
-                      <img src={activePhoto} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                      <img
+                        src={activePhoto}
+                        alt="Mi Memoria"
+                        className="w-10 h-10 rounded-lg object-cover border border-zinc-700 shrink-0"
+                      />
                       <div className="truncate">
-                        <div className="truncate text-[11px]">Mi Memoria</div>
-                        <div className="text-[9px] text-amber-400 truncate">El Siete</div>
+                        <div className="truncate text-xs font-bold text-white">Mi Memoria</div>
+                        <div className="text-[10px] text-amber-400 font-semibold truncate">El Siete</div>
                       </div>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setWalkInStyle('Mid Fade Crop Texturizado')}
-                      className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition ${
+                      className={`p-2.5 rounded-xl border text-left flex items-center gap-2.5 transition cursor-pointer ${
                         walkInStyle.includes('Mid Fade')
-                          ? 'bg-amber-500/20 border-amber-500 text-white font-bold'
+                          ? 'bg-amber-500/20 border-amber-500 text-white font-bold ring-1 ring-amber-500/40'
                           : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
                       }`}
                     >
-                      <img src="/styles/mid-fade-crop.jpg" alt="" className="w-8 h-8 rounded-lg object-cover" />
+                      <img
+                        src="/styles/hair_04.jpg"
+                        alt="Mid Fade"
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/styles/hair_01.jpg'; }}
+                        className="w-10 h-10 rounded-lg object-cover border border-zinc-700 shrink-0"
+                      />
                       <div className="truncate">
-                        <div className="truncate text-[11px]">Mid Fade</div>
-                        <div className="text-[9px] text-amber-400 truncate">Crop Urbano</div>
+                        <div className="truncate text-xs font-bold text-white">Mid Fade</div>
+                        <div className="text-[10px] text-amber-400 font-semibold truncate">Crop Urbano</div>
                       </div>
                     </button>
                   </div>
                 </div>
 
-                <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
+                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
                   <span className="font-bold text-zinc-300 block">2. Barbero de tu preferencia:</span>
                   <select
                     value={walkInBarber}
                     onChange={(e) => setWalkInBarber(e.target.value)}
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-white font-bold"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white font-bold text-xs focus:border-amber-400 outline-none cursor-pointer"
                   >
                     {businessBarbers.map((b) => (
                       <option key={b.id} value={b.fullName}>
@@ -1933,7 +1942,7 @@ export const ClientHome: React.FC = () => {
                   </select>
                 </div>
 
-                <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
+                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-zinc-300 block">3. Instrucción especial para el barbero:</span>
                     <button
@@ -1952,10 +1961,10 @@ export const ClientHome: React.FC = () => {
                           if (t) setWalkInNote((prev) => (prev ? `${prev} ${t}` : t));
                         };
                       }}
-                      className="text-[10px] text-amber-400 font-bold flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 cursor-pointer"
+                      className="text-[10px] text-amber-400 font-bold flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition cursor-pointer"
                     >
-                      <Mic className="w-2.5 h-2.5" />
-                      <span>🎙️ Dictar</span>
+                      <Mic className="w-3 h-3 text-amber-400" />
+                      <span>Dictar por Voz</span>
                     </button>
                   </div>
                   <input
@@ -1963,7 +1972,7 @@ export const ClientHome: React.FC = () => {
                     value={walkInNote}
                     onChange={(e) => setWalkInNote(e.target.value)}
                     placeholder="Ej: Degradado a la 1.5 y mantener 2 dedos arriba"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2.5 text-white"
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white text-xs focus:border-amber-400 outline-none"
                   />
                 </div>
 
@@ -1983,12 +1992,13 @@ export const ClientHome: React.FC = () => {
                     });
                     setWalkInSent(true);
                   }}
-                  className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 shadow-2xl transition cursor-pointer text-xs"
+                  className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 shadow-2xl transition cursor-pointer text-xs sm:text-sm active:scale-98"
                 >
                   <Bell className="w-4 h-4 stroke-[2.5]" />
-                  <span>🛎️ ¡Avisar a Álvaro: "Quiero este corte"!</span>
+                  <span>¡Avisar a Álvaro: "Quiero este corte"!</span>
                 </button>
               </div>
+
             )}
           </div>
         </div>
