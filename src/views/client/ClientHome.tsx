@@ -6,9 +6,12 @@ import { useAuth } from '../../core/auth/AuthContext';
 import { INITIAL_BARBERS, INITIAL_SERVICES, INITIAL_STYLE_MEMORIES } from '../../database/mockData';
 import { Service, BarberProfile, StyleMemory } from '../../core/types';
 import { BeardStyle } from '../../database/beardStylesData';
+import { OFFICIAL_STYLES_LIBRARY } from '../../database/stylesLibraryData';
+
 import { AuthService } from '../../core/services/authService';
 import { VisualStyleCatalog } from './VisualStyleCatalog';
 import { CameraCaptureModal } from '../../components/CameraCaptureModal';
+
 
 import {
   Sparkles,
@@ -390,6 +393,19 @@ export const ClientHome: React.FC = () => {
   const [walkInNote, setWalkInNote] = useState('');
   const [walkInStyle, setWalkInStyle] = useState('Mi Estilo de Memoria (El Siete Colombiano)');
   const [walkInPhoto, setWalkInPhoto] = useState<string>(activePhoto);
+  const [isStylePickerModalOpen, setIsStylePickerModalOpen] = useState(false);
+  const [stylePickerDomain, setStylePickerDomain] = useState<'todos' | 'cabello' | 'barba' | 'combos'>('todos');
+  const [stylePickerSearch, setStylePickerSearch] = useState('');
+
+  const filteredPickerStyles = useMemo(() => {
+    return OFFICIAL_STYLES_LIBRARY.filter(s => {
+      const matchDomain = stylePickerDomain === 'todos' || s.domain === stylePickerDomain;
+      const matchSearch = !stylePickerSearch.trim() ||
+        s.name.toLowerCase().includes(stylePickerSearch.toLowerCase()) ||
+        s.category.toLowerCase().includes(stylePickerSearch.toLowerCase());
+      return matchDomain && matchSearch;
+    });
+  }, [stylePickerDomain, stylePickerSearch]);
 
   const handleRepeatStyle = () => {
     setBookingMode('repeat');
@@ -398,6 +414,7 @@ export const ClientHome: React.FC = () => {
     setCustomStyleNote(`Mantener: ${activeLiked}. Ajuste indicado: ${activeAdjustment}`);
     setActiveTab('booking');
   };
+
 
   const [selectedBeardStyle, setSelectedBeardStyle] = useState<BeardStyle | null>(null);
 
@@ -2152,18 +2169,15 @@ export const ClientHome: React.FC = () => {
                     </button>
                   </div>
 
-                  {/* Botón para abrir el Catálogo Completo */}
+                  {/* Botón para abrir el Catálogo Completo en Modal */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setIsWalkInModalOpen(false);
-                      setActiveTab('catalog');
-                    }}
-                    className="w-full py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-850 text-amber-400 font-bold text-[11px] flex items-center justify-center gap-1.5 border border-amber-500/30 transition shadow cursor-pointer hover:border-amber-500"
+                    onClick={() => setIsStylePickerModalOpen(true)}
+                    className="w-full py-2.5 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center gap-2 border border-amber-500/40 transition shadow cursor-pointer hover:border-amber-400 active:scale-98"
                   >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>🔍 Explorar Todos los +40 Estilos del Catálogo</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
+                    <Sparkles className="w-4 h-4 text-amber-400" />
+                    <span>🔍 Explorar Galería Completa (+44 Estilos HD)</span>
+                    <ChevronRight className="w-4 h-4" />
                   </button>
                 </div>
 
@@ -2300,8 +2314,116 @@ export const ClientHome: React.FC = () => {
         </div>
       )}
 
+      {/* 🌟 MODAL SELECTOR VISUAL DE GALERÍA (+44 ESTILOS HD) */}
+      {isStylePickerModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+          <div className="w-full sm:max-w-2xl bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 space-y-4 shadow-2xl max-h-[88vh] flex flex-col">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-sm sm:text-base font-black text-white">Galería Visual Oficial de Cortes</h3>
+                  <span className="text-[10px] text-amber-400 font-bold uppercase">{currentBusiness.name} • Elige tu estilo</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsStylePickerModalOpen(false)}
+                className="text-xs font-bold text-zinc-400 hover:text-white px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-xl transition cursor-pointer"
+              >
+                ✕ Cerrar
+              </button>
+            </div>
+
+            {/* Buscador y Pestañas */}
+            <div className="space-y-2.5 shrink-0">
+              <input
+                type="text"
+                value={stylePickerSearch}
+                onChange={(e) => setStylePickerSearch(e.target.value)}
+                placeholder="🔍 Buscar estilo (ej: Low Fade, Taper, Stubble, Siete, Pompadour)..."
+                className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-amber-400 outline-none"
+              />
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                {[
+                  { key: 'todos', label: 'Todos (+44)' },
+                  { key: 'cabello', label: '✂️ Cortes & Fades' },
+                  { key: 'barba', label: '🧔 Barbas' },
+                  { key: 'combos', label: '🔥 Combos' },
+                ].map(tab => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setStylePickerDomain(tab.key as any)}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition cursor-pointer ${
+                      stylePickerDomain === tab.key
+                        ? 'bg-amber-500 text-black shadow-md'
+                        : 'bg-zinc-800 text-zinc-300 hover:text-white'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Grid Visual de Estilos */}
+            <div className="flex-1 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-2.5 pr-1">
+              {filteredPickerStyles.map((s) => {
+                const isSelected = walkInStyle === s.name;
+                return (
+                  <div
+                    key={s.id}
+                    onClick={() => {
+                      setWalkInStyle(s.name);
+                      setWalkInPhoto(s.image || s.thumbnail || '/styles/hair_01.jpg');
+                      setIsStylePickerModalOpen(false);
+                    }}
+                    className={`group rounded-2xl border p-2 text-left flex flex-col justify-between transition cursor-pointer ${
+                      isSelected
+                        ? 'bg-amber-500/20 border-amber-500 ring-2 ring-amber-500/50 shadow-xl'
+                        : 'bg-zinc-950 border-zinc-800 hover:border-amber-500/50 hover:bg-zinc-850'
+                    }`}
+                  >
+                    <div className="aspect-[4/3] rounded-xl overflow-hidden bg-zinc-900 mb-2 relative">
+                      <img
+                        src={s.thumbnail || s.image}
+                        alt={s.name}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/styles/hair_01.jpg'; }}
+                      />
+                      {isSelected && (
+                        <div className="absolute top-1.5 right-1.5 bg-amber-500 text-black px-1.5 py-0.5 rounded-lg shadow font-black text-[10px] flex items-center gap-0.5">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                          <span>ELEGIDO</span>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-xs line-clamp-1 group-hover:text-amber-400 transition">
+                        {s.name}
+                      </h4>
+                      <p className="text-[10px] text-amber-400 font-semibold truncate mt-0.5">
+                        {s.category}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="pt-2 border-t border-zinc-800 text-center text-[11px] text-zinc-400 shrink-0">
+              💡 Toca cualquier estilo para seleccionarlo y regresar a la confirmación de tu turno.
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 12. MODAL DE CONTROL DE ACCESO PRIVADO CON PIN DE SEGURIDAD */}
       {staffTargetRole && (
+
         <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-start justify-center p-3 sm:p-4 pt-3 sm:pt-6 overflow-y-auto animate-fade-in">
           <div className="w-full max-w-sm bg-zinc-900 border border-zinc-700 rounded-3xl p-5 space-y-4 shadow-2xl text-xs my-0">
 
