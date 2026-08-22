@@ -388,14 +388,15 @@ export const ClientHome: React.FC = () => {
   const primaryBarberName = primaryBarber?.fullName || currentBusiness.ownerName || 'Tu Barbero';
   const primaryBarberFirstName = primaryBarberName.split(' ')[0];
 
-  const [walkInBarber, setWalkInBarber] = useState(primaryBarberName);
+  const [walkInBarber, setWalkInBarber] = useState('Primer barbero libre');
   const [walkInSent, setWalkInSent] = useState(false);
   const [walkInNote, setWalkInNote] = useState('');
-  const [walkInStyle, setWalkInStyle] = useState('Mi Estilo de Memoria (El Siete Colombiano)');
-  const [walkInPhoto, setWalkInPhoto] = useState<string>(activePhoto);
+  const [walkInStyle, setWalkInStyle] = useState('💈 Asesoría en Sillón (Decidir en persona)');
+  const [walkInPhoto, setWalkInPhoto] = useState<string>('/styles/hair_01.jpg');
   const [isStylePickerModalOpen, setIsStylePickerModalOpen] = useState(false);
   const [stylePickerDomain, setStylePickerDomain] = useState<'todos' | 'cabello' | 'barba' | 'combos'>('todos');
   const [stylePickerSearch, setStylePickerSearch] = useState('');
+
 
   const filteredPickerStyles = useMemo(() => {
     return OFFICIAL_STYLES_LIBRARY.filter(s => {
@@ -2083,7 +2084,9 @@ export const ClientHome: React.FC = () => {
                         {walkInStyle}
                       </h4>
                       <p className="text-[11px] text-zinc-300 line-clamp-2 mt-0.5 leading-relaxed">
-                        {walkInStyle.includes('Memoria')
+                        {walkInStyle.includes('Asesoría')
+                          ? 'El barbero te asesorará directamente en el sillón según tus rasgos y tipo de cabello.'
+                          : walkInStyle.includes('Memoria')
                           ? 'Fórmula: Fade 1.5 a 3 con tijera superior y patillas pulidas.'
                           : walkInStyle.includes('Mid Fade')
                           ? 'Fórmula: Degradado medio al ras con textura superior mate.'
@@ -2107,7 +2110,7 @@ export const ClientHome: React.FC = () => {
                       <span>Elegir de la Galería (+44 Cortes)</span>
                     </button>
 
-                    {clientMemory && (
+                    {clientMemory ? (
                       <button
                         type="button"
                         onClick={() => {
@@ -2123,31 +2126,45 @@ export const ClientHome: React.FC = () => {
                         <RotateCcw className="w-3.5 h-3.5" />
                         <span>Usar Mi Último Corte</span>
                       </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWalkInStyle('💈 Asesoría en Sillón (Decidir en persona)');
+                          setWalkInPhoto('/styles/hair_01.jpg');
+                        }}
+                        className={`w-full py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                          walkInStyle.includes('Asesoría')
+                            ? 'bg-zinc-800 border-amber-500 text-amber-400 font-black'
+                            : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        <Scissors className="w-3.5 h-3.5" />
+                        <span>Decidir en el Sillón</span>
+                      </button>
                     )}
                   </div>
                 </div>
 
-
                 <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
-
                   <span className="font-bold text-zinc-300 block">2. Barbero de tu preferencia:</span>
                   <select
                     value={walkInBarber}
                     onChange={(e) => setWalkInBarber(e.target.value)}
                     className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-3 text-white font-bold text-xs focus:border-amber-400 outline-none cursor-pointer"
                   >
+                    <option value="Primer barbero libre">⚡ Primer barbero disponible (Más rápido)</option>
                     {businessBarbers.map((b) => (
                       <option key={b.id} value={b.fullName}>
                         {b.fullName}
                       </option>
                     ))}
-                    <option value="Primer barbero libre">⚡ Primer barbero disponible</option>
                   </select>
                 </div>
 
                 <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="font-bold text-zinc-200 text-xs sm:text-sm">3. Instrucciones especiales para el barbero:</span>
+                    <span className="font-bold text-zinc-200 text-xs sm:text-sm">3. Instrucciones especiales (Opcional):</span>
                     <div className="flex items-center gap-1.5">
                       {walkInNote && (
                         <button
@@ -2208,7 +2225,7 @@ export const ClientHome: React.FC = () => {
                   )}
 
                   <p className="text-[11px] text-zinc-400 leading-relaxed">
-                    💡 Toca <strong>Dictar por Voz</strong> para hablarle a tu celular o escribe notas para {walkInBarber && walkInBarber !== 'Primer barbero libre' ? walkInBarber.split(' ')[0] : primaryBarberFirstName}.
+                    💡 Si deseas, dicta por voz o escribe notas para {walkInBarber && walkInBarber !== 'Primer barbero libre' ? walkInBarber.split(' ')[0] : 'tu barbero'}.
                   </p>
 
                   <div className="relative">
@@ -2248,12 +2265,17 @@ export const ClientHome: React.FC = () => {
                     });
                     setWalkInSent(true);
                   }}
-                  className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 shadow-2xl transition cursor-pointer text-xs sm:text-sm active:scale-98"
+                  className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 shadow-2xl shadow-amber-500/25 transition cursor-pointer text-xs sm:text-sm active:scale-98"
                 >
-                  <Bell className="w-4 h-4 stroke-[2.5]" />
-                  <span>¡Avisar a {walkInBarber && walkInBarber !== 'Primer barbero libre' ? walkInBarber.split(' ')[0] : primaryBarberFirstName}: "Quiero este corte"!</span>
+                  <Bell className="w-4 h-4 stroke-[3]" />
+                  <span>
+                    {walkInBarber && walkInBarber !== 'Primer barbero libre'
+                      ? `🎟️ ¡TOMAR MI TURNO CON ${walkInBarber.split(' ')[0].toUpperCase()}!`
+                      : '🎟️ ¡TOMAR MI TURNO AHORA (MÁS RÁPIDO)!'}
+                  </span>
                 </button>
               </div>
+
 
 
 
