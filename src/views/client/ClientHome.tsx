@@ -2169,6 +2169,37 @@ export const ClientHome: React.FC = () => {
                     </button>
                   </div>
 
+                  {/* Vista Previa Expandida en HD del Estilo Seleccionado */}
+                  <div className="p-3 bg-zinc-900 border border-amber-500/40 rounded-2xl flex items-center gap-3 animate-fade-in shadow-md">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-zinc-950 border border-amber-500/50 shrink-0">
+                      <img
+                        src={walkInPhoto || activePhoto}
+                        alt={walkInStyle}
+                        className="w-full h-full object-cover"
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/styles/hair_01.jpg'; }}
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-black bg-amber-500 px-2 py-0.5 rounded-md mb-1 shadow">
+                        <Check className="w-3 h-3 stroke-[3]" /> Estilo Seleccionado
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-black text-white truncate">
+                        {walkInStyle}
+                      </h4>
+                      <p className="text-[11px] text-zinc-300 line-clamp-1 mt-0.5">
+                        {walkInStyle.includes('Memoria')
+                          ? 'Fórmula: Fade 1.5 a 3 con tijera superior y patillas pulidas.'
+                          : walkInStyle.includes('Mid Fade')
+                          ? 'Fórmula: Degradado medio al ras con textura superior mate.'
+                          : walkInStyle.includes('Taper')
+                          ? 'Fórmula: Taper clásico ejecutivo en sienes y nuca.'
+                          : walkInStyle.includes('Barba')
+                          ? 'Fórmula: Perfilado con navaja, toalla caliente y bálsamo.'
+                          : 'Fórmula profesional oficial del catálogo.'}
+                      </p>
+                    </div>
+                  </div>
+
                   {/* Botón para abrir el Catálogo Completo en Modal */}
                   <button
                     type="button"
@@ -2182,6 +2213,7 @@ export const ClientHome: React.FC = () => {
                 </div>
 
                 <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
+
                   <span className="font-bold text-zinc-300 block">2. Barbero de tu preferencia:</span>
                   <select
                     value={walkInBarber}
@@ -2316,7 +2348,8 @@ export const ClientHome: React.FC = () => {
 
       {/* 🌟 MODAL SELECTOR VISUAL DE GALERÍA (+44 ESTILOS HD) */}
       {isStylePickerModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+        <div className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in">
+
           <div className="w-full sm:max-w-2xl bg-zinc-900 border-t sm:border border-zinc-700 rounded-t-3xl sm:rounded-3xl p-4 sm:p-6 space-y-4 shadow-2xl max-h-[88vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3 shrink-0">
               <div className="flex items-center gap-2.5">
