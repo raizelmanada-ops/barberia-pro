@@ -2057,121 +2057,17 @@ export const ClientHome: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-3.5 text-xs">
-                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2.5">
+                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-zinc-300 block">1. Estilo / Corte que deseas hoy:</span>
-                    {walkInStyle && (
-                      <span className="text-[10px] text-amber-400 font-bold max-w-[150px] truncate">
-                        Seleccionado: {walkInStyle}
-                      </span>
-                    )}
+                    <span className="text-[10px] text-amber-400 font-black uppercase tracking-wider">
+                      Foto & Fórmula
+                    </span>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    {/* Opción 1: Memoria previa si existe */}
-                    {clientMemory && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setWalkInStyle('Mi Memoria (' + (clientMemory.likedAspects?.[0] || 'Corte Personalizado') + ')');
-                          setWalkInPhoto(activePhoto);
-                        }}
-                        className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition cursor-pointer ${
-
-                          walkInStyle.includes('Memoria')
-                            ? 'bg-amber-500/20 border-amber-500 text-white font-bold ring-1 ring-amber-500/40'
-                            : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
-                        }`}
-                      >
-                        <img
-                          src={activePhoto}
-                          alt="Mi Memoria"
-                          className="w-9 h-9 rounded-lg object-cover border border-zinc-700 shrink-0"
-                        />
-                        <div className="truncate">
-                          <div className="truncate text-xs font-bold text-white">Mi Memoria</div>
-                          <div className="text-[10px] text-amber-400 font-semibold truncate">Último corte</div>
-                        </div>
-                      </button>
-                    )}
-
-                    {/* Opción 2: Mid Fade */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setWalkInStyle('Mid Fade Crop Texturizado');
-                        setWalkInPhoto('/styles/hair_04.jpg');
-                      }}
-                      className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition cursor-pointer ${
-                        walkInStyle === 'Mid Fade Crop Texturizado'
-                          ? 'bg-amber-500/20 border-amber-500 text-white font-bold ring-1 ring-amber-500/40'
-                          : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      <img
-                        src="/styles/hair_04.jpg"
-                        alt="Mid Fade"
-                        onError={(e) => { (e.target as HTMLImageElement).src = '/styles/hair_01.jpg'; }}
-                        className="w-9 h-9 rounded-lg object-cover border border-zinc-700 shrink-0"
-                      />
-                      <div className="truncate">
-                        <div className="truncate text-xs font-bold text-white">Mid Fade</div>
-                        <div className="text-[10px] text-amber-400 font-semibold truncate">Crop Textura</div>
-                      </div>
-                    </button>
-
-                    {/* Opción 3: Taper Clásico */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setWalkInStyle('Taper Fade Clásico');
-                        setWalkInPhoto('/styles/hair_01.jpg');
-                      }}
-                      className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition cursor-pointer ${
-                        walkInStyle === 'Taper Fade Clásico'
-                          ? 'bg-amber-500/20 border-amber-500 text-white font-bold ring-1 ring-amber-500/40'
-                          : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      <img
-                        src="/styles/hair_01.jpg"
-                        alt="Taper"
-                        className="w-9 h-9 rounded-lg object-cover border border-zinc-700 shrink-0"
-                      />
-                      <div className="truncate">
-                        <div className="truncate text-xs font-bold text-white">Taper Fade</div>
-                        <div className="text-[10px] text-amber-400 font-semibold truncate">Clásico Ejecutivo</div>
-                      </div>
-                    </button>
-
-                    {/* Opción 4: Barba Perfilada */}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setWalkInStyle('Perfilado de Barba & Stubble');
-                        setWalkInPhoto('/styles/beard_01.jpg');
-                      }}
-                      className={`p-2.5 rounded-xl border text-left flex items-center gap-2 transition cursor-pointer ${
-                        walkInStyle.includes('Barba')
-                          ? 'bg-amber-500/20 border-amber-500 text-white font-bold ring-1 ring-amber-500/40'
-                          : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
-                      }`}
-                    >
-                      <img
-                        src="/styles/beard_01.jpg"
-                        alt="Barba"
-                        className="w-9 h-9 rounded-lg object-cover border border-zinc-700 shrink-0"
-                      />
-                      <div className="truncate">
-                        <div className="truncate text-xs font-bold text-white">Barba Stubble</div>
-                        <div className="text-[10px] text-amber-400 font-semibold truncate">Perfilada</div>
-                      </div>
-                    </button>
-                  </div>
-
-                  {/* Vista Previa Expandida en HD del Estilo Seleccionado */}
-                  <div className="p-3 bg-zinc-900 border border-amber-500/40 rounded-2xl flex items-center gap-3 animate-fade-in shadow-md">
-                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-zinc-950 border border-amber-500/50 shrink-0">
+                  {/* Tarjeta Principal del Estilo Seleccionado */}
+                  <div className="p-3 bg-zinc-900 border border-amber-500/50 rounded-2xl flex items-center gap-3.5 shadow-lg relative overflow-hidden">
+                    <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-zinc-950 border border-amber-500/50 shrink-0 shadow-inner">
                       <img
                         src={walkInPhoto || activePhoto}
                         alt={walkInStyle}
@@ -2183,10 +2079,10 @@ export const ClientHome: React.FC = () => {
                       <div className="inline-flex items-center gap-1 text-[9px] font-black uppercase text-black bg-amber-500 px-2 py-0.5 rounded-md mb-1 shadow">
                         <Check className="w-3 h-3 stroke-[3]" /> Estilo Seleccionado
                       </div>
-                      <h4 className="text-xs sm:text-sm font-black text-white truncate">
+                      <h4 className="text-sm font-black text-white truncate">
                         {walkInStyle}
                       </h4>
-                      <p className="text-[11px] text-zinc-300 line-clamp-1 mt-0.5">
+                      <p className="text-[11px] text-zinc-300 line-clamp-2 mt-0.5 leading-relaxed">
                         {walkInStyle.includes('Memoria')
                           ? 'Fórmula: Fade 1.5 a 3 con tijera superior y patillas pulidas.'
                           : walkInStyle.includes('Mid Fade')
@@ -2195,22 +2091,42 @@ export const ClientHome: React.FC = () => {
                           ? 'Fórmula: Taper clásico ejecutivo en sienes y nuca.'
                           : walkInStyle.includes('Barba')
                           ? 'Fórmula: Perfilado con navaja, toalla caliente y bálsamo.'
-                          : 'Fórmula profesional oficial del catálogo.'}
+                          : 'Fórmula profesional oficial de la barbería.'}
                       </p>
                     </div>
                   </div>
 
-                  {/* Botón para abrir el Catálogo Completo en Modal */}
-                  <button
-                    type="button"
-                    onClick={() => setIsStylePickerModalOpen(true)}
-                    className="w-full py-2.5 px-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-black text-xs flex items-center justify-center gap-2 border border-amber-500/40 transition shadow cursor-pointer hover:border-amber-400 active:scale-98"
-                  >
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    <span>🔍 Explorar Galería Completa (+44 Estilos HD)</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                  {/* Acciones de Selección: Galería de +44 Cortes o Repetir Memoria */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsStylePickerModalOpen(true)}
+                      className="w-full py-2.5 px-3.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs flex items-center justify-center gap-1.5 shadow-md shadow-amber-500/20 transition cursor-pointer active:scale-98"
+                    >
+                      <Sparkles className="w-4 h-4 stroke-[2.5]" />
+                      <span>Elegir de la Galería (+44 Cortes)</span>
+                    </button>
+
+                    {clientMemory && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setWalkInStyle('Mi Memoria (' + (clientMemory.likedAspects?.[0] || 'Corte Personalizado') + ')');
+                          setWalkInPhoto(activePhoto);
+                        }}
+                        className={`w-full py-2.5 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                          walkInStyle.includes('Memoria')
+                            ? 'bg-zinc-800 border-amber-500 text-amber-400 font-black'
+                            : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-white'
+                        }`}
+                      >
+                        <RotateCcw className="w-3.5 h-3.5" />
+                        <span>Usar Mi Último Corte</span>
+                      </button>
+                    )}
+                  </div>
                 </div>
+
 
                 <div className="p-3.5 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-2">
 
