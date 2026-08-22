@@ -38,14 +38,9 @@ import {
   X,
   MapPin,
   MessageCircle,
-  ExternalLink
+  ExternalLink,
+  User
 } from 'lucide-react';
-
-
-
-
-
-
 
 import { SubscriptionService } from '../../core/services/subscriptionService';
 import { ServiceCatalogService } from '../../core/services/serviceCatalogService';
@@ -54,7 +49,6 @@ import { WhatsAppService } from '../../core/whatsapp/whatsappService';
 import { WalkInService } from '../../core/services/walkinService';
 import { ClientHistoryService } from '../../core/services/clientHistoryService';
 import { ImageStorageService } from '../../core/services/imageStorageService';
-
 
 export const ClientHome: React.FC = () => {
   const { currentBusiness } = useTenant();
@@ -419,6 +413,20 @@ export const ClientHome: React.FC = () => {
 
   const [selectedBeardStyle, setSelectedBeardStyle] = useState<BeardStyle | null>(null);
 
+  // Estado para captura y persistencia obligatoria del Cliente (Nombre + WhatsApp)
+  const [clientInputName, setClientInputName] = useState(() => currentUser.fullName !== 'Cliente Invitado' ? currentUser.fullName : '');
+  const [clientInputPhone, setClientInputPhone] = useState(() => currentUser.phone || '');
+  const [clientInputError, setClientInputError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (currentUser.fullName && currentUser.fullName !== 'Cliente Invitado') {
+      setClientInputName(currentUser.fullName);
+    }
+    if (currentUser.phone) {
+      setClientInputPhone(currentUser.phone);
+    }
+  }, [currentUser]);
+
   const handleSelectStyleFromCatalog = (style: any) => {
     setSelectedBeardStyle(style);
     setWalkInStyle(style.name);
@@ -429,13 +437,20 @@ export const ClientHome: React.FC = () => {
     setIsWalkInModalOpen(true);
   };
 
-
   const handleConfirmBooking = () => {
+    const finalName = (clientInputName || (currentUser.fullName !== 'Cliente Invitado' ? currentUser.fullName : '')).trim();
+    const finalPhone = (clientInputPhone || currentUser.phone || '').trim();
 
+    if (!finalName || !finalPhone) {
+      setClientInputError('Por favor ingresa tu Nombre Completo y tu número de WhatsApp para confirmar la cita.');
+      return;
+    }
+
+    // 🔒 Guardar y enlazar permanentemente la sesión del cliente para que no se pierda su teléfono
+    loginAsClient(finalPhone, finalName);
+    setClientInputError(null);
     setBookingConfirmed(true);
 
-    const clientName = currentUser.fullName !== 'Cliente Invitado' ? currentUser.fullName : 'Pedro Duarte';
-    const clientPhone = currentUser.phone || '+57 310 999 8877';
     const barberName = selectedBarber?.fullName || currentBusiness.ownerName || 'Álvaro Ortiz';
     const serviceName = selectedService?.name || 'Corte Clásico';
     const priceCOP = selectedService?.priceCOP || 38000;
@@ -444,8 +459,8 @@ export const ClientHome: React.FC = () => {
     WalkInService.createTicket({
       businessId: currentBusiness.id,
       type: 'appointment',
-      clientName,
-      clientPhone,
+      clientName: finalName,
+      clientPhone: finalPhone,
       styleName: `${serviceName} ($${priceCOP.toLocaleString('es-CO')} COP)`,
       stylePhotoUrl: activePhoto,
       specialNote: customStyleNote || `Cita para el ${selectedDate} a las ${selectedTime}`,
@@ -458,8 +473,8 @@ export const ClientHome: React.FC = () => {
     // Disparo desacoplado de confirmación transaccional por WhatsApp
     WhatsAppService.sendAppointmentConfirmation({
       business: currentBusiness,
-      clientName,
-      clientPhone,
+      clientName: finalName,
+      clientPhone: finalPhone,
       barberName,
       serviceName,
       priceCOP,
@@ -472,12 +487,38 @@ export const ClientHome: React.FC = () => {
         business: currentBusiness,
         barberName: selectedBarber.fullName,
         barberPhone: selectedBarber.phone,
-        clientName,
+        clientName: finalName,
         serviceName,
         date: selectedDate,
         time: selectedTime,
       });
     }
+  };
+
+  const handleConfirmWalkIn = () => {
+    const finalName = (clientInputName || (currentUser.fullName !== 'Cliente Invitado' ? currentUser.fullName : '')).trim();
+    const finalPhone = (clientInputPhone || currentUser.phone || '').trim();
+
+    if (!finalName || !finalPhone) {
+      setClientInputError('Por favor ingresa tu Nombre Completo y tu número de WhatsApp para tomar tu turno.');
+      return;
+    }
+
+    // 🔒 Guardar y enlazar permanentemente la sesión del cliente en su celular/dispositivo
+    loginAsClient(finalPhone, finalName);
+    setClientInputError(null);
+
+    WalkInService.createTicket({
+      businessId: currentBusiness.id,
+      type: 'walkin',
+      clientName: finalName,
+      clientPhone: finalPhone,
+      styleName: walkInStyle,
+      stylePhotoUrl: walkInPhoto || activePhoto,
+      specialNote: walkInNote || activeAdjustment,
+      barberName: walkInBarber,
+    });
+    setWalkInSent(true);
   };
 
   const handleRegisterLoyalty = (e: React.FormEvent) => {
@@ -1531,9 +1572,59 @@ export const ClientHome: React.FC = () => {
                   />
                 </div>
 
+                {/* Registro / Identificación del Cliente (Nombre + WhatsApp) */}
+                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-amber-500/30 space-y-2.5 shadow-inner">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-amber-400 flex items-center gap-1.5 text-xs">
+                      <User className="w-3.5 h-3.5" /> Tus Datos de Registro (Obligatorio)
+                    </span>
+                    {currentUser.fullName !== 'Cliente Invitado' && currentUser.phone ? (
+                      <span className="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" /> Guardado en este celular
+                      </span>
+                    ) : (
+                      <span className="text-[9px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded-full">
+                        Se guardará en tu teléfono
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-zinc-400 font-bold block mb-1">Tu Nombre Completo:</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ej: Pedro Duarte"
+                        value={clientInputName}
+                        onChange={(e) => { setClientInputName(e.target.value); setClientInputError(null); }}
+                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-white text-xs focus:border-amber-400 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-zinc-400 font-bold block mb-1">Tu Teléfono / WhatsApp:</label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="Ej: 310 236 5163"
+                        value={clientInputPhone}
+                        onChange={(e) => { setClientInputPhone(e.target.value); setClientInputError(null); }}
+                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-white text-xs focus:border-amber-400 focus:outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {clientInputError && (
+                    <div className="text-[11px] text-red-400 font-bold flex items-center gap-1.5 bg-red-500/10 p-2 rounded-xl border border-red-500/20 animate-shake">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{clientInputError}</span>
+                    </div>
+                  )}
+                </div>
+
                 <button
                   onClick={handleConfirmBooking}
-                  className="w-full py-3 rounded-xl font-extrabold text-black text-sm shadow-xl transition active:scale-95"
+                  className="w-full py-3 rounded-xl font-extrabold text-black text-sm shadow-xl transition active:scale-95 cursor-pointer"
                   style={{ backgroundColor: 'var(--brand-primary)' }}
                 >
                   Confirmar Reserva en {currentBusiness.name}
@@ -2047,7 +2138,7 @@ export const ClientHome: React.FC = () => {
                   Tu barbero ya tiene en su pantalla la foto del corte que pediste (<strong>{walkInStyle}</strong>).
                 </p>
                 <div className="p-3 bg-zinc-900 rounded-xl border border-zinc-800 text-[11px] text-amber-400 font-bold">
-                  🪑 Por favor toma asiento en la sala de espera. Te llamaremos en breve por tu nombre ({currentUser.fullName !== 'Cliente Invitado' ? currentUser.fullName : 'Pedro Duarte'}).
+                  🪑 Por favor toma asiento en la sala de espera. Te llamaremos en breve por tu nombre ({clientInputName || (currentUser.fullName !== 'Cliente Invitado' ? currentUser.fullName : 'Cliente Registrado')}) y recibirás aviso a tu WhatsApp ({clientInputPhone || currentUser.phone || 'registrado'}).
                 </div>
                 <button
                   onClick={() => setIsWalkInModalOpen(false)}
@@ -2249,22 +2340,58 @@ export const ClientHome: React.FC = () => {
                   </div>
                 </div>
 
+                {/* 4. Registro / Identificación del Cliente (Nombre + WhatsApp) */}
+                <div className="p-3.5 bg-zinc-950 rounded-2xl border border-amber-500/30 space-y-2.5 shadow-inner">
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-amber-400 flex items-center gap-1.5 text-xs">
+                      <User className="w-3.5 h-3.5" /> 4. Tus Datos de Registro (Obligatorio)
+                    </span>
+                    {currentUser.fullName !== 'Cliente Invitado' && currentUser.phone ? (
+                      <span className="text-[9px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <Check className="w-2.5 h-2.5" /> Guardado en este celular
+                      </span>
+                    ) : (
+                      <span className="text-[9px] bg-amber-500/20 text-amber-300 font-bold px-2 py-0.5 rounded-full">
+                        Se guardará en tu teléfono
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-zinc-400 font-bold block mb-1">Tu Nombre Completo:</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Ej: Pedro Duarte"
+                        value={clientInputName}
+                        onChange={(e) => { setClientInputName(e.target.value); setClientInputError(null); }}
+                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-white text-xs focus:border-amber-400 focus:outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-zinc-400 font-bold block mb-1">Tu Teléfono / WhatsApp:</label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="Ej: 310 236 5163"
+                        value={clientInputPhone}
+                        onChange={(e) => { setClientInputPhone(e.target.value); setClientInputError(null); }}
+                        className="w-full bg-zinc-900 border border-zinc-700 rounded-xl px-3 py-2 text-white text-xs focus:border-amber-400 focus:outline-none font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {clientInputError && (
+                    <div className="text-[11px] text-red-400 font-bold flex items-center gap-1.5 bg-red-500/10 p-2 rounded-xl border border-red-500/20 animate-shake">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                      <span>{clientInputError}</span>
+                    </div>
+                  )}
+                </div>
+
                 <button
-                  onClick={() => {
-                    const clientName = currentUser.fullName !== 'Cliente Invitado' ? currentUser.fullName : 'Pedro Duarte';
-                    const clientPhone = currentUser.phone || '+57 310 555 1234';
-                    WalkInService.createTicket({
-                      businessId: currentBusiness.id,
-                      type: 'walkin',
-                      clientName,
-                      clientPhone,
-                      styleName: walkInStyle,
-                      stylePhotoUrl: walkInPhoto || activePhoto,
-                      specialNote: walkInNote || activeAdjustment,
-                      barberName: walkInBarber,
-                    });
-                    setWalkInSent(true);
-                  }}
+                  onClick={handleConfirmWalkIn}
                   className="w-full py-3.5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black flex items-center justify-center gap-2 shadow-2xl shadow-amber-500/25 transition cursor-pointer text-xs sm:text-sm active:scale-98"
                 >
                   <Bell className="w-4 h-4 stroke-[3]" />
@@ -2275,10 +2402,6 @@ export const ClientHome: React.FC = () => {
                   </span>
                 </button>
               </div>
-
-
-
-
             )}
           </div>
         </div>
