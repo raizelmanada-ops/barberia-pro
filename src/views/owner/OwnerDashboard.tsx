@@ -17,8 +17,6 @@ import {
   Service,
   BarberProfile,
   BusinessSchedule,
-  WhatsAppNotificationConfig,
-  WhatsAppMessageLog,
   SubscriptionPlan,
   TenantHotmartSubscription,
   StyleCatalogItem,
@@ -26,10 +24,10 @@ import {
   CashTransaction,
   PaymentMethod
 } from '../../core/types';
-import { WhatsAppService } from '../../core/whatsapp/whatsappService';
 import { HotmartAdapter } from '../../core/hotmart/hotmartAdapter';
 import { EntitlementsService } from '../../core/services/entitlementsService';
 import { PlanService } from '../../core/services/planService';
+import { WhatsAppAgentHub } from '../../components/WhatsAppAgentHub';
 import {
   TrendingUp,
   Star,
@@ -53,7 +51,6 @@ import {
   Save,
   Info,
   Smartphone,
-  Send,
   ShieldCheck,
   CreditCard,
   ExternalLink,
@@ -99,16 +96,6 @@ export const OwnerDashboard: React.FC = () => {
     () => EntitlementsService.getEntitlements(currentBusiness),
     [currentBusiness]
   );
-
-  // WhatsApp Configuration State
-  const [waConfig, setWaConfig] = useState<WhatsAppNotificationConfig>(() =>
-    WhatsAppService.getConfig(currentBusiness)
-  );
-  const [waTestPhone, setWaTestPhone] = useState<string>(currentBusiness.phone || '+57 310 236 5163');
-  const [waLogs, setWaLogs] = useState<WhatsAppMessageLog[]>(() =>
-    WhatsAppService.getLogs(currentBusiness.id)
-  );
-  const [waSendingTest, setWaSendingTest] = useState(false);
 
   // Business Info Form State
   const [bizName, setBizName] = useState(currentBusiness.name);
@@ -670,22 +657,6 @@ export const OwnerDashboard: React.FC = () => {
     triggerSuccess('Visibilidad del servicio actualizada en Cloud');
   };
 
-  const handleSaveWhatsAppConfig = (e: React.FormEvent) => {
-    e.preventDefault();
-    WhatsAppService.saveConfig(currentBusiness.id, waConfig, `Owner (${ownerDisplayName})`);
-    triggerSuccess('¡Configuración de WhatsApp guardada en Cloud!');
-  };
-
-  const handleSendTestWhatsApp = async () => {
-    setWaSendingTest(true);
-    const res = await WhatsAppService.sendTestPing(currentBusiness, waTestPhone);
-    setWaSendingTest(false);
-    if (res.success) {
-      setWaLogs(WhatsAppService.getLogs(currentBusiness.id));
-      triggerSuccess(`¡Mensaje de prueba WhatsApp enviado a ${waTestPhone}!`);
-    }
-  };
-
   const handleSimulateHotmartActivation = async (planId: string) => {
     setSimulatingHotmart(true);
     const res = await HotmartAdapter.simulateHotmartEvent(currentBusiness.id, 'SUBSCRIPTION_ACTIVATION', planId);
@@ -1034,12 +1005,12 @@ export const OwnerDashboard: React.FC = () => {
 
         <button
           onClick={() => setActiveTab('whatsapp')}
-          className={`py-2.5 px-1 rounded-xl text-center transition truncate flex items-center justify-center gap-1 ${
+          className={`py-2.5 px-2 rounded-xl text-center transition truncate flex items-center justify-center gap-1.5 ${
             activeTab === 'whatsapp' ? 'bg-emerald-500 text-black shadow font-black' : 'text-zinc-400 hover:text-white'
           }`}
         >
           <Smartphone className="w-3.5 h-3.5" />
-          <span>💬 WhatsApp</span>
+          <span>🤖 Agente IA & WhatsApp</span>
         </button>
 
         <button
@@ -3137,281 +3108,9 @@ export const OwnerDashboard: React.FC = () => {
         </form>
       )}
 
-      {/* TAB 6: WHATSAPP CLOUD API INTEGRATION */}
+      {/* TAB 6: WHATSAPP CLOUD API & AI AGENT HUB INTEGRATION */}
       {activeTab === 'whatsapp' && (
-        <div className="space-y-5 animate-fade-in text-xs">
-          {/* Header & Status Card */}
-          <div className="bg-zinc-900 border border-emerald-500/30 p-5 rounded-3xl space-y-3 shadow-xl">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="p-1 rounded-lg bg-emerald-500/20 text-emerald-400">
-                    <Smartphone className="w-4 h-4" />
-                  </span>
-                  <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
-                    Canal Oficial de WhatsApp Business
-                  </span>
-                </div>
-                <h3 className="text-base font-black text-white mt-1">
-                  Integración Transaccional para {currentBusiness.name}
-                </h3>
-                <p className="text-zinc-400 mt-0.5 max-w-xl">
-                  Notificaciones automáticas de confirmación y recordatorio de citas directas al WhatsApp del cliente y del barbero.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold border ${
-                  waConfig.mode === 'sandbox'
-                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400'
-                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
-                }`}>
-                  {waConfig.mode === 'sandbox' ? 'MODO PRUEBA / SANDBOX' : 'PRODUCCIÓN META API'}
-                </span>
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-3 text-zinc-300">
-              <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-1">
-                <span className="text-zinc-400 block text-[10px] uppercase font-bold">Número Registrado del Negocio:</span>
-                <div className="font-mono font-bold text-white text-sm">{waConfig.phoneNumber}</div>
-                <div className="text-[10px] text-zinc-500">
-                  {currentBusiness.id === 'biz_arizshop_01' ? 'Línea oficial de Álvaro Ortiz' : 'Línea del tenant'}
-                </div>
-              </div>
-
-              <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-1">
-                <span className="text-zinc-400 block text-[10px] uppercase font-bold">Estado de Credenciales Meta:</span>
-                <div className="text-amber-400 font-bold flex items-center gap-1.5">
-                  <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-                  <span>PENDIENTE DE CONFIGURACIÓN DEL OWNER / META</span>
-                </div>
-                <div className="text-[10px] text-zinc-500">
-                  Operando en Sandbox transaccional con plantillas oficiales aprobadas.
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Formulario de Configuración & Preferencias */}
-          <form onSubmit={handleSaveWhatsAppConfig} className="bg-zinc-900 border border-zinc-800 p-5 rounded-3xl space-y-4 shadow-xl">
-            <h4 className="text-sm font-black text-white flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-emerald-400" />
-              Preferencias de Mensajería Transaccional
-            </h4>
-
-            <div className="space-y-2.5">
-              <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-white">Canal de Notificaciones Activo</div>
-                  <div className="text-zinc-400 text-[11px]">Habilita o pausa el envío de mensajes por WhatsApp.</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setWaConfig({ ...waConfig, isEnabled: !waConfig.isEnabled })}
-                  className={`p-1.5 rounded-xl border transition ${
-                    waConfig.isEnabled ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-zinc-800 border-zinc-700 text-zinc-500'
-                  }`}
-                >
-                  {waConfig.isEnabled ? <ToggleRight className="w-6 h-6" /> : <ToggleLeft className="w-6 h-6" />}
-                </button>
-              </div>
-
-              <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-white">Confirmación Inmediata de Reserva (Cliente)</div>
-                  <div className="text-zinc-400 text-[11px]">Envía mensaje al cliente con fecha, hora, barbero y precio al confirmar.</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setWaConfig({ ...waConfig, notifyOnBooking: !waConfig.notifyOnBooking })}
-                  className={`p-1.5 rounded-xl border transition ${
-                    waConfig.notifyOnBooking ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-zinc-800 border-zinc-700 text-zinc-500'
-                  }`}
-                >
-                  {waConfig.notifyOnBooking ? <ToggleRight className="w-6 h-6" /> : <ToggleLeft className="w-6 h-6" />}
-                </button>
-              </div>
-
-              <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-white">Recordatorio Automático de Turno (Cliente)</div>
-                  <div className="text-zinc-400 text-[11px]">Notifica al cliente con antelación el día de su servicio.</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setWaConfig({ ...waConfig, notifyOnReminder: !waConfig.notifyOnReminder })}
-                  className={`p-1.5 rounded-xl border transition ${
-                    waConfig.notifyOnReminder ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-zinc-800 border-zinc-700 text-zinc-500'
-                  }`}
-                >
-                  {waConfig.notifyOnReminder ? <ToggleRight className="w-6 h-6" /> : <ToggleLeft className="w-6 h-6" />}
-                </button>
-              </div>
-
-              <div className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800 flex items-center justify-between">
-                <div>
-                  <div className="font-bold text-white">Alerta de Nueva Cita al Barbero en Sillón</div>
-                  <div className="text-zinc-400 text-[11px]">Avisa al profesional asignado cuando un cliente agenda en su horario.</div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setWaConfig({ ...waConfig, notifyBarberOnNewBooking: !waConfig.notifyBarberOnNewBooking })}
-                  className={`p-1.5 rounded-xl border transition ${
-                    waConfig.notifyBarberOnNewBooking ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' : 'bg-zinc-800 border-zinc-700 text-zinc-500'
-                  }`}
-                >
-                  {waConfig.notifyBarberOnNewBooking ? <ToggleRight className="w-6 h-6" /> : <ToggleLeft className="w-6 h-6" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Canal Nativo Directo wa.me (Sin Meta requerido) */}
-            <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="font-bold text-emerald-400 flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Canal de Contacto Directo WhatsApp (wa.me)</span>
-                </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400">
-                  ACTIVO • SIN DEPENDENCIAS EXTERNAS
-                </span>
-              </div>
-              <p className="text-zinc-300 text-xs">
-                Tus clientes pueden contactarte directamente a tu línea oficial <strong>{bizWhatsapp || '+57 310 236 5163'}</strong> con el detalle de su reserva al presionar un botón, sin necesidad de cuentas ni configuraciones de Meta.
-              </p>
-              <div className="pt-1">
-                <a
-                  href={`https://wa.me/${(bizWhatsapp || '+57 310 236 5163').replace(/\D/g, '')}?text=${encodeURIComponent(`¡Hola ${bizName}! Estoy interesado en agendar un servicio en su barbería.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                  <span>Probar mi Enlace Directo de WhatsApp</span>
-                </a>
-              </div>
-            </div>
-
-            {/* Parámetros Meta Cloud API (Módulo Avanzado Opcional Futuro) */}
-            <div className="p-4 bg-zinc-950 rounded-2xl border border-zinc-800 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="font-bold text-zinc-300">Meta Cloud API (Módulo Avanzado Opcional Futuro):</div>
-                <span className="text-[9px] text-zinc-500 uppercase font-mono">No Requerido para Operar</span>
-              </div>
-              <div className="grid sm:grid-cols-3 gap-3">
-                <div>
-                  <label className="text-[10px] text-zinc-400 block mb-1">Phone Number ID:</label>
-                  <input
-                    type="text"
-                    value={waConfig.phoneNumberId || ''}
-                    onChange={(e) => setWaConfig({ ...waConfig, phoneNumberId: e.target.value })}
-                    placeholder="Pendiente de Meta"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-white font-mono text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-zinc-400 block mb-1">WABA Account ID:</label>
-                  <input
-                    type="text"
-                    value={waConfig.wabaId || ''}
-                    onChange={(e) => setWaConfig({ ...waConfig, wabaId: e.target.value })}
-                    placeholder="Pendiente de Meta"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-white font-mono text-xs"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] text-zinc-400 block mb-1">Access Token (Bearer):</label>
-                  <input
-                    type="password"
-                    value={waConfig.accessToken || ''}
-                    onChange={(e) => setWaConfig({ ...waConfig, accessToken: e.target.value })}
-                    placeholder="••••••••••••••••"
-                    className="w-full bg-zinc-900 border border-zinc-800 rounded-xl p-2 text-white font-mono text-xs"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="px-5 py-2.5 rounded-xl font-bold text-black shadow-lg transition flex items-center gap-2"
-              style={{ backgroundColor: 'var(--brand-primary)' }}
-            >
-              <Save className="w-4 h-4" /> Guardar Preferencias de WhatsApp
-            </button>
-          </form>
-
-          {/* Probador Interactivo Sandbox */}
-          <div className="bg-zinc-900 border border-zinc-800 p-5 rounded-3xl space-y-3 shadow-xl">
-            <h4 className="text-sm font-black text-white flex items-center gap-2">
-              <Send className="w-4 h-4 text-sky-400" />
-              Probador de Envío Sandbox (Piloto Controlado)
-            </h4>
-            <p className="text-zinc-400 text-xs">
-              Envía un mensaje de prueba al número de Álvaro Ortiz o de un barbero para validar la recepción de plantillas transaccionales.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center gap-2 pt-1">
-              <input
-                type="text"
-                value={waTestPhone}
-                onChange={(e) => setWaTestPhone(e.target.value)}
-                placeholder="+57 310 236 5163"
-                className="w-full sm:w-72 bg-zinc-950 border border-zinc-800 rounded-xl p-2.5 text-white font-mono text-xs"
-              />
-              <button
-                type="button"
-                disabled={waSendingTest}
-                onClick={handleSendTestWhatsApp}
-                className="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition flex items-center justify-center gap-1.5 disabled:opacity-50"
-              >
-                <Send className="w-3.5 h-3.5" />
-                <span>{waSendingTest ? 'Enviando...' : 'Enviar Prueba a WhatsApp'}</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Telemetría y Bitácora de Mensajes Enviados */}
-          <div className="bg-zinc-900 border border-zinc-800 p-5 rounded-3xl space-y-3 shadow-xl">
-            <div className="flex items-center justify-between border-b border-zinc-800 pb-2.5">
-              <h4 className="text-sm font-black text-white flex items-center gap-2">
-                <Clock className="w-4 h-4 text-purple-400" />
-                Bitácora de Telemetría WhatsApp (Solo este Tenant)
-              </h4>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-950 text-zinc-400 border border-zinc-800">
-                {waLogs.length} notificaciones
-              </span>
-            </div>
-
-            {waLogs.length === 0 ? (
-              <div className="p-4 bg-zinc-950 rounded-2xl text-center text-zinc-500 text-xs">
-                Sin mensajes registrados aún. Realiza una reserva de prueba o usa el probador superior.
-              </div>
-            ) : (
-              <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                {waLogs.map((log) => (
-                  <div key={log.id} className="p-3 bg-zinc-950 rounded-2xl border border-zinc-800/80 flex items-center justify-between gap-3">
-                    <div className="space-y-0.5 truncate">
-                      <div className="font-bold text-white text-xs truncate">{log.summary}</div>
-                      <div className="text-[10px] text-zinc-400 flex items-center gap-2">
-                        <span>Destino: <strong className="text-zinc-200">{log.recipientPhone}</strong></span>
-                        <span>•</span>
-                        <span>Plantilla: <code className="text-purple-300">{log.templateName}</code></span>
-                        <span>•</span>
-                        <span>{new Date(log.sentAt).toLocaleTimeString('es-CO')}</span>
-                      </div>
-                    </div>
-
-                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 shrink-0">
-                      ✓ ENTREGADO
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        <WhatsAppAgentHub business={currentBusiness} />
       )}
 
       {/* TAB 7: HOTMART SAAS SUBSCRIPTION */}

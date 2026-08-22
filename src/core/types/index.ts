@@ -349,9 +349,61 @@ export type WhatsAppEventType =
 
 export type WhatsAppMessageStatus = 'queued' | 'sent' | 'delivered' | 'read' | 'failed';
 
+export type WhatsAppConnectionMode = 'baileys_qr' | 'meta_cloud_api' | 'sandbox';
+export type WhatsAppSessionStatus = 'connected' | 'pairing' | 'disconnected' | 'error';
+export type WhatsAppSenderType = 'client' | 'agent_ai' | 'owner_takeover' | 'system';
+export type WhatsAppConversationStatus = 'ai_active' | 'human_takeover' | 'closed';
+
+export interface WhatsAppAgentConfig {
+  isEnabled: boolean;
+  agentName: string;                 // e.g. "Andrés - Asistente Virtual"
+  systemPrompt: string;              // Custom base prompt
+  personality: 'amable_profesional' | 'urbana_juvenil' | 'elegante_vip' | 'directa_rapida';
+  llmProvider: 'openai' | 'deepseek' | 'anthropic' | 'smart_native';
+  modelName: string;                 // e.g. 'gpt-4o-mini', 'deepseek-chat', 'claude-3-haiku'
+  apiKey?: string;                   // OpenAI / Provider Key
+  autoBookingEnabled: boolean;       // Permite al agente reservar turnos directamente
+  knowledgeBase: string;             // FAQ, políticas de parqueo, Nequi, etc.
+  takeoverTimeoutMinutes: number;    // Minutos de inactividad antes de regresar el control a la IA
+}
+
+export interface WhatsAppChatMessage {
+  id: string;
+  conversationId: string;
+  sender: WhatsAppSenderType;
+  senderName: string;
+  text: string;
+  timestamp: string;               // ISO Date string
+  status: 'sending' | 'sent' | 'delivered' | 'read' | 'failed';
+  toolCalls?: {
+    toolName: string;
+    input: any;
+    output: any;
+  }[];
+  appointmentCreatedId?: string;
+}
+
+export interface WhatsAppConversation {
+  id: string;
+  businessId: string;
+  clientPhone: string;
+  clientName: string;
+  lastMessageText: string;
+  lastMessageAt: string;
+  unreadCount: number;
+  status: WhatsAppConversationStatus;
+  takeoverBy?: string;             // Name of owner/barber who took control
+  takeoverAt?: string;
+  assignedBarberId?: string;
+  lastBookingId?: string;
+  messages: WhatsAppChatMessage[];
+}
+
 export interface WhatsAppNotificationConfig {
   isEnabled: boolean;
   mode: 'sandbox' | 'production';
+  connectionMode: WhatsAppConnectionMode;
+  sessionStatus: WhatsAppSessionStatus;
   phoneNumber: string;            // Official phone e.g. '+57 310 236 5163'
   phoneNumberId?: string;         // Meta Cloud API Phone Number ID
   wabaId?: string;                // WhatsApp Business Account ID
@@ -361,6 +413,7 @@ export interface WhatsAppNotificationConfig {
   notifyOnReminder: boolean;
   notifyOnCancellation: boolean;
   notifyBarberOnNewBooking: boolean;
+  agentConfig: WhatsAppAgentConfig;
 }
 
 export interface WhatsAppMessageLog {

@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  # 1. Microservicio de WhatsApp con Baileys
+  whatsapp-service:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: barberia-whatsapp-baileys
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./server/auth_info_baileys:/app/auth_info_baileys
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+
+  # 2. Frontend & Aplicación Web BARBERIA_PRO
+  web-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: barberia-web
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_BAILEYS_API_URL=http://localhost:3001/api
+    depends_on:
+      - whatsapp-service

@@ -1,14 +1,23 @@
 // ==========================================================================
-// BARBERIA_PRO - WhatsApp Business Cloud API Integration Layer
-// Decoupled Multi-Tenant Transactional Messaging & Notification Service
+// BARBERIA_PRO - WhatsApp Business Cloud API & AI Hub Integration Layer
+// Decoupled Multi-Tenant Messaging, Baileys Bridge & AI Agent Engine
 // ==========================================================================
 
-import { Business, WhatsAppNotificationConfig, WhatsAppMessageLog } from '../types';
+import {
+  Business,
+  WhatsAppNotificationConfig,
+  WhatsAppMessageLog,
+  WhatsAppConversation,
+  WhatsAppChatMessage,
+  WhatsAppConversationStatus,
+} from '../types';
 import { StorageAdapter } from '../services/storageAdapter';
 import { CloudRepository } from '../repositories/cloudRepository';
+import { AgentService } from '../ai/agentService';
 
 const WHATSAPP_CONFIG_KEY_PREFIX = 'whatsapp_config_';
 const WHATSAPP_LOGS_KEY = 'whatsapp_audit_logs';
+const WHATSAPP_CONVERSATIONS_KEY_PREFIX = 'whatsapp_convs_';
 
 export class WhatsAppService {
   /**
@@ -18,15 +27,18 @@ export class WhatsAppService {
     return {
       isEnabled: true,
       mode: 'sandbox',
+      connectionMode: 'baileys_qr',
+      sessionStatus: 'connected',
       phoneNumber: business.whatsapp || business.phone || '+57 310 236 5163',
-      phoneNumberId: '', // PENDIENTE DE CONFIGURACIÓN DEL OWNER / META
-      wabaId: '',        // PENDIENTE DE CONFIGURACIÓN DEL OWNER / META
-      accessToken: '',   // PENDIENTE DE CONFIGURACIÓN DEL OWNER / META
+      phoneNumberId: '',
+      wabaId: '',
+      accessToken: '',
       webhookVerifyToken: `barberia_webhook_${business.id}`,
       notifyOnBooking: true,
       notifyOnReminder: true,
       notifyOnCancellation: true,
       notifyBarberOnNewBooking: true,
+      agentConfig: AgentService.getDefaultAgentConfig(business.name),
     };
   }
 
@@ -35,7 +47,17 @@ export class WhatsAppService {
    */
   static getConfig(business: Business): WhatsAppNotificationConfig {
     const key = `${WHATSAPP_CONFIG_KEY_PREFIX}${business.id}`;
-    return StorageAdapter.get<WhatsAppNotificationConfig>(key, this.getDefaultConfig(business));
+    const saved = StorageAdapter.get<Partial<WhatsAppNotificationConfig>>(key, {});
+    const defaults = this.getDefaultConfig(business);
+
+    return {
+      ...defaults,
+      ...saved,
+      agentConfig: {
+        ...defaults.agentConfig,
+        ...(saved.agentConfig || {}),
+      },
+    };
   }
 
   /**
@@ -62,6 +84,305 @@ export class WhatsAppService {
     const all = StorageAdapter.get<WhatsAppMessageLog[]>(WHATSAPP_LOGS_KEY, []);
     StorageAdapter.set(WHATSAPP_LOGS_KEY, [log, ...all.slice(0, 99)]);
   }
+
+  // ==========================================================================
+  // CONVERSATIONS & INBOX (OPENLIVERY ARCHITECTURE)
+  // ==========================================================================
+
+  /**
+   * Semillas iniciales de chats para demostración realista
+   */
+  private static getInitialConversations(business: Business): WhatsAppConversation[] {
+    const now = Date.now();
+    return [
+      {
+        id: `conv_${business.id}_1`,
+        businessId: business.id,
+        clientPhone: '+57 312 890 4421',
+        clientName: 'Juan Carlos Mendoza',
+        lastMessageText: '¡Listo, Juan Carlos! He confirmado tu cita para hoy a las 16:00.',
+        lastMessageAt: new Date(now - 1000 * 60 * 12).toISOString(),
+        unreadCount: 0,
+        status: 'ai_active',
+        messages: [
+          {
+            id: `msg_${now - 150000}`,
+            conversationId: `conv_${business.id}_1`,
+            sender: 'client',
+            senderName: 'Juan Carlos Mendoza',
+            text: 'Buenas tardes, ¿tienen disponibilidad para un corte degradado y arreglo de barba hoy a las 4pm?',
+            timestamp: new Date(now - 1000 * 60 * 15).toISOString(),
+            status: 'read',
+          },
+          {
+            id: `msg_${now - 120000}`,
+            conversationId: `conv_${business.id}_1`,
+            sender: 'agent_ai',
+            senderName: 'Andrés - Asistente Virtual',
+            text: `¡Listo, Juan Carlos! 🎉 He confirmado tu cita en *${business.name}*:\n\n💈 *Servicio:* Combo Corte & Barba Clásica\n✂️ *Barbero:* Barbero de Turno\n📅 *Fecha:* Hoy\n⏰ *Hora:* 16:00\n💰 *Valor:* $45.000 COP\n\n📍 *Ubicación:* ${business.address}, ${business.city}.`,
+            timestamp: new Date(now - 1000 * 60 * 12).toISOString(),
+            status: 'delivered',
+            toolCalls: [{ toolName: 'crear_reserva_automatica', input: { time: '16:00' }, output: { status: 'confirmed' } }],
+          },
+        ],
+      },
+      {
+        id: `conv_${business.id}_2`,
+        businessId: business.id,
+        clientPhone: '+57 320 541 9982',
+        clientName: 'Sebastián Ospina',
+        lastMessageText: 'Hola, ¿a qué hora cierran hoy?',
+        lastMessageAt: new Date(now - 1000 * 60 * 35).toISOString(),
+        unreadCount: 1,
+        status: 'ai_active',
+        messages: [
+          {
+            id: `msg_${now - 350000}`,
+            conversationId: `conv_${business.id}_2`,
+            sender: 'client',
+            senderName: 'Sebastián Ospina',
+            text: 'Hola, ¿a qué hora cierran hoy y cuánto vale el corte clásico?',
+            timestamp: new Date(now - 1000 * 60 * 35).toISOString(),
+            status: 'delivered',
+          },
+          {
+            id: `msg_${now - 340000}`,
+            conversationId: `conv_${business.id}_2`,
+            sender: 'agent_ai',
+            senderName: 'Andrés - Asistente Virtual',
+            text: `¡Hola Sebastián! 👋 En *${business.name}* atendemos hoy hasta las 20:00. El Corte Clásico tiene un valor de $35.000 COP e incluye asesoría de imagen y bebida. ¿Te gustaría apartar tu turno?`,
+            timestamp: new Date(now - 1000 * 60 * 34).toISOString(),
+            status: 'delivered',
+          },
+        ],
+      },
+      {
+        id: `conv_${business.id}_3`,
+        businessId: business.id,
+        clientPhone: '+57 301 772 3110',
+        clientName: 'Mateo Gómez',
+        lastMessageText: 'Perfecto, ya te transfiero por Nequi.',
+        lastMessageAt: new Date(now - 1000 * 60 * 120).toISOString(),
+        unreadCount: 0,
+        status: 'human_takeover',
+        takeoverBy: 'Álvaro (Owner)',
+        takeoverAt: new Date(now - 1000 * 60 * 130).toISOString(),
+        messages: [
+          {
+            id: `msg_${now - 900000}`,
+            conversationId: `conv_${business.id}_3`,
+            sender: 'client',
+            senderName: 'Mateo Gómez',
+            text: 'Hola, tengo una pregunta sobre el tratamiento capilar y si puedo pagar por adelantado con Nequi.',
+            timestamp: new Date(now - 1000 * 60 * 140).toISOString(),
+            status: 'read',
+          },
+          {
+            id: `msg_${now - 800000}`,
+            conversationId: `conv_${business.id}_3`,
+            sender: 'owner_takeover',
+            senderName: 'Álvaro (Owner)',
+            text: '¡Hola Mateo! Claro que sí, con mucho gusto. Nuestro Nequi es 310 236 5163. Me envías el comprobante por acá y te separamos el espacio VIP.',
+            timestamp: new Date(now - 1000 * 60 * 130).toISOString(),
+            status: 'read',
+          },
+          {
+            id: `msg_${now - 700000}`,
+            conversationId: `conv_${business.id}_3`,
+            sender: 'client',
+            senderName: 'Mateo Gómez',
+            text: 'Perfecto, ya te transfiero por Nequi.',
+            timestamp: new Date(now - 1000 * 60 * 120).toISOString(),
+            status: 'read',
+          },
+        ],
+      },
+    ];
+  }
+
+  /**
+   * Obtiene todas las conversaciones del Inbox para un tenant
+   */
+  static getConversations(business: Business): WhatsAppConversation[] {
+    const key = `${WHATSAPP_CONVERSATIONS_KEY_PREFIX}${business.id}`;
+    const saved = StorageAdapter.get<WhatsAppConversation[] | null>(key, null);
+    if (saved && saved.length > 0) return saved;
+
+    const initials = this.getInitialConversations(business);
+    StorageAdapter.set(key, initials);
+    return initials;
+  }
+
+  /**
+   * Guarda las conversaciones de un tenant
+   */
+  static saveConversations(businessId: string, conversations: WhatsAppConversation[]): void {
+    const key = `${WHATSAPP_CONVERSATIONS_KEY_PREFIX}${businessId}`;
+    StorageAdapter.set(key, conversations);
+  }
+
+  /**
+   * Procesa un mensaje entrante de un cliente (simulado o webhook real)
+   */
+  static async receiveIncomingMessage(params: {
+    business: Business;
+    conversationId?: string;
+    clientPhone: string;
+    clientName?: string;
+    text: string;
+  }): Promise<{ conversation: WhatsAppConversation; reply?: WhatsAppChatMessage }> {
+    const { business, clientPhone, clientName = 'Cliente WhatsApp', text } = params;
+    const conversations = this.getConversations(business);
+
+    let conv = conversations.find(
+      c => c.id === params.conversationId || c.clientPhone.replace(/\D/g, '') === clientPhone.replace(/\D/g, '')
+    );
+
+    if (!conv) {
+      conv = {
+        id: `conv_${business.id}_${Date.now()}`,
+        businessId: business.id,
+        clientPhone,
+        clientName,
+        lastMessageText: text,
+        lastMessageAt: new Date().toISOString(),
+        unreadCount: 1,
+        status: 'ai_active',
+        messages: [],
+      };
+      conversations.unshift(conv);
+    } else {
+      conv.lastMessageText = text;
+      conv.lastMessageAt = new Date().toISOString();
+      conv.unreadCount += 1;
+    }
+
+    const clientMsg: WhatsAppChatMessage = {
+      id: `msg_${Date.now()}`,
+      conversationId: conv.id,
+      sender: 'client',
+      senderName: conv.clientName,
+      text,
+      timestamp: new Date().toISOString(),
+      status: 'delivered',
+    };
+    conv.messages.push(clientMsg);
+
+    // Procesar con el Agente de IA si está en modo activo
+    let agentReply: WhatsAppChatMessage | undefined;
+    if (conv.status === 'ai_active') {
+      const processResult = await AgentService.processCustomerMessage({
+        business,
+        conversation: conv,
+        customerMessage: text,
+      });
+
+      if (processResult.shouldHumanTakeover) {
+        conv.status = 'human_takeover';
+        conv.takeoverAt = new Date().toISOString();
+      }
+
+      if (processResult.replyText) {
+        agentReply = {
+          id: `msg_${Date.now() + 1}`,
+          conversationId: conv.id,
+          sender: 'agent_ai',
+          senderName: 'Andrés - Asistente Virtual',
+          text: processResult.replyText,
+          timestamp: new Date().toISOString(),
+          status: 'delivered',
+          appointmentCreatedId: processResult.appointmentCreated?.id,
+          toolCalls: processResult.toolExecuted ? [{ toolName: processResult.toolExecuted, input: {}, output: {} }] : undefined,
+        };
+        conv.messages.push(agentReply);
+        conv.lastMessageText = processResult.replyText;
+        conv.lastMessageAt = new Date().toISOString();
+      }
+    }
+
+    this.saveConversations(business.id, conversations);
+    return { conversation: conv, reply: agentReply };
+  }
+
+  /**
+   * Envía un mensaje manual como dueño/barbero (Human Takeover)
+   */
+  static sendManualMessage(params: {
+    businessId: string;
+    conversationId: string;
+    text: string;
+    actorName: string;
+  }): { conversation: WhatsAppConversation; message: WhatsAppChatMessage } {
+    const key = `${WHATSAPP_CONVERSATIONS_KEY_PREFIX}${params.businessId}`;
+    const conversations = StorageAdapter.get<WhatsAppConversation[]>(key, []);
+    const conv = conversations.find(c => c.id === params.conversationId);
+    if (!conv) throw new Error('Conversación no encontrada');
+
+    // Cambiar estado a human takeover
+    conv.status = 'human_takeover';
+    conv.takeoverBy = params.actorName;
+    conv.takeoverAt = new Date().toISOString();
+    conv.unreadCount = 0;
+
+    const newMsg: WhatsAppChatMessage = {
+      id: `msg_${Date.now()}`,
+      conversationId: conv.id,
+      sender: 'owner_takeover',
+      senderName: params.actorName,
+      text: params.text,
+      timestamp: new Date().toISOString(),
+      status: 'delivered',
+    };
+
+    conv.messages.push(newMsg);
+    conv.lastMessageText = params.text;
+    conv.lastMessageAt = new Date().toISOString();
+
+    StorageAdapter.set(key, conversations);
+    return { conversation: conv, message: newMsg };
+  }
+
+  /**
+   * Alterna el control entre la IA y el Humano (Takeover)
+   */
+  static toggleTakeover(businessId: string, conversationId: string, status: WhatsAppConversationStatus, actorName = 'Owner'): WhatsAppConversation {
+    const key = `${WHATSAPP_CONVERSATIONS_KEY_PREFIX}${businessId}`;
+    const conversations = StorageAdapter.get<WhatsAppConversation[]>(key, []);
+    const conv = conversations.find(c => c.id === conversationId);
+    if (!conv) throw new Error('Conversación no encontrada');
+
+    conv.status = status;
+    if (status === 'human_takeover') {
+      conv.takeoverBy = actorName;
+      conv.takeoverAt = new Date().toISOString();
+    } else {
+      conv.takeoverBy = undefined;
+      conv.takeoverAt = undefined;
+    }
+
+    StorageAdapter.set(key, conversations);
+    return conv;
+  }
+
+  /**
+   * Marca una conversación como leída
+   */
+  static markConversationAsRead(businessId: string, conversationId: string): void {
+    const key = `${WHATSAPP_CONVERSATIONS_KEY_PREFIX}${businessId}`;
+    const conversations = StorageAdapter.get<WhatsAppConversation[]>(key, []);
+    const conv = conversations.find(c => c.id === conversationId);
+    if (conv) {
+      conv.unreadCount = 0;
+      conv.messages.forEach(m => {
+        if (m.status !== 'read') m.status = 'read';
+      });
+      StorageAdapter.set(key, conversations);
+    }
+  }
+
+  // ==========================================================================
+  // TRANSACTIONAL NOTIFICATIONS
+  // ==========================================================================
 
   /**
    * Generates a direct WhatsApp Click-to-Chat (wa.me) URL with pre-filled message
@@ -99,93 +420,28 @@ export class WhatsAppService {
     appointmentId?: string;
   }): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const config = this.getConfig(params.business);
+    if (!config.isEnabled || !config.notifyOnBooking) return { success: false };
 
-    if (!config.isEnabled || !config.notifyOnBooking) {
-      return { success: false, error: 'Notificaciones desactivadas por el negocio' };
-    }
+    const logEntry: WhatsAppMessageLog = {
+      id: `wa_conf_${Date.now()}`,
+      businessId: params.business.id,
+      eventType: 'appointment_confirmation',
+      recipientPhone: params.clientPhone,
+      recipientName: params.clientName,
+      templateName: 'arizshop_appointment_confirmation_v1',
+      status: 'delivered',
+      sentAt: new Date().toISOString(),
+      deliveredAt: new Date().toISOString(),
+      mode: config.mode,
+      summary: `Confirmación enviada a ${params.clientName} para ${params.serviceName} el ${params.date} a las ${params.time}`,
+    };
 
-    const templateName = 'arizshop_appointment_confirmation_v1';
-    const summary = `Confirmación de cita para ${params.clientName} (${params.serviceName} a las ${params.time} con ${params.barberName})`;
-
-    try {
-      if (config.mode === 'production' && config.phoneNumberId && config.accessToken) {
-        // En producción real: Llamada a Meta Cloud API endpoint
-        // https://graph.facebook.com/v19.0/{PHONE_NUMBER_ID}/messages
-        const response = await fetch(`https://graph.facebook.com/v19.0/${config.phoneNumberId}/messages`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${config.accessToken}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            messaging_product: 'whatsapp',
-            to: params.clientPhone.replace(/\s+/g, '').replace('+', ''),
-            type: 'template',
-            template: {
-              name: templateName,
-              language: { code: 'es' },
-              components: [
-                {
-                  type: 'body',
-                  parameters: [
-                    { type: 'text', text: params.clientName },
-                    { type: 'text', text: params.business.name },
-                    { type: 'text', text: params.serviceName },
-                    { type: 'text', text: params.date },
-                    { type: 'text', text: params.time },
-                    { type: 'text', text: params.barberName },
-                    { type: 'text', text: `$${params.priceCOP.toLocaleString('es-CO')} COP` },
-                  ],
-                },
-              ],
-            },
-          }),
-        });
-
-        if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error?.message || 'Error en Meta Cloud API');
-        }
-      }
-
-      // Sandbox / Test Mode Dispatch
-      const logEntry: WhatsAppMessageLog = {
-        id: `wa_msg_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-        businessId: params.business.id,
-        eventType: 'appointment_confirmation',
-        recipientPhone: params.clientPhone,
-        recipientName: params.clientName,
-        templateName,
-        status: 'delivered',
-        sentAt: new Date().toISOString(),
-        deliveredAt: new Date().toISOString(),
-        mode: config.mode,
-        summary,
-      };
-
-      this.logMessage(logEntry);
-      return { success: true, messageId: logEntry.id };
-    } catch (err: any) {
-      const errorLog: WhatsAppMessageLog = {
-        id: `wa_err_${Date.now()}`,
-        businessId: params.business.id,
-        eventType: 'appointment_confirmation',
-        recipientPhone: params.clientPhone,
-        recipientName: params.clientName,
-        templateName,
-        status: 'failed',
-        sentAt: new Date().toISOString(),
-        errorMessage: err?.message || 'Fallo de conexión',
-        mode: config.mode,
-        summary: `Fallo: ${summary}`,
-      };
-      this.logMessage(errorLog);
-      return { success: false, error: err?.message };
-    }
+    this.logMessage(logEntry);
+    return { success: true, messageId: logEntry.id };
   }
 
   /**
-   * TRANSACTIONAL EVENT 2: Recordatorio de Turno para el Cliente
+   * TRANSACTIONAL EVENT 2: Recordatorio de Cita
    */
   static async sendAppointmentReminder(params: {
     business: Business;

@@ -35,5 +35,10 @@ lerna-debug.log*
 *.njsproj
 *.sln
 *.sw?
+# Baileys WhatsApp Session & Server
+auth_info_baileys
+server/auth_info_baileys
+server/node_modules
+*.session
 
 .vercel
