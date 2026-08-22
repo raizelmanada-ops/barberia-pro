@@ -660,14 +660,52 @@ export const ClientHome: React.FC = () => {
         </div>
       </div>
 
+      {/* 🛎️ ACCIÓN #1 DE ENTRADA: ¿LLEGASTE AL LOCAL? TOMA TU TURNO AL INSTANTE */}
+      <section className="rounded-3xl p-4.5 sm:p-5 bg-gradient-to-r from-amber-500/20 via-zinc-900 to-zinc-950 border-2 border-amber-500/50 shadow-2xl relative overflow-hidden space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="p-2 rounded-xl bg-amber-500 text-black font-black text-xs shadow flex items-center gap-1">
+              <Bell className="w-4 h-4" />
+              <span>SALA DE ESPERA EN VIVO</span>
+            </span>
+            <span className="text-xs text-zinc-300 font-bold hidden sm:inline-block">¿Llegaste a la barbería?</span>
+          </div>
+          <span className="text-[10px] font-black px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" /> ATENDIENDO EN VIVO
+          </span>
+        </div>
 
+        <div className="grid sm:grid-cols-2 gap-2.5 pt-0.5">
+          <button
+            onClick={() => {
+              setWalkInSent(false);
+              setIsWalkInModalOpen(true);
+            }}
+            className="w-full py-3.5 px-4 rounded-2xl bg-amber-500 hover:bg-amber-400 text-black font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-amber-500/25 transition cursor-pointer hover:scale-102 active:scale-98"
+          >
+            <Bell className="w-4 h-4 stroke-[3]" />
+            <span>🎟️ ¡TOMAR MI TURNO AHORA!</span>
+          </button>
 
+          <button
+            onClick={() => {
+              setBookingMode('standard');
+              setActiveTab('booking');
+            }}
+            className="w-full py-3.5 px-4 rounded-2xl bg-zinc-850 hover:bg-zinc-800 text-amber-400 hover:text-white font-bold text-xs sm:text-sm flex items-center justify-center gap-2 border border-zinc-700 shadow transition cursor-pointer"
+          >
+            <Calendar className="w-4 h-4" />
+            <span>📅 Agendar Cita para Otro Día</span>
+          </button>
+        </div>
+      </section>
 
-      {/* 🌟 1. ELEGIR ESTILO — EL GRAN ACCESO PRINCIPAL A LA BIBLIOTECA VISUAL */}
+      {/* 🌟 2. BIBLIOTECA VISUAL OFICIAL — CATÁLOGO DE CORTES, BARBAS Y COMBOS */}
       <section
         onClick={() => setActiveTab('catalog')}
-        className="rounded-3xl p-5 sm:p-6 bg-gradient-to-r from-amber-500/20 via-zinc-900 to-zinc-900 border-2 border-amber-500/50 shadow-2xl relative overflow-hidden group cursor-pointer hover:border-amber-400 transition"
+        className="rounded-3xl p-5 sm:p-6 bg-gradient-to-r from-amber-500/15 via-zinc-900 to-zinc-900 border border-zinc-800 shadow-xl relative overflow-hidden group cursor-pointer hover:border-amber-500/50 transition"
       >
+
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-2 flex-1">
             <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-black bg-amber-500 px-3 py-1 rounded-full shadow">
@@ -1076,35 +1114,9 @@ export const ClientHome: React.FC = () => {
         </div>
       </section>
 
-      {/* 🛎️ 5. SALA DE ESPERA / TURNO EN VIVO SIN CITA */}
-      <section
-        onClick={() => {
-          setWalkInSent(false);
-          setIsWalkInModalOpen(true);
-        }}
-        className="rounded-2xl p-4 bg-gradient-to-r from-amber-500/15 via-zinc-900 to-zinc-900 border border-zinc-800 hover:border-amber-500/50 transition shadow-lg flex items-center justify-between cursor-pointer group"
-      >
-        <div className="flex items-center gap-3.5">
-          <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/30 group-hover:scale-105 transition shrink-0">
-            <Bell className="w-5 h-5 animate-bounce" />
-          </div>
-          <div>
-            <div className="text-sm font-black text-white flex items-center gap-2">
-              <span>¿Llegaste a la barbería sin cita?</span>
-              <span className="text-[10px] font-black px-2 py-0.5 rounded bg-amber-500 text-black">
-                TURNO EN VIVO
-              </span>
-            </div>
-            <p className="text-xs text-zinc-400 mt-0.5">
-              Toca aquí para avisar a {primaryBarberFirstName}: <strong>"Ya llegué, quiero este corte"</strong>.
-            </p>
-          </div>
-        </div>
-        <ChevronRight className="w-5 h-5 text-amber-400 group-hover:translate-x-1 transition shrink-0" />
-      </section>
-
       {/* 👥 6. EQUIPO DE COLABORADORES & CALIFICACIONES EN VIVO (CARRUSEL HORIZONTAL) */}
       <section className="space-y-3 pt-2">
+
         <div className="flex items-center justify-between">
 
           <div>
