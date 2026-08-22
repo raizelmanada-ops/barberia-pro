@@ -33,7 +33,7 @@ interface VisualStyleCatalogProps {
   defaultDomain?: StyleDomain;
 }
 
-// Componente de Imagen con carga reactiva y z-index garantizado
+// Componente de Imagen con carga reactiva directa y fallback garantizado
 const LazyStyleImage: React.FC<{
   src: string;
   alt: string;
@@ -43,13 +43,12 @@ const LazyStyleImage: React.FC<{
   isZoomed?: boolean;
   onToggleZoom?: () => void;
 }> = ({ src, alt, name, category, isModal = false, isZoomed = false, onToggleZoom }) => {
+  const [imgSrc, setImgSrc] = useState(src);
   const [hasError, setHasError] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Resetear estados al cambiar de estilo
   useEffect(() => {
+    setImgSrc(src);
     setHasError(false);
-    setIsLoaded(false);
   }, [src]);
 
   return (
@@ -59,8 +58,28 @@ const LazyStyleImage: React.FC<{
         isModal ? 'cursor-zoom-in' : 'border-b border-zinc-800/60'
       }`}
     >
-      {/* 1. Placeholder que solo se muestra si hay error o mientras carga */}
-      {(!isLoaded || hasError) && (
+      {!hasError ? (
+        <img
+          src={imgSrc}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          onError={() => {
+            if (imgSrc !== '/styles/hair_01.jpg') {
+              setImgSrc('/styles/hair_01.jpg');
+            } else {
+              setHasError(true);
+            }
+          }}
+          className={`w-full h-full ${
+            isModal
+              ? isZoomed
+                ? 'scale-150 cursor-zoom-out object-contain'
+                : 'object-contain cursor-zoom-in'
+              : 'object-cover group-hover:scale-105'
+          } transition-all duration-300 relative z-10`}
+        />
+      ) : (
         <div className="absolute inset-0 flex flex-col items-center justify-center p-4 text-center bg-gradient-to-b from-zinc-900 to-zinc-950 z-0">
           <div className="w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/25 flex items-center justify-center text-amber-400 mb-2 shadow-inner">
             <Scissors className="w-6 h-6 stroke-[2]" />
@@ -70,28 +89,7 @@ const LazyStyleImage: React.FC<{
         </div>
       )}
 
-      {/* 2. Imagen Real en Z-INDEX 10 con soporte de Zoom */}
-      {!hasError && (
-        <img
-          src={src}
-          alt={alt}
-          loading="lazy"
-          decoding="async"
-          onLoad={() => setIsLoaded(true)}
-          onError={() => setHasError(true)}
-          className={`w-full h-full ${
-            isModal
-              ? isZoomed
-                ? 'scale-150 cursor-zoom-out object-contain'
-                : 'object-contain cursor-zoom-in'
-              : 'object-cover group-hover:scale-105'
-          } transition-all duration-500 relative z-10 ${
-            isLoaded ? 'opacity-100' : 'opacity-0'
-          }`}
-        />
-      )}
-
-      {isModal && isLoaded && (
+      {isModal && !hasError && (
         <div className="absolute top-2.5 right-2.5 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded-xl text-[10px] sm:text-xs font-bold text-zinc-200 border border-white/10 z-20 flex items-center gap-1 pointer-events-none shadow-lg">
           {isZoomed ? <ZoomOut className="w-3.5 h-3.5 text-amber-400" /> : <ZoomIn className="w-3.5 h-3.5 text-amber-400" />}
           <span>{isZoomed ? 'Alejar' : 'Toca para Zoom'}</span>
@@ -100,6 +98,7 @@ const LazyStyleImage: React.FC<{
     </div>
   );
 };
+
 
 export const VisualStyleCatalog: React.FC<VisualStyleCatalogProps> = ({
   onBack,
